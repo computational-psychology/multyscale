@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 import utils
-import filters
 import filterbank
 
 # %% Load example stimulus
@@ -44,10 +43,7 @@ for i in range(bank.shape[0]):
         plt.imshow(bank[i, j, ...], extent=visextent)
 
 # %% Apply filterbank
-filters_output = np.empty(bank.shape)
-for i in range(len(orientations)):
-    for j in range(len(sigmas)):
-        filters_output[i, j, ...] = filters.apply(stimulus, bank[i, j, ...])
+filters_output = filterbank.apply(stimulus, bank)
 
 # %% Visualise filter bank output
 for i in range(filters_output.shape[0]):
