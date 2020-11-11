@@ -15,6 +15,15 @@ visextent = (-16, 16, -16, 16)
 # %% Create model
 model = models.ODOG_BM1999(shape, visextent)
 
+# %% Integrated run
+output_1 = model.apply(stimulus)
+
+# %% Visualise output
+plt.subplot(1, 2, 1)
+plt.imshow(output_1, extent=visextent)
+plt.subplot(1, 2, 2)
+plt.plot(output_1[512, 250:750])
+
 # %% Visualise filterbank
 for i in range(model.bank.filters.shape[0]):
     for j in range(model.bank.filters.shape[1]):
@@ -54,10 +63,15 @@ for i in range(normalized_multiscale_output.shape[0]):
     plt.imshow(normalized_multiscale_output[i, ...], extent=visextent)
 
 # %% Sum over orientations
-output = normalized_multiscale_output.sum(0)
+output_2 = normalized_multiscale_output.sum(0)
 
-# %% Visualise output
-plt.subplot(1, 2, 1)
-plt.imshow(output, extent=visextent)
-plt.subplot(1, 2, 2)
-plt.plot(output[512, 250:750])
+# %% Visualise both outputs
+plt.subplot(2, 2, 1)
+plt.imshow(output_1, extent=visextent)
+plt.subplot(2, 2, 2)
+plt.plot(output_1[512, 250:750])
+
+plt.subplot(2, 2, 3)
+plt.imshow(output_2, extent=visextent)
+plt.subplot(2, 2, 4)
+plt.plot(output_2[512, 250:750])
