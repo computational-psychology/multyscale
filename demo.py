@@ -1,10 +1,14 @@
 # %%
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image
 import filters
 
+# %% Load example stimulus
+stimulus = np.asarray(Image.open('example_stimulus.png').convert('L'))
+
 # %% Parameters of image
-shape = (1024, 1024)  # filtershape in pixels
+shape = stimulus.shape  # filtershape in pixels
 # visual extent, same convention as pyplot:
 visextent = (-16, 16, -16, 16)
 
@@ -19,7 +23,7 @@ img = filters.gaussian2d(x, y, (2, 2))
 
 # Plot
 plt.subplot(1, 2, 1)
-plt.imshow(img, cmap="gray")
+plt.imshow(img, extent=visextent)
 
 # Plot horizontal meridian
 plt.subplot(1, 2, 2)
@@ -30,7 +34,7 @@ img = filters.gaussian2d(x, y, (6, 2), orientation=15)
 
 # Plot
 plt.subplot(1, 2, 1)
-plt.imshow(img, cmap="gray")
+plt.imshow(img, extent=visextent)
 
 # Plot horizontal meridian
 plt.subplot(1, 2, 2)
@@ -41,10 +45,21 @@ sigmas = ((2, 2), (2, 4))  # surround Gaussian is 2:1 in one axis
 
 img = filters.odog(x, y, sigmas, orientation=(80, 80))
 
-# Plot
-plt.subplot(1, 2, 1)
-plt.imshow(img, cmap="gray")
+# % Apply filter
+filt_img = filters.apply(stimulus, img)
 
-# Plot horizontal meridian
-plt.subplot(1, 2, 2)
+# Plot stimulus
+plt.subplot(1, 3, 1)
+plt.imshow(stimulus, cmap="gray", extent=visextent)
+
+# Plot filter + horizontal meridian
+plt.subplot(2, 3, 2)
+plt.imshow(img, extent=visextent)
+plt.subplot(2, 3, 5)
 plt.plot(x[int(img.shape[0]/2)], img[int(img.shape[0]/2), ...])
+
+# Plot filtered image
+plt.subplot(1, 3, 3)
+plt.imshow(filt_img, extent=visextent)
+
+# %%
