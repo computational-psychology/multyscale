@@ -1,5 +1,6 @@
 import numpy as np
 import filters
+import utils
 
 # TODO: (abstract) base class Filterbank, with apply method
 
@@ -35,4 +36,31 @@ def odog_bank(orientations,
                                 (angle, angle))
             bank[i, j, :, :] = odog
 
+    return bank
+
+
+def BM1999(filtershape=(1024, 1024),
+           visextent=(24, 24)):
+    # TODO: docstring
+    # TODO: typehints
+    # TODO: figure out actual BM space parameter....
+
+    # Parameters (BM1999)
+    n_orientations = 6
+    num_scales = 7
+    largest_center_sigma = 3  # in degrees
+    center_sigmas = utils.octave_intervals(num_scales) * largest_center_sigma
+    cs_ratio = 2  # center-surround ratio
+
+    # Convert to filterbank parameters
+    orientations = np.arange(0, 180, 180/n_orientations)
+    sigmas = [((s, s), (s, cs_ratio*s)) for s in center_sigmas]
+
+    # Create image coordinate system:
+    axish = np.linspace(visextent[0], visextent[1], filtershape[0])
+    axisv = np.linspace(visextent[2], visextent[3], filtershape[1])
+    (x, y) = np.meshgrid(axish, axisv)
+
+    # Create filterbank
+    bank = odog_bank(orientations, sigmas, x, y)
     return bank
