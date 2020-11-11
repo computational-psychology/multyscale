@@ -18,25 +18,28 @@ def apply(image, bank):
     return filters_output
 
 
-def odog_bank(orientations,
-              sigmas,
-              x, y):
-    # TODO: docstring
-    # TODO: typehints
-    # TODO: refactor as class
-    # TODO: don't store filtes as ND-array
-    bank = np.empty((len(orientations),
-                    len(sigmas),
-                    x.shape[0], x.shape[1]))
+class ODOGBank:
+    def __init__(self,
+                 orientations, sigmas,
+                 x, y):
+        # TODO: docstring
+        # TODO: typehints
+        # TODO: don't store filtes as ND-array
+        self.orientations = orientations
+        self.sigmas = sigmas
+        self.x = x
+        self.y = y
 
-    for i, angle in enumerate(orientations):
-        for j, sigma in enumerate(sigmas):
-            odog = filters.odog(x, y,
-                                sigma,
-                                (angle, angle))
-            bank[i, j, :, :] = odog
+        self.filters = np.empty((len(orientations),
+                                 len(sigmas),
+                                 x.shape[0], x.shape[1]))
 
-    return bank
+        for i, angle in enumerate(orientations):
+            for j, sigma in enumerate(sigmas):
+                odog = filters.odog(x, y,
+                                    sigma,
+                                    (angle, angle))
+                self.filters[i, j, :, :] = odog
 
 
 def BM1999(filtershape=(1024, 1024),
@@ -62,5 +65,5 @@ def BM1999(filtershape=(1024, 1024),
     (x, y) = np.meshgrid(axish, axisv)
 
     # Create filterbank
-    bank = odog_bank(orientations, sigmas, x, y)
+    bank = ODOGBank(orientations, sigmas, x, y)
     return bank
