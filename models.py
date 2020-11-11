@@ -25,3 +25,12 @@ class ODOG_BM1999:
                                          self.scale_weights,
                                          (1, 0))
         return multiscale_output
+
+    def normalize_multiscale_output(self, multiscale_output):
+        # TODO: docstring
+        normalized_multiscale_output = np.empty(multiscale_output.shape)
+        for i in range(multiscale_output.shape[0]):
+            image = multiscale_output[i]
+            rms = np.sqrt(np.square(image).mean((-1, -2)))  # image-wide RMS
+            normalized_multiscale_output[i] = image / rms
+        return normalized_multiscale_output
