@@ -1,4 +1,14 @@
 import numpy as np
+from scipy import signal
+
+# TODO: (Abstract) base class Filter with apply-method,...
+
+
+def apply(image, filt):
+    # TODO: docstring
+    # TODO: make method
+    filtered_image = signal.fftconvolve(image, filt, mode="same")
+    return filtered_image
 
 
 def gaussian2d(x, y,
