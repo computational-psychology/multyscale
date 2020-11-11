@@ -17,15 +17,15 @@ visextent = (-16, 16, -16, 16)
 bank = filterbank.BM1999(shape, visextent)
 
 # %% Visualise filterbank
-for i in range(bank.shape[0]):
-    for j in range(bank.shape[1]):
-        plt.subplot(bank.shape[0],
-                    bank.shape[1],
-                    i*bank.shape[0]+((j+i)*1)+1)
-        plt.imshow(bank[i, j, ...], extent=visextent)
+for i in range(bank.filters.shape[0]):
+    for j in range(bank.filters.shape[1]):
+        plt.subplot(bank.filters.shape[0],
+                    bank.filters.shape[1],
+                    i*bank.filters.shape[0]+((j+i)*1)+1)
+        plt.imshow(bank.filters[i, j, ...], extent=visextent)
 
 # %% Apply filterbank
-filters_output = filterbank.apply(stimulus, bank)
+filters_output = bank.apply(stimulus)
 
 # %% Visualise filter bank output
 for i in range(filters_output.shape[0]):
