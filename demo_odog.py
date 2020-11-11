@@ -2,7 +2,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
-import utils
 import models
 
 # %% Load example stimulus
@@ -36,11 +35,7 @@ for i in range(filters_output.shape[0]):
         plt.imshow(filters_output[i, j, ...], extent=visextent)
 
 # %% Sum over spatial scales
-spatial_scales = utils.octave_intervals(7) * 3
-weights_slope = .1
-scale_weights = (1 / spatial_scales) ** weights_slope
-
-multiscale_output = np.tensordot(filters_output, scale_weights, (1, 0))
+multiscale_output = model.sum_scales(filters_output)
 
 # %% Visualise oriented multiscale output
 for i in range(multiscale_output.shape[0]):
@@ -49,11 +44,8 @@ for i in range(multiscale_output.shape[0]):
     plt.imshow(multiscale_output[i, ...], extent=visextent)
 
 # %%  Normalize oriented multiscale outputs by their RMS
-normalized_multiscale_output = np.empty(multiscale_output.shape)
-for i in range(multiscale_output.shape[0]):
-    image = multiscale_output[i]
-    rms = np.sqrt(np.square(image).mean((-1, -2)))  # image-wide RMS
-    normalized_multiscale_output[i] = image / rms
+normalized_multiscale_output = \
+    model.normalize_multiscale_output(multiscale_output)
 
 # %% Visualise normalized multiscale output
 for i in range(normalized_multiscale_output.shape[0]):
