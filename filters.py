@@ -50,3 +50,27 @@ def gaussian2d(x, y,
                       c*(y-center[1])**2))
 
     return gaussian
+
+
+def odog(x, y,
+         sigma,
+         orientation=(0, 0)):
+    # TODO: convert ODoG to class
+    # TODO: typehints
+    # TODO: docstring
+
+    # Sigma is tuple of two tuples, one for Gaussian.
+    # Orientation is tuple of two floats, one for each
+
+    # Create center and surround anisotropic Gaussian filters
+    center = gaussian2d(x, y, sigma=sigma[0], orientation=orientation[0])
+    surround = gaussian2d(x, y, sigma=sigma[1], orientation=orientation[1])
+
+    # Normalize each filter by its total
+    center = center / center.sum()
+    surround = surround / surround.sum()
+
+    # Subtract to create differential filter
+    odog = center - surround
+
+    return odog
