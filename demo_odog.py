@@ -2,8 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
-import utils
-import filterbank
+import models
 
 # %% Load example stimulus
 stimulus = np.asarray(Image.open('example_stimulus.png').convert('L'))
@@ -13,19 +12,28 @@ shape = stimulus.shape  # filtershape in pixels
 # visual extent, same convention as pyplot:
 visextent = (-16, 16, -16, 16)
 
-# %% Create filterbank
-bank = filterbank.BM1999(shape, visextent)
+# %% Create model
+model = models.ODOG_BM1999(shape, visextent)
+
+# %% Integrated run
+output_1 = model.apply(stimulus)
+
+# %% Visualise output
+plt.subplot(1, 2, 1)
+plt.imshow(output_1, extent=visextent)
+plt.subplot(1, 2, 2)
+plt.plot(output_1[512, 250:750])
 
 # %% Visualise filterbank
-for i in range(bank.filters.shape[0]):
-    for j in range(bank.filters.shape[1]):
-        plt.subplot(bank.filters.shape[0],
-                    bank.filters.shape[1],
-                    i*bank.filters.shape[0]+((j+i)*1)+1)
-        plt.imshow(bank.filters[i, j, ...], extent=visextent)
+for i in range(model.bank.filters.shape[0]):
+    for j in range(model.bank.filters.shape[1]):
+        plt.subplot(model.bank.filters.shape[0],
+                    model.bank.filters.shape[1],
+                    i*model.bank.filters.shape[0]+((j+i)*1)+1)
+        plt.imshow(model.bank.filters[i, j, ...], extent=visextent)
 
 # %% Apply filterbank
-filters_output = bank.apply(stimulus)
+filters_output = model.bank.apply(stimulus)
 
 # %% Visualise filter bank output
 for i in range(filters_output.shape[0]):
@@ -36,11 +44,7 @@ for i in range(filters_output.shape[0]):
         plt.imshow(filters_output[i, j, ...], extent=visextent)
 
 # %% Sum over spatial scales
-spatial_scales = utils.octave_intervals(7) * 3
-weights_slope = .1
-scale_weights = (1 / spatial_scales) ** weights_slope
-
-multiscale_output = np.tensordot(filters_output, scale_weights, (1, 0))
+multiscale_output = model.sum_scales(filters_output)
 
 # %% Visualise oriented multiscale output
 for i in range(multiscale_output.shape[0]):
@@ -49,11 +53,8 @@ for i in range(multiscale_output.shape[0]):
     plt.imshow(multiscale_output[i, ...], extent=visextent)
 
 # %%  Normalize oriented multiscale outputs by their RMS
-normalized_multiscale_output = np.empty(multiscale_output.shape)
-for i in range(multiscale_output.shape[0]):
-    image = multiscale_output[i]
-    rms = np.sqrt(np.square(image).mean((-1, -2)))  # image-wide RMS
-    normalized_multiscale_output[i] = image / rms
+normalized_multiscale_output = \
+    model.normalize_multiscale_output(multiscale_output)
 
 # %% Visualise normalized multiscale output
 for i in range(normalized_multiscale_output.shape[0]):
@@ -62,10 +63,15 @@ for i in range(normalized_multiscale_output.shape[0]):
     plt.imshow(normalized_multiscale_output[i, ...], extent=visextent)
 
 # %% Sum over orientations
-output = normalized_multiscale_output.sum(0)
+output_2 = normalized_multiscale_output.sum(0)
 
-# %% Visualise output
-plt.subplot(1, 2, 1)
-plt.imshow(output, extent=visextent)
-plt.subplot(1, 2, 2)
-plt.plot(output[512, 250:750])
+# %% Visualise both outputs
+plt.subplot(2, 2, 1)
+plt.imshow(output_1, extent=visextent)
+plt.subplot(2, 2, 2)
+plt.plot(output_1[512, 250:750])
+
+plt.subplot(2, 2, 3)
+plt.imshow(output_2, extent=visextent)
+plt.subplot(2, 2, 4)
+plt.plot(output_2[512, 250:750])
