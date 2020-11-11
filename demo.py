@@ -35,3 +35,16 @@ plt.imshow(img, cmap="gray")
 # Plot horizontal meridian
 plt.subplot(1, 2, 2)
 plt.plot(x[int(img.shape[0]/2)], img[int(img.shape[0]/2), ...])
+
+# %% ODOG
+sigmas = ((2, 2), (2, 4))  # surround Gaussian is 2:1 in one axis
+
+img = filters.odog(x, y, sigmas, orientation=(80, 80))
+
+# Plot
+plt.subplot(1, 2, 1)
+plt.imshow(img, cmap="gray")
+
+# Plot horizontal meridian
+plt.subplot(1, 2, 2)
+plt.plot(x[int(img.shape[0]/2)], img[int(img.shape[0]/2), ...])
