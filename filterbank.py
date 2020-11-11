@@ -1,6 +1,21 @@
 import numpy as np
 import filters
 
+# TODO: (abstract) base class Filterbank, with apply method
+
+# TODO: data structure for filter output, with filter metadata
+
+
+def apply(image, bank):
+    # TODO: docstring
+    # TODO: typehints
+    # TODO: refactor as method of filterbank class
+    filters_output = np.empty(bank.shape)
+    for i in range(bank.shape[0]):
+        for j in range(bank.shape[1]):
+            filters_output[i, j, ...] = filters.apply(image, bank[i, j, ...])
+    return filters_output
+
 
 def odog_bank(orientations,
               sigmas,
