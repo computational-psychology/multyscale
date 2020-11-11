@@ -32,18 +32,18 @@ orientations = np.arange(0, 180, 180/n_orientations)
 sigmas = [((s, s), (s, cs_ratio*s)) for s in center_sigmas]
 
 # %% Create filterbank
-bank = filterbank.odog_bank(orientations, sigmas, x, y)
+bank = filterbank.ODOGBank(orientations, sigmas, x, y)
 
 # %% Visualise filterbank
-for i in range(bank.shape[0]):
-    for j in range(bank.shape[1]):
-        plt.subplot(bank.shape[0],
-                    bank.shape[1],
-                    i*bank.shape[0]+((j+i)*1)+1)
-        plt.imshow(bank[i, j, ...], extent=visextent)
+for i in range(bank.filters.shape[0]):
+    for j in range(bank.filters.shape[1]):
+        plt.subplot(bank.filters.shape[0],
+                    bank.filters.shape[1],
+                    i*bank.filters.shape[0]+((j+i)*1)+1)
+        plt.imshow(bank.filters[i, j, ...], extent=visextent)
 
 # %% Apply filterbank
-filters_output = filterbank.apply(stimulus, bank)
+filters_output = bank.apply(stimulus)
 
 # %% Visualise filter bank output
 for i in range(filters_output.shape[0]):
