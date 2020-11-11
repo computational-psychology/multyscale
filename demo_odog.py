@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 import utils
-import filterbank
+import models
 
 # %% Load example stimulus
 stimulus = np.asarray(Image.open('example_stimulus.png').convert('L'))
@@ -13,19 +13,19 @@ shape = stimulus.shape  # filtershape in pixels
 # visual extent, same convention as pyplot:
 visextent = (-16, 16, -16, 16)
 
-# %% Create filterbank
-bank = filterbank.BM1999(shape, visextent)
+# %% Create model
+model = models.ODOG_BM1999(shape, visextent)
 
 # %% Visualise filterbank
-for i in range(bank.filters.shape[0]):
-    for j in range(bank.filters.shape[1]):
-        plt.subplot(bank.filters.shape[0],
-                    bank.filters.shape[1],
-                    i*bank.filters.shape[0]+((j+i)*1)+1)
-        plt.imshow(bank.filters[i, j, ...], extent=visextent)
+for i in range(model.bank.filters.shape[0]):
+    for j in range(model.bank.filters.shape[1]):
+        plt.subplot(model.bank.filters.shape[0],
+                    model.bank.filters.shape[1],
+                    i*model.bank.filters.shape[0]+((j+i)*1)+1)
+        plt.imshow(model.bank.filters[i, j, ...], extent=visextent)
 
 # %% Apply filterbank
-filters_output = bank.apply(stimulus)
+filters_output = model.bank.apply(stimulus)
 
 # %% Visualise filter bank output
 for i in range(filters_output.shape[0]):
