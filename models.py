@@ -34,3 +34,18 @@ class ODOG_BM1999:
             rms = np.sqrt(np.square(image).mean((-1, -2)))  # image-wide RMS
             normalized_multiscale_output[i] = image / rms
         return normalized_multiscale_output
+
+    def apply(self, image):
+        # TODO: docstring
+
+        # Sum over spatial scales
+        filters_output = self.bank.apply(image)
+        multiscale_output = self.sum_scales(filters_output)
+
+        # Normalize oriented multiscale outputs
+        normalized_multiscale_output = \
+            self.normalize_multiscale_output(multiscale_output)
+
+        # Sum over orientations
+        output = normalized_multiscale_output.sum(0)
+        return output
