@@ -9,9 +9,9 @@ def odog_bank(orientations,
     # TODO: typehints
     # TODO: refactor as class
     # TODO: don't store filtes as ND-array
-    bank = np.empty(len(orientations),
+    bank = np.empty((len(orientations),
                     len(sigmas),
-                    x.shape[0], x.shape[1])
+                    x.shape[0], x.shape[1]))
 
     for i, angle in enumerate(orientations):
         for j, sigma in enumerate(sigmas):
