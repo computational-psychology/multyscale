@@ -14,7 +14,17 @@ shape = stimulus.shape  # filtershape in pixels
 visextent = (-16, 16, -16, 16)
 
 # %% Create model
-model = models.LODOG_RHS2007(shape, visextent)
+model = models.FLODOG_RHS2007(shape, visextent)
+
+# %% Integrated run
+output_1 = model.apply(stimulus)
+
+# %% Visualise output
+plt.subplot(1, 2, 1)
+plt.imshow(output_1, extent=visextent)
+plt.subplot(1, 2, 2)
+plt.plot(output_1[512, 250:750])
+
 
 # %% Visualise filterbank
 for i in range(model.bank.filters.shape[0]):
@@ -43,7 +53,7 @@ for i in range(filters_output.shape[0]):
 
 # %% Build normalizer for each filter output
 center_sigmas = [sigma[0][0] for sigma in model.bank.sigmas]
-sdmix = .5  # stdev of Gaussian weights for scale mixing
+sdmix = model.sdmix  # stdev of Gaussian weights for scale mixing
 
 # Create normalizer images
 normalizers = np.empty(filters_output.shape)
@@ -98,7 +108,14 @@ for o, multiscale in enumerate(filters_output):
 output_2 = normalized_outputs.sum((0, 1))
 
 # %% Visualise both outputs
+plt.subplot(2, 2, 1)
+plt.imshow(output_1, extent=visextent)
+plt.subplot(2, 2, 2)
+plt.plot(output_1[512, 250:750])
+
 plt.subplot(2, 2, 3)
 plt.imshow(output_2, extent=visextent)
 plt.subplot(2, 2, 4)
 plt.plot(output_2[512, 250:750])
+
+np.allclose(output_1, output_2)
