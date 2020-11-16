@@ -84,3 +84,17 @@ def odog(x, y,
     odog = center - surround
 
     return odog
+
+
+def dog(x, y,
+        sigma):
+    # TODO: docstring
+    # TODO: typehints
+
+    # Isotropic difference of Gaussian;
+    # Sigma is tuple of two floats, one for each Gaussian.
+    # center has (sigma[0], sigma[0]),
+    # surround has (sigma[1], sigma[1])
+    dog = odog(x, y, ((sigma[0], sigma[0]), (sigma[1], sigma[1])))
+
+    return dog
