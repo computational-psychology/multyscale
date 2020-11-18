@@ -2,8 +2,7 @@
 import numpy as np
 
 # Local application imports
-import filters
-import utils
+from . import filters, utils
 
 # TODO: (abstract) base class Filterbank, with apply method
 

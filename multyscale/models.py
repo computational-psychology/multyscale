@@ -2,8 +2,7 @@
 import numpy as np
 
 # Local application imports
-import filterbank
-import filters
+from . import filterbank, filters
 
 # TODO: refactor filter-output datastructures
 
