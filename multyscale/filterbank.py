@@ -1,6 +1,8 @@
+# Third party imports
 import numpy as np
-import filters
-import utils
+
+# Local application imports
+from . import filters, utils
 
 # TODO: (abstract) base class Filterbank, with apply method
 
