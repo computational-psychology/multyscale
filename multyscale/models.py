@@ -1,6 +1,8 @@
+# Third party imports
 import numpy as np
-import filterbank
-import filters
+
+# Local application imports
+from . import filterbank, filters
 
 # TODO: refactor filter-output datastructures
 

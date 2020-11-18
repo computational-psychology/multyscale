@@ -1,8 +1,14 @@
 # %%
+# Third party libraries
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
-import models
+
+# Import local module
+import os
+import sys
+sys.path.insert(0, os.path.abspath('..'))
+from multyscale import models
 
 # %% Load example stimulus
 stimulus = np.asarray(Image.open('example_stimulus.png').convert('L'))
@@ -13,7 +19,7 @@ shape = stimulus.shape  # filtershape in pixels
 visextent = (-16, 16, -16, 16)
 
 # %% Create model
-model = models.LODOG_RHS2007(shape, visextent)
+model = models.ODOG_BM1999(shape, visextent)
 
 # %% Integrated run
 output_1 = model.apply(stimulus)
@@ -52,20 +58,14 @@ for i in range(multiscale_output.shape[0]):
                 1, i+1)
     plt.imshow(multiscale_output[i, ...], extent=visextent)
 
-# %%  Normalize oriented multiscale outputs by local mean
-(normalized_multiscale_output, normalizers) = \
+# %%  Normalize oriented multiscale outputs by their RMS
+normalized_multiscale_output = \
     model.normalize_multiscale_output(multiscale_output)
 
 # %% Visualise normalized multiscale output
 for i in range(normalized_multiscale_output.shape[0]):
     plt.subplot(normalized_multiscale_output.shape[0],
-                3, i*3+1)
-    plt.imshow(multiscale_output[i, ...], extent=visextent)
-    plt.subplot(normalized_multiscale_output.shape[0],
-                3, i*3+2)
-    plt.imshow(normalizers[i, ...], extent=visextent)
-    plt.subplot(normalized_multiscale_output.shape[0],
-                3, i*3+3)
+                1, i+1)
     plt.imshow(normalized_multiscale_output[i, ...], extent=visextent)
 
 # %% Sum over orientations
