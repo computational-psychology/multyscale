@@ -1,4 +1,7 @@
+# Third party imports
 import numpy as np
+
+# Local application imports
 import filterbank
 import filters
 
