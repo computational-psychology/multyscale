@@ -11,4 +11,4 @@ def octave_intervals(num):
     x = np.logspace(1, num, num=num, base=2)
 
     # Normalize, so that maximum is 1
-    return x/x.max()
+    return x / x.max()

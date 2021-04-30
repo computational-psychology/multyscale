@@ -8,7 +8,7 @@ from PIL import Image
 from multyscale import utils, filterbank
 
 # %% Load example stimulus
-stimulus = np.asarray(Image.open('example_stimulus.png').convert('L'))
+stimulus = np.asarray(Image.open("example_stimulus.png").convert("L"))
 
 # %% Parameters of image
 shape = stimulus.shape  # filtershape in pixels
@@ -28,14 +28,14 @@ center_sigmas = utils.octave_intervals(num_scales) * largest_center_sigma
 cs_ratio = 2  # center-surround ratio
 
 # Convert to filterbank parameters
-sigmas = [(s, cs_ratio*s) for s in center_sigmas]
+sigmas = [(s, cs_ratio * s) for s in center_sigmas]
 
 # %% Create filterbank
 bank = filterbank.DOGBank(sigmas, x, y)
 
 # %% Visualise filterbank
 for i in range(bank.filters.shape[0]):
-    plt.subplot(1, bank.filters.shape[0], i+1)
+    plt.subplot(1, bank.filters.shape[0], i + 1)
     plt.imshow(bank.filters[i, ...], extent=visextent)
 
 # %% Apply filterbank
@@ -43,5 +43,5 @@ filters_output = bank.apply(stimulus)
 
 # %% Visualise filter bank output
 for i in range(filters_output.shape[0]):
-    plt.subplot(1, filters_output.shape[0], i+1)
+    plt.subplot(1, filters_output.shape[0], i + 1)
     plt.imshow(filters_output[i, ...], extent=visextent)

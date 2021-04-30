@@ -8,7 +8,7 @@ from PIL import Image
 from multyscale import models, filters
 
 # %% Load example stimulus
-stimulus = np.asarray(Image.open('example_stimulus.png').convert('L'))
+stimulus = np.asarray(Image.open("example_stimulus.png").convert("L"))
 
 # %% Parameters of image
 shape = stimulus.shape  # filtershape in pixels
@@ -31,9 +31,11 @@ plt.plot(output_1[512, 250:750])
 # %% Visualise filterbank
 for i in range(model.bank.filters.shape[0]):
     for j in range(model.bank.filters.shape[1]):
-        plt.subplot(model.bank.filters.shape[0],
-                    model.bank.filters.shape[1],
-                    i*model.bank.filters.shape[0]+((j+i)*1)+1)
+        plt.subplot(
+            model.bank.filters.shape[0],
+            model.bank.filters.shape[1],
+            i * model.bank.filters.shape[0] + ((j + i) * 1) + 1,
+        )
         plt.imshow(model.bank.filters[i, j, ...], extent=visextent)
 
 # %% Apply filterbank
@@ -42,9 +44,11 @@ filters_output = model.bank.apply(stimulus)
 # %% Visualise filter bank output
 for i in range(filters_output.shape[0]):
     for j in range(filters_output.shape[1]):
-        plt.subplot(filters_output.shape[0],
-                    filters_output.shape[1],
-                    i*filters_output.shape[0]+((j+i)*1)+1)
+        plt.subplot(
+            filters_output.shape[0],
+            filters_output.shape[1],
+            i * filters_output.shape[0] + ((j + i) * 1) + 1,
+        )
         plt.imshow(filters_output[i, j, ...], extent=visextent)
 
 
@@ -67,8 +71,7 @@ for o, multiscale in enumerate(filters_output):  # seperate for orientations
         rel_i = i - np.asarray(range(multiscale.shape[0]))
 
         # Gaussian weights, based on relative index
-        gweights = np.exp(- rel_i ** 2 / 2 * sdmix ** 2) /\
-            (sdmix * np.sqrt(2 * np.pi))
+        gweights = np.exp(-(rel_i ** 2) / 2 * sdmix ** 2) / (sdmix * np.sqrt(2 * np.pi))
 
         # Sum filter outputs, by Gaussian weights
         normalizer = np.tensordot(multiscale, gweights, axes=(0, 0))
@@ -82,8 +85,9 @@ for o, multiscale in enumerate(filters_output):  # seperate for orientations
 
 # %% Blur normalizers
 # Create Gaussian window
-window = filters.gaussian2d(model.bank.x, model.bank.y,
-                            (model.window_sigma, model.window_sigma))
+window = filters.gaussian2d(
+    model.bank.x, model.bank.y, (model.window_sigma, model.window_sigma)
+)
 
 # Normalize window to unit-sum (== spatial averaging filter)
 window = window / window.sum()

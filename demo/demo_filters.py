@@ -8,7 +8,7 @@ from PIL import Image
 from multyscale import filters
 
 # %% Load example stimulus
-stimulus = np.asarray(Image.open('example_stimulus.png').convert('L'))
+stimulus = np.asarray(Image.open("example_stimulus.png").convert("L"))
 
 # %% Parameters of image
 shape = stimulus.shape  # filtershape in pixels
@@ -30,7 +30,7 @@ plt.imshow(img, extent=visextent)
 
 # Plot horizontal meridian
 plt.subplot(1, 2, 2)
-plt.plot(x[int(img.shape[0]/2)], img[int(img.shape[0]/2), ...])
+plt.plot(x[int(img.shape[0] / 2)], img[int(img.shape[0] / 2), ...])
 
 # %% Elliptical gaussian (3:1 axes; rotated)
 img = filters.gaussian2d(x, y, (6, 2), orientation=15)
@@ -41,7 +41,7 @@ plt.imshow(img, extent=visextent)
 
 # Plot horizontal meridian
 plt.subplot(1, 2, 2)
-plt.plot(x[int(img.shape[0]/2)], img[int(img.shape[0]/2), ...])
+plt.plot(x[int(img.shape[0] / 2)], img[int(img.shape[0] / 2), ...])
 
 # %% ODOG
 sigmas = ((2, 2), (2, 4))  # surround Gaussian is 2:1 in one axis
@@ -59,7 +59,7 @@ plt.imshow(stimulus, cmap="gray", extent=visextent)
 plt.subplot(2, 3, 2)
 plt.imshow(img, extent=visextent)
 plt.subplot(2, 3, 5)
-plt.plot(x[int(img.shape[0]/2)], img[int(img.shape[0]/2), ...])
+plt.plot(x[int(img.shape[0] / 2)], img[int(img.shape[0] / 2), ...])
 
 # Plot filtered image
 plt.subplot(1, 3, 3)
