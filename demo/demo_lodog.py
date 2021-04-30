@@ -5,9 +5,6 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 # Import local module
-import os
-import sys
-sys.path.insert(0, os.path.abspath('..'))
 from multyscale import models
 
 # %% Load example stimulus
