@@ -33,6 +33,18 @@ def scale_norm_weights_equal(n_scales):
     return np.ones((n_scales, n_scales)) / n_scales
 
 
+def scale_norm_weights_gaussian(n_scales, sdmix):
+    scale_norm_weights = np.ndarray((n_scales, n_scales))
+    for s in range(n_scales):
+        rel_i = s - np.asarray(range(n_scales))
+
+        # Gaussian weights, based on relative index
+        scale_norm_weights[s, ...] = np.exp(-(rel_i ** 2) / 2 * sdmix ** 2) / (
+            sdmix * np.sqrt(2 * np.pi)
+        )
+    return scale_norm_weights
+
+
 def orientation_norm_weights(n_orientations):
     orientation_norm_weights = np.eye(n_orientations)
     return orientation_norm_weights
@@ -47,6 +59,12 @@ def normalizers(filters_output, normalization_weights):
 
         # Tensor dot: multiply filters_output by weights, then sum over axes [0,1]
         normalizer = np.tensordot(filters_output, weights, axes=([0, 1], [0, 1]))
+
+        # Normalize normalizer...
+        area = weights.sum()
+        normalizer = normalizer / area
+
+        # Accumulate
         normalizers[o, s, ...] = normalizer
 
     return normalizers
