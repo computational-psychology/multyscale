@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 # Import local module
-from multyscale import models
+from multyscale import models, filters
 
 # %% Load example stimulus
 stimulus = np.asarray(Image.open("example_stimulus.png").convert("L"))
@@ -50,8 +50,8 @@ for i in range(filters_output.shape[0]):
         )
         plt.imshow(filters_output[i, j, ...], extent=visextent)
 
-# %% Sum over spatial scales
-multiscale_output = model.sum_scales(filters_output)
+# %% Sum over spatial scales, weighting relative to scale
+multiscale_output = np.tensordot(filters_output, model.scale_weights, axes=(1, 0))
 
 # %% Visualise oriented multiscale output
 for i in range(multiscale_output.shape[0]):
@@ -59,9 +59,30 @@ for i in range(multiscale_output.shape[0]):
     plt.imshow(multiscale_output[i, ...], extent=visextent)
 
 # %%  Normalize oriented multiscale outputs by local mean
-(normalized_multiscale_output, normalizers) = model.normalize_multiscale_output(
-    multiscale_output
+# Create Gaussian window
+window = filters.gaussian2d(
+    model.bank.x, model.bank.y, (model.window_sigma, model.window_sigma)
 )
+
+# Normalize window to unit-sum (== spatial averaging filter)
+window = window / window.sum()
+
+# Create normalizer images
+normalized_multiscale_output = np.empty(multiscale_output.shape)
+normalizers = np.empty(multiscale_output.shape)
+for i, image in enumerate(multiscale_output):
+    # Square image
+    normalizer = np.square(image)
+
+    # Apply Gaussian window
+    normalizer = filters.apply(normalizer, window)
+
+    # Square root
+    normalizer = np.sqrt(normalizer)
+    normalizers[i, ...] = normalizer
+
+    # Normalize
+    normalized_multiscale_output[i, ...] = image / normalizer
 
 # %% Visualise normalized multiscale output
 for i in range(normalized_multiscale_output.shape[0]):
