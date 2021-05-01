@@ -2,7 +2,7 @@
 import numpy as np
 
 # Local application imports
-from . import filterbank, filters
+from . import filterbank, filters, normalization
 
 # TODO: refactor filter-output datastructures
 
@@ -22,8 +22,13 @@ class ODOG_BM1999:
             self.center_sigmas, self.weights_slope
         )
 
-    def scale_weights(self):
-        return filterbank.scale_weights(self.center_sigmas, self.weights_slope)
+        self.scale_norm_weights = normalization.scale_norm_weights_equal(
+            len(self.scale_weights)
+        )
+        self.orientation_norm_weights = normalization.orientation_norm_weights(6)
+        self.normalization_weights = normalization.create_normalization_weights(
+            6, 7, self.scale_norm_weights, self.orientation_norm_weights
+        )
 
     def weight_outputs(self, filters_output):
         return filterbank.weight_oriented_multiscale_outputs(
