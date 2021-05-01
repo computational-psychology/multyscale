@@ -51,7 +51,7 @@ for i in range(filters_output.shape[0]):
         plt.imshow(filters_output[i, j, ...], extent=visextent)
 
 # %% Sum over spatial scales, weighting relative to scale
-multiscale_output = np.tensordot(filters_output, model.scale_weights(), axes=(1, 0))
+multiscale_output = np.tensordot(filters_output, model.scale_weights, axes=(1, 0))
 
 # %% Visualise oriented multiscale output
 for i in range(multiscale_output.shape[0]):

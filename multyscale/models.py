@@ -18,13 +18,16 @@ class ODOG_BM1999:
 
         self.center_sigmas = [sigma[0][0] for sigma in self.bank.sigmas]
         self.weights_slope = 0.1
+        self.scale_weights = filterbank.scale_weights(
+            self.center_sigmas, self.weights_slope
+        )
 
     def scale_weights(self):
         return filterbank.scale_weights(self.center_sigmas, self.weights_slope)
 
     def weight_outputs(self, filters_output):
         return filterbank.weight_oriented_multiscale_outputs(
-            filters_output, self.scale_weights()
+            filters_output, self.scale_weights
         )
 
     def normalize_multiscale_output(self, multiscale_output):
