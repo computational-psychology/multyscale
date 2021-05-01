@@ -16,14 +16,16 @@ class ODOG_BM1999:
 
         self.bank = filterbank.BM1999(shape, visextent)
 
-        center_sigmas = [sigma[0][0] for sigma in self.bank.sigmas]
+        self.center_sigmas = [sigma[0][0] for sigma in self.bank.sigmas]
         self.weights_slope = 0.1
-        self.scale_weights = (1 / np.asarray(center_sigmas)) ** self.weights_slope
 
-    def sum_scales(self, filters_output):
-        # TODO: docstring
-        multiscale_output = np.tensordot(filters_output, self.scale_weights, (1, 0))
-        return multiscale_output
+    def scale_weights(self):
+        return filterbank.scale_weights(self.center_sigmas, self.weights_slope)
+
+    def weight_outputs(self, filters_output):
+        return filterbank.weight_oriented_multiscale_outputs(
+            filters_output, self.scale_weights()
+        )
 
     def normalize_multiscale_output(self, multiscale_output):
         # TODO: docstring
@@ -39,7 +41,8 @@ class ODOG_BM1999:
 
         # Sum over spatial scales
         filters_output = self.bank.apply(image)
-        multiscale_output = self.sum_scales(filters_output)
+        weighted_outputs = self.weight_outputs(filters_output)
+        multiscale_output = weighted_outputs.sum(axis=1)
 
         # Normalize oriented multiscale outputs
         normalized_multiscale_output = self.normalize_multiscale_output(
