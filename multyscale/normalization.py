@@ -36,3 +36,17 @@ def scale_norm_weights_equal(n_scales):
 def orientation_norm_weights(n_orientations):
     orientation_norm_weights = np.eye(n_orientations)
     return orientation_norm_weights
+
+
+def normalizers(filters_output, normalization_weights):
+    # Create normalizing images from weighted combination of filter outputs
+    normalizers = np.ndarray(filters_output.shape)
+
+    for o, s in np.ndindex(filters_output.shape[:2]):
+        weights = normalization_weights[o, s]
+
+        # Tensor dot: multiply filters_output by weights, then sum over axes [0,1]
+        normalizer = np.tensordot(filters_output, weights, axes=([0, 1], [0, 1]))
+        normalizers[o, s, ...] = normalizer
+
+    return normalizers
