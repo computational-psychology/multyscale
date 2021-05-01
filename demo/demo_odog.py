@@ -59,7 +59,12 @@ for i in range(multiscale_output.shape[0]):
     plt.imshow(multiscale_output[i, ...], extent=visextent)
 
 # %%  Normalize oriented multiscale outputs by their RMS
-normalized_multiscale_output = model.normalize_multiscale_output(multiscale_output)
+normalized_multiscale_output = np.empty(multiscale_output.shape)
+rms = np.ndarray((6))
+for i in range(multiscale_output.shape[0]):
+    image = multiscale_output[i]
+    rms[i] = np.sqrt(np.square(image).mean((-1, -2)))  # image-wide RMS
+    normalized_multiscale_output[i] = image / rms[i]
 
 # %% Visualise normalized multiscale output
 for i in range(normalized_multiscale_output.shape[0]):

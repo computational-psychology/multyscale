@@ -35,14 +35,21 @@ class ODOG_BM1999:
             filters_output, self.scale_weights
         )
 
-    def normalize_multiscale_output(self, multiscale_output):
+    def normalize_outputs(self, filters_output):
         # TODO: docstring
-        normalized_multiscale_output = np.empty(multiscale_output.shape)
-        for i in range(multiscale_output.shape[0]):
-            image = multiscale_output[i]
-            rms = np.sqrt(np.square(image).mean((-1, -2)))  # image-wide RMS
-            normalized_multiscale_output[i] = image / rms
-        return normalized_multiscale_output
+        # Get normalizers
+        normalizers = normalization.normalizers(
+            filters_output, self.normalization_weights
+        )
+
+        # Get RMS from each normalizer
+        normalizer_RMS = np.sqrt(np.square(normalizers).mean((-1, -2)))
+
+        normalized_outputs = np.ndarray(filters_output.shape)
+        for o, s in np.ndindex(filters_output.shape[:2]):
+            normalized_outputs[o, s] = filters_output[o, s] / normalizer_RMS[o, s]
+
+        return normalized_outputs
 
     def apply(self, image):
         # TODO: docstring
@@ -50,15 +57,12 @@ class ODOG_BM1999:
         # Sum over spatial scales
         filters_output = self.bank.apply(image)
         weighted_outputs = self.weight_outputs(filters_output)
-        multiscale_output = weighted_outputs.sum(axis=1)
 
         # Normalize oriented multiscale outputs
-        normalized_multiscale_output = self.normalize_multiscale_output(
-            multiscale_output
-        )
+        normalized_outputs = self.normalize_outputs(weighted_outputs)
 
-        # Sum over orientations
-        output = normalized_multiscale_output.sum(0)
+        # Sum over orientations and scales
+        output = normalized_outputs.sum((0, 1))
         return output
 
 
