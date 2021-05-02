@@ -117,3 +117,8 @@ class FLODOG_RHS2007(LODOG_RHS2007):
         self.normalization_weights = normalization.create_normalization_weights(
             6, 7, self.scale_norm_weights, self.orientation_norm_weights
         )
+
+        self.spatial_window_scalar = 2
+        self.window_sigmas = np.broadcast_to(
+            np.array(self.center_sigmas)[None, ..., None], (6, 7, 2)
+        )
