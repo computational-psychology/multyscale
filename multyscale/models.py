@@ -2,7 +2,7 @@
 import numpy as np
 
 # Local application imports
-from . import filterbank, filters, normalization
+from . import filters, filterbank, normalization
 
 # TODO: refactor filter-output datastructures
 
@@ -84,33 +84,24 @@ class LODOG_RHS2007(ODOG_BM1999):
 
     def __init__(self, shape, visextent):
         self.window_sigma = 2
+        self.window_sigmas = np.ones(shape=(6, 7, 2)) * self.window_sigma
+
         super().__init__(shape, visextent)
 
     def normalizers_to_RMS(self, normalizers):
-        # Create Gaussian window
-        window = filters.gaussian2d(
-            self.bank.x, self.bank.y, (self.window_sigma, self.window_sigma)
-        )
-
-        # Normalize window to unit-sum (== spatial averaging filter)
-        window = window / window.sum()
-
+        # Expand sigmas
         # Get RMS from each normalizer
-        normalizer_RMS = np.ndarray(normalizers.shape)
-        for o, s in np.ndindex(normalizers.shape[:2]):
-            normalizer = normalizers[o, s]
-
-            # Square image
-            normalizer = np.square(normalizer)
-
-            # Apply Gaussian window
-            normalizer = filters.apply(normalizer, window)
-
-            # Square root
-            normalizer = np.sqrt(normalizer)
-
-            normalizer_RMS[o, s, ...] = normalizer
-        return normalizer_RMS
+        spatial_avg_filters = normalization.spatial_avg_windows_gaussian(
+            self.bank.x, self.bank.y, self.window_sigmas
+        )
+        normalizers_RMS = normalizers.copy()
+        normalizers_RMS = np.square(normalizers_RMS)
+        for o, s in np.ndindex(normalizers_RMS.shape[:2]):
+            normalizers_RMS[o, s] = filters.apply(
+                spatial_avg_filters[o, s], normalizers_RMS[o, s]
+            )
+        normalizers_RMS = np.sqrt(normalizers_RMS)
+        return normalizers_RMS
 
 
 class FLODOG_RHS2007(LODOG_RHS2007):
