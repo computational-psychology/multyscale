@@ -100,3 +100,9 @@ def dog(x, y, sigma):
     dog = odog(x, y, ((sigma[0], sigma[0]), (sigma[1], sigma[1])))
 
     return dog
+
+
+def global_avg(shape):
+    filt_avg = np.ones(shape)
+    filt_avg = filt_avg / filt_avg.sum(axis=(-1, -2))
+    return filt_avg

@@ -2,6 +2,7 @@
 import numpy as np
 
 # Local application imports
+from . import filters
 
 
 # DOG_BM1997 normalization
@@ -68,3 +69,19 @@ def normalizers(filters_output, normalization_weights):
         normalizers[o, s, ...] = normalizer
 
     return normalizers
+
+
+def spatial_avg_windows_globalmean(normalizers):
+    filts = np.ndarray(normalizers.shape)
+    for o, s in np.ndindex(filts.shape[:2]):
+        filts[o, s] = filters.global_avg(normalizers.shape[2:])
+    return filts
+
+
+def nomalizers_to_RMS(normalizers, spatial_avg_filters):
+    normalizers_RMS = normalizers.copy()
+    normalizers_RMS = np.square(normalizers_RMS)
+    normalizers_RMS = spatial_avg_filters * normalizers_RMS
+    normalizers_RMS = normalizers_RMS.sum(axis=(-1, -2))
+    normalizers_RMS = np.sqrt(normalizers_RMS)
+    return normalizers_RMS
