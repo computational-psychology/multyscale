@@ -78,10 +78,13 @@ def spatial_avg_windows_globalmean(normalizers):
     return filts
 
 
-def nomalizers_to_RMS(normalizers, spatial_avg_filters):
-    normalizers_RMS = normalizers.copy()
-    normalizers_RMS = np.square(normalizers_RMS)
-    normalizers_RMS = spatial_avg_filters * normalizers_RMS
-    normalizers_RMS = normalizers_RMS.sum(axis=(-1, -2))
-    normalizers_RMS = np.sqrt(normalizers_RMS)
-    return normalizers_RMS
+def spatial_avg_windows_gaussian(x, y, sigmas):
+    filts = np.ndarray(sigmas.shape[:2] + x.shape)
+    for o, s in np.ndindex(filts.shape[:2]):
+        # Create Gaussian window
+        window = filters.gaussian2d(x, y, sigmas[o, s])
+
+        # Normalize window to unit-sum (== spatial averaging filter)
+        window = window / window.sum()
+        filts[o, s, ...] = window
+    return filts
