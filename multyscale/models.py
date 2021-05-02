@@ -35,15 +35,23 @@ class ODOG_BM1999:
             filters_output, self.scale_weights
         )
 
-    def normalize_outputs(self, filters_output):
-        # TODO: docstring
+    def normalizers(self, filters_output):
         # Get normalizers
         normalizers = normalization.normalizers(
             filters_output, self.normalization_weights
         )
+        return normalizers
 
+    def normalizers_to_RMS(self, normalizers):
         # Get RMS from each normalizer
         normalizer_RMS = np.sqrt(np.square(normalizers).mean((-1, -2)))
+        return normalizer_RMS
+
+    def normalize_outputs(self, filters_output):
+        # TODO: docstring
+        normalizers = self.normalizers(filters_output)
+
+        normalizer_RMS = self.normalizers_to_RMS(normalizers)
 
         normalized_outputs = np.ndarray(filters_output.shape)
         for o, s in np.ndindex(filters_output.shape[:2]):
@@ -73,13 +81,7 @@ class LODOG_RHS2007(ODOG_BM1999):
         self.window_sigma = 2
         super().__init__(shape, visextent)
 
-    def normalize_outputs(self, filters_output):
-        # TODO: docstring
-        # Get normalizers
-        normalizers = normalization.normalizers(
-            filters_output, self.normalization_weights
-        )
-
+    def normalizers_to_RMS(self, normalizers):
         # Create Gaussian window
         window = filters.gaussian2d(
             self.bank.x, self.bank.y, (self.window_sigma, self.window_sigma)
@@ -103,13 +105,7 @@ class LODOG_RHS2007(ODOG_BM1999):
             normalizer = np.sqrt(normalizer)
 
             normalizer_RMS[o, s, ...] = normalizer
-
-        # Normalize
-        normalized_outputs = np.ndarray(filters_output.shape)
-        for o, s in np.ndindex(filters_output.shape[:2]):
-            normalized_outputs[o, s] = filters_output[o, s] / normalizer_RMS[o, s]
-
-        return normalized_outputs
+        return normalizer_RMS
 
 
 class FLODOG_RHS2007(LODOG_RHS2007):
