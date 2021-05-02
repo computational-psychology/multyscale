@@ -44,7 +44,10 @@ class ODOG_BM1999:
 
     def normalizers_to_RMS(self, normalizers):
         # Get RMS from each normalizer
-        normalizer_RMS = np.sqrt(np.square(normalizers).mean((-1, -2)))
+        spatial_avg_filters = normalization.spatial_avg_windows_globalmean(normalizers)
+        normalizer_RMS = normalization.nomalizers_to_RMS(
+            normalizers, spatial_avg_filters
+        )
         return normalizer_RMS
 
     def normalize_outputs(self, filters_output):
