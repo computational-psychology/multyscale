@@ -53,7 +53,9 @@ class DOGBank:
         # TODO: typehints
         filters_output = np.empty(self.filters.shape)
         for i in range(self.filters.shape[0]):
-            filters_output[i, ...] = filters.apply(image, self.filters[i, ...])
+            filters_output[i, ...] = filters.apply(
+                image, self.filters[i, ...], pad=True
+            )
         return filters_output
 
 
@@ -83,7 +85,7 @@ class ODOGBank:
         for i in range(self.filters.shape[0]):
             for j in range(self.filters.shape[1]):
                 filters_output[i, j, ...] = filters.apply(
-                    image, self.filters[i, j, ...]
+                    image, self.filters[i, j, ...], pad=True
                 )
         return filters_output
 
