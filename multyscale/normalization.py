@@ -31,7 +31,9 @@ def create_normalization_weights(
 
 
 def scale_norm_weights_equal(n_scales):
-    return np.ones((n_scales, n_scales)) / n_scales
+    scale_norm_weights = np.ones((n_scales, n_scales))
+    scale_norm_weights = scale_norm_weights / scale_norm_weights.sum((0))
+    return scale_norm_weights
 
 
 def scale_norm_weights_gaussian(n_scales, sdmix):
@@ -43,11 +45,15 @@ def scale_norm_weights_gaussian(n_scales, sdmix):
         scale_norm_weights[s, ...] = np.exp(-(rel_i ** 2) / 2 * sdmix ** 2) / (
             sdmix * np.sqrt(2 * np.pi)
         )
+    scale_norm_weights = scale_norm_weights / scale_norm_weights.sum((0))
     return scale_norm_weights
 
 
 def orientation_norm_weights(n_orientations):
     orientation_norm_weights = np.eye(n_orientations)
+    orientation_norm_weights = orientation_norm_weights / orientation_norm_weights.sum(
+        (0)
+    )
     return orientation_norm_weights
 
 
