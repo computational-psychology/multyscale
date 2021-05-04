@@ -9,6 +9,32 @@ from . import filters, utils
 # TODO: data structure for filter output, with filter metadata
 
 
+# Weighting filter(outputs) according to spatial scale
+# Defining the scale weights
+def scale_weights(center_sigmas, slope):
+    # TODO: docstring
+    scale_weights = (1 / np.asarray(center_sigmas)) ** slope
+    return scale_weights
+
+
+# Weighting multiscale output
+def weight_multiscale_outputs(multiscale_filters, scale_weights):
+    # TODO: docstring
+    # Weight multiscale filters outputs according to filter spatial scale
+    weighted_multiscale = [f * w for f, w in zip(multiscale_filters, scale_weights)]
+    return np.asarray(weighted_multiscale)
+
+
+# Weighting oriented multiscales
+def weight_oriented_multiscale_outputs(filters_output, scale_weights):
+    # TODO: docstring
+    # Weight each filter output according to filter spatial scale
+    weighted_filters_output = [
+        weight_multiscale_outputs(m, scale_weights) for m in filters_output
+    ]
+    return np.asarray(weighted_filters_output)
+
+
 class DOGBank:
     def __init__(self, sigmas, x, y):
         # TODO: docstring

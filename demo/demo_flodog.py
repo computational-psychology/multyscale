@@ -53,17 +53,18 @@ for i in range(filters_output.shape[0]):
 
 
 # %% Weight each filter output according to scale
+weighted_outputs = np.ndarray(filters_output.shape)
 for i in range(filters_output.shape[0]):
     for j, output in enumerate(filters_output[i, ...]):
-        filters_output[i, j, ...] = output * model.scale_weights[j]
+        weighted_outputs[i, j, ...] = output * model.scale_weights[j]
 
 # %% Build normalizer for each filter output
 center_sigmas = [sigma[0][0] for sigma in model.bank.sigmas]
 sdmix = model.sdmix  # stdev of Gaussian weights for scale mixing
 
 # Create normalizer images
-normalizers = np.empty(filters_output.shape)
-for o, multiscale in enumerate(filters_output):  # seperate for orientations
+normalizers = np.empty(weighted_outputs.shape)
+for o, multiscale in enumerate(weighted_outputs):  # seperate for orientations
     for i, filt in enumerate(multiscale):
         normalizer = np.empty(filt.shape)
 
@@ -105,10 +106,9 @@ for o, multiscale in enumerate(normalizers):
         normalizers[o, s, ...] = normalizer
 
 # %% Normalize filter output
-normalized_outputs = np.empty(filters_output.shape)
-for o, multiscale in enumerate(filters_output):
-    for s, output in enumerate(multiscale):
-        normalized_outputs[o, s] = output / normalizers[o, s]
+normalized_outputs = np.ndarray(weighted_outputs.shape)
+for o, s in np.ndindex(weighted_outputs.shape[:2]):
+    normalized_outputs[o, s] = weighted_outputs[o, s] / normalizers[o, s]
 
 # %% Sum over orientations
 output_2 = normalized_outputs.sum((0, 1))

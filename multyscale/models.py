@@ -2,7 +2,7 @@
 import numpy as np
 
 # Local application imports
-from . import filterbank, filters
+from . import filters, filterbank, normalization
 
 # TODO: refactor filter-output datastructures
 
@@ -16,203 +16,104 @@ class ODOG_BM1999:
 
         self.bank = filterbank.BM1999(shape, visextent)
 
-        center_sigmas = [sigma[0][0] for sigma in self.bank.sigmas]
+        self.center_sigmas = [sigma[0][0] for sigma in self.bank.sigmas]
         self.weights_slope = 0.1
-        self.scale_weights = (1 / np.asarray(center_sigmas)) ** self.weights_slope
-
-    def sum_scales(self, filters_output):
-        # TODO: docstring
-        multiscale_output = np.tensordot(filters_output, self.scale_weights, (1, 0))
-        return multiscale_output
-
-    def normalize_multiscale_output(self, multiscale_output):
-        # TODO: docstring
-        normalized_multiscale_output = np.empty(multiscale_output.shape)
-        for i in range(multiscale_output.shape[0]):
-            image = multiscale_output[i]
-            rms = np.sqrt(np.square(image).mean((-1, -2)))  # image-wide RMS
-            normalized_multiscale_output[i] = image / rms
-        return normalized_multiscale_output
-
-    def apply(self, image):
-        # TODO: docstring
-
-        # Sum over spatial scales
-        filters_output = self.bank.apply(image)
-        multiscale_output = self.sum_scales(filters_output)
-
-        # Normalize oriented multiscale outputs
-        normalized_multiscale_output = self.normalize_multiscale_output(
-            multiscale_output
+        self.scale_weights = filterbank.scale_weights(
+            self.center_sigmas, self.weights_slope
         )
 
-        # Sum over orientations
-        output = normalized_multiscale_output.sum(0)
-        return output
-
-
-class LODOG_RHS2007:
-    # TODO: docstring
-
-    def __init__(self, shape, visextent):
-        self.shape = shape
-        self.visextent = visextent
-
-        self.bank = filterbank.BM1999(shape, visextent)
-
-        center_sigmas = [sigma[0][0] for sigma in self.bank.sigmas]
-        self.weights_slope = 0.1
-        self.scale_weights = (1 / np.asarray(center_sigmas)) ** self.weights_slope
-
-        self.window_sigma = 2
-
-    def sum_scales(self, filters_output):
-        # TODO: docstring
-        multiscale_output = np.tensordot(filters_output, self.scale_weights, (1, 0))
-        return multiscale_output
-
-    def normalize_multiscale_output(self, multiscale_output):
-        # TODO: docstring
-        # Create Gaussian window
-        window = filters.gaussian2d(
-            self.bank.x, self.bank.y, (self.window_sigma, self.window_sigma)
+        self.scale_norm_weights = normalization.scale_norm_weights_equal(
+            len(self.scale_weights)
+        )
+        self.orientation_norm_weights = normalization.orientation_norm_weights(6)
+        self.normalization_weights = normalization.create_normalization_weights(
+            6, 7, self.scale_norm_weights, self.orientation_norm_weights
         )
 
-        # Normalize window to unit-sum (== spatial averaging filter)
-        window = window / window.sum()
+    def weight_outputs(self, filters_output):
+        return filterbank.weight_oriented_multiscale_outputs(
+            filters_output, self.scale_weights
+        )
 
-        # Create normalizer images
-        normalized_multiscale_output = np.empty(multiscale_output.shape)
-        normalizers = np.empty(multiscale_output.shape)
-        for i, image in enumerate(multiscale_output):
-            # Square image
-            normalizer = np.square(image)
-
-            # Apply Gaussian window
-            normalizer = filters.apply(normalizer, window)
-
-            # Square root
-            normalizer = np.sqrt(normalizer)
-            normalizers[i, ...] = normalizer
-
-            # Normalize
-            normalized_multiscale_output[i, ...] = image / normalizer
-        return normalized_multiscale_output, normalizers
-
-    def apply(self, image):
-        # TODO: docstring
-
-        # Sum over spatial scales
-        filters_output = self.bank.apply(image)
-        multiscale_output = self.sum_scales(filters_output)
-
-        # Normalize oriented multiscale outputs
-        normalized_multiscale_output = self.normalize_multiscale_output(
-            multiscale_output
-        )[0]
-
-        # Sum over orientations
-        output = normalized_multiscale_output.sum(0)
-        return output
-
-
-class FLODOG_RHS2007:
-    # TODO: docstring
-
-    def __init__(self, shape, visextent):
-        self.shape = shape
-        self.visextent = visextent
-
-        self.bank = filterbank.BM1999(shape, visextent)
-
-        center_sigmas = [sigma[0][0] for sigma in self.bank.sigmas]
-        self.weights_slope = 0.1
-        self.scale_weights = (1 / np.asarray(center_sigmas)) ** self.weights_slope
-
-        self.window_sigma = 2
-        self.sdmix = 0.5  # stdev of Gaussian weights for scale mixing
-
-    def weight_filters_output(self, filters_output):
-        # TODO: docstring
-        # Weight each filter output according to scale
-        weighted_filters_output = np.empty(filters_output.shape)
-        for i in range(filters_output.shape[0]):
-            for j, output in enumerate(filters_output[i, ...]):
-                weighted_filters_output[i, j, ...] = output * self.scale_weights[j]
-        return weighted_filters_output
-
-    def create_normalizers(self, filters_output):
-        # TODO: docstring
-        # Create normalizer images
-        normalizers = np.empty(filters_output.shape)
-        for o, multiscale in enumerate(filters_output):
-            for i, filt in enumerate(multiscale):
-                normalizer = np.empty(filt.shape)
-
-                # Identify relative index of each scale to the current one
-                rel_i = i - np.asarray(range(multiscale.shape[0]))
-
-                # Gaussian weights, based on relative index
-                gweights = np.exp(-(rel_i ** 2) / 2 * self.sdmix ** 2) / (
-                    self.sdmix * np.sqrt(2 * np.pi)
-                )
-
-                # Sum filter outputs, by Gaussian weights
-                normalizer = np.tensordot(multiscale, gweights, axes=(0, 0))
-
-                # Normalize normalizer...
-                area = gweights.sum()
-                normalizer = normalizer / area
-
-                # Accumulate
-                normalizers[o, i, ...] = normalizer
+    def normalizers(self, filters_output):
+        # Get normalizers
+        normalizers = normalization.normalizers(
+            filters_output, self.normalization_weights
+        )
         return normalizers
 
-    def blur_normalizers(self, normalizers):
+    def normalizers_to_RMS(self, normalizers):
+        # Get RMS from each normalizer
+        spatial_avg_filters = normalization.spatial_avg_windows_globalmean(normalizers)
+        normalizers_RMS = normalizers.copy()
+        normalizers_RMS = np.square(normalizers_RMS)
+        normalizers_RMS = spatial_avg_filters * normalizers_RMS
+        normalizers_RMS = normalizers_RMS.sum(axis=(-1, -2))
+        normalizers_RMS = np.sqrt(normalizers_RMS)
+        return normalizers_RMS
+
+    def normalize_outputs(self, filters_output):
         # TODO: docstring
-        # Create Gaussian window
-        window = filters.gaussian2d(
-            self.bank.x, self.bank.y, (self.window_sigma, self.window_sigma)
-        )
+        normalizers = self.normalizers(filters_output)
 
-        # Normalize window to unit-sum (== spatial averaging filter)
-        window = window / window.sum()
+        normalizer_RMS = self.normalizers_to_RMS(normalizers)
 
-        for o, multiscale in enumerate(normalizers):
-            for s, normalizer in enumerate(multiscale):
-                # Square image
-                normalizer = np.square(normalizer)
+        normalized_outputs = np.ndarray(filters_output.shape)
+        for o, s in np.ndindex(filters_output.shape[:2]):
+            normalized_outputs[o, s] = filters_output[o, s] / normalizer_RMS[o, s]
 
-                # Apply Gaussian window
-                normalizer = filters.apply(normalizer, window)
-
-                # Square root
-                normalizer = np.sqrt(normalizer)
-                normalizers[o, s, ...] = normalizer
-        return normalizers
-
-    def normalize_filters_output(self, filters_output, normalizers):
-        # TODO: docstring
-        normalized_outputs = np.empty(filters_output.shape)
-        for o, multiscale in enumerate(filters_output):
-            for s, output in enumerate(multiscale):
-                normalized_outputs[o, s] = output / normalizers[o, s]
         return normalized_outputs
 
     def apply(self, image):
         # TODO: docstring
 
-        # Apply filterbank
+        # Sum over spatial scales
         filters_output = self.bank.apply(image)
+        weighted_outputs = self.weight_outputs(filters_output)
 
-        # Weight filter output
-        filters_output = self.weight_filters_output(filters_output)
+        # Normalize oriented multiscale outputs
+        normalized_outputs = self.normalize_outputs(weighted_outputs)
 
-        # Normalize filtes output
-        normalizers = self.create_normalizers(filters_output)
-        normalizers = self.blur_normalizers(normalizers)
-        normalized_outputs = self.normalize_filters_output(filters_output, normalizers)
-
-        # Sum outputs
+        # Sum over orientations and scales
         output = normalized_outputs.sum((0, 1))
         return output
+
+
+class LODOG_RHS2007(ODOG_BM1999):
+    # TODO: docstring
+
+    def __init__(self, shape, visextent):
+        self.window_sigma = 2
+        self.window_sigmas = np.ones(shape=(6, 7, 2)) * self.window_sigma
+
+        super().__init__(shape, visextent)
+
+    def normalizers_to_RMS(self, normalizers):
+        # Expand sigmas
+        # Get RMS from each normalizer
+        spatial_avg_filters = normalization.spatial_avg_windows_gaussian(
+            self.bank.x, self.bank.y, self.window_sigmas
+        )
+        normalizers_RMS = normalizers.copy()
+        normalizers_RMS = np.square(normalizers_RMS)
+        for o, s in np.ndindex(normalizers_RMS.shape[:2]):
+            normalizers_RMS[o, s] = filters.apply(
+                spatial_avg_filters[o, s], normalizers_RMS[o, s]
+            )
+        normalizers_RMS = np.sqrt(normalizers_RMS)
+        return normalizers_RMS
+
+
+class FLODOG_RHS2007(LODOG_RHS2007):
+    # TODO: docstring
+
+    def __init__(self, shape, visextent):
+        super().__init__(shape, visextent)
+
+        self.sdmix = 0.5  # stdev of Gaussian weights for scale mixing
+        self.scale_norm_weights = normalization.scale_norm_weights_gaussian(
+            len(self.scale_weights), self.sdmix
+        )
+        self.normalization_weights = normalization.create_normalization_weights(
+            6, 7, self.scale_norm_weights, self.orientation_norm_weights
+        )
