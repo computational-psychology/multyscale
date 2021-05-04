@@ -10,23 +10,19 @@ from . import filterbank, filters
 class ODOG_BM1999:
     # TODO: docstring
 
-    def __init__(self,
-                 shape, visextent):
+    def __init__(self, shape, visextent):
         self.shape = shape
         self.visextent = visextent
 
         self.bank = filterbank.BM1999(shape, visextent)
 
         center_sigmas = [sigma[0][0] for sigma in self.bank.sigmas]
-        self.weights_slope = .1
-        self.scale_weights = (1 / np.asarray(center_sigmas)) \
-            ** self.weights_slope
+        self.weights_slope = 0.1
+        self.scale_weights = (1 / np.asarray(center_sigmas)) ** self.weights_slope
 
     def sum_scales(self, filters_output):
         # TODO: docstring
-        multiscale_output = np.tensordot(filters_output,
-                                         self.scale_weights,
-                                         (1, 0))
+        multiscale_output = np.tensordot(filters_output, self.scale_weights, (1, 0))
         return multiscale_output
 
     def normalize_multiscale_output(self, multiscale_output):
@@ -46,8 +42,9 @@ class ODOG_BM1999:
         multiscale_output = self.sum_scales(filters_output)
 
         # Normalize oriented multiscale outputs
-        normalized_multiscale_output = \
-            self.normalize_multiscale_output(multiscale_output)
+        normalized_multiscale_output = self.normalize_multiscale_output(
+            multiscale_output
+        )
 
         # Sum over orientations
         output = normalized_multiscale_output.sum(0)
@@ -57,32 +54,29 @@ class ODOG_BM1999:
 class LODOG_RHS2007:
     # TODO: docstring
 
-    def __init__(self,
-                 shape, visextent):
+    def __init__(self, shape, visextent):
         self.shape = shape
         self.visextent = visextent
 
         self.bank = filterbank.BM1999(shape, visextent)
 
         center_sigmas = [sigma[0][0] for sigma in self.bank.sigmas]
-        self.weights_slope = .1
-        self.scale_weights = (1 / np.asarray(center_sigmas)) \
-            ** self.weights_slope
+        self.weights_slope = 0.1
+        self.scale_weights = (1 / np.asarray(center_sigmas)) ** self.weights_slope
 
         self.window_sigma = 2
 
     def sum_scales(self, filters_output):
         # TODO: docstring
-        multiscale_output = np.tensordot(filters_output,
-                                         self.scale_weights,
-                                         (1, 0))
+        multiscale_output = np.tensordot(filters_output, self.scale_weights, (1, 0))
         return multiscale_output
 
     def normalize_multiscale_output(self, multiscale_output):
         # TODO: docstring
         # Create Gaussian window
-        window = filters.gaussian2d(self.bank.x, self.bank.y,
-                                    (self.window_sigma, self.window_sigma))
+        window = filters.gaussian2d(
+            self.bank.x, self.bank.y, (self.window_sigma, self.window_sigma)
+        )
 
         # Normalize window to unit-sum (== spatial averaging filter)
         window = window / window.sum()
@@ -113,8 +107,9 @@ class LODOG_RHS2007:
         multiscale_output = self.sum_scales(filters_output)
 
         # Normalize oriented multiscale outputs
-        normalized_multiscale_output = \
-            self.normalize_multiscale_output(multiscale_output)[0]
+        normalized_multiscale_output = self.normalize_multiscale_output(
+            multiscale_output
+        )[0]
 
         # Sum over orientations
         output = normalized_multiscale_output.sum(0)
@@ -124,20 +119,18 @@ class LODOG_RHS2007:
 class FLODOG_RHS2007:
     # TODO: docstring
 
-    def __init__(self,
-                 shape, visextent):
+    def __init__(self, shape, visextent):
         self.shape = shape
         self.visextent = visextent
 
         self.bank = filterbank.BM1999(shape, visextent)
 
         center_sigmas = [sigma[0][0] for sigma in self.bank.sigmas]
-        self.weights_slope = .1
-        self.scale_weights = (1 / np.asarray(center_sigmas)) \
-            ** self.weights_slope
+        self.weights_slope = 0.1
+        self.scale_weights = (1 / np.asarray(center_sigmas)) ** self.weights_slope
 
         self.window_sigma = 2
-        self.sdmix = .5  # stdev of Gaussian weights for scale mixing
+        self.sdmix = 0.5  # stdev of Gaussian weights for scale mixing
 
     def weight_filters_output(self, filters_output):
         # TODO: docstring
@@ -145,8 +138,7 @@ class FLODOG_RHS2007:
         weighted_filters_output = np.empty(filters_output.shape)
         for i in range(filters_output.shape[0]):
             for j, output in enumerate(filters_output[i, ...]):
-                weighted_filters_output[i, j, ...] = output * \
-                    self.scale_weights[j]
+                weighted_filters_output[i, j, ...] = output * self.scale_weights[j]
         return weighted_filters_output
 
     def create_normalizers(self, filters_output):
@@ -161,8 +153,9 @@ class FLODOG_RHS2007:
                 rel_i = i - np.asarray(range(multiscale.shape[0]))
 
                 # Gaussian weights, based on relative index
-                gweights = np.exp(- rel_i ** 2 / 2 * self.sdmix ** 2) /\
-                    (self.sdmix * np.sqrt(2 * np.pi))
+                gweights = np.exp(-(rel_i ** 2) / 2 * self.sdmix ** 2) / (
+                    self.sdmix * np.sqrt(2 * np.pi)
+                )
 
                 # Sum filter outputs, by Gaussian weights
                 normalizer = np.tensordot(multiscale, gweights, axes=(0, 0))
@@ -178,8 +171,9 @@ class FLODOG_RHS2007:
     def blur_normalizers(self, normalizers):
         # TODO: docstring
         # Create Gaussian window
-        window = filters.gaussian2d(self.bank.x, self.bank.y,
-                                    (self.window_sigma, self.window_sigma))
+        window = filters.gaussian2d(
+            self.bank.x, self.bank.y, (self.window_sigma, self.window_sigma)
+        )
 
         # Normalize window to unit-sum (== spatial averaging filter)
         window = window / window.sum()
@@ -220,5 +214,5 @@ class FLODOG_RHS2007:
         normalized_outputs = self.normalize_filters_output(filters_output, normalizers)
 
         # Sum outputs
-        output = normalized_outputs.sum((0,1))
+        output = normalized_outputs.sum((0, 1))
         return output

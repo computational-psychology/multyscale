@@ -12,10 +12,7 @@ def apply(image, filt):
     return filtered_image
 
 
-def gaussian2d(x, y,
-               sigma,
-               center=(0, 0),
-               orientation=0):
+def gaussian2d(x, y, sigma, center=(0, 0), orientation=0):
     # TODO: convert Gaussian to class
     # TODO: typehints
     # TODO: docstring
@@ -48,24 +45,29 @@ def gaussian2d(x, y,
     theta = np.deg2rad(orientation)
 
     # determine a, b, c coefficients
-    a = (np.cos(theta)**2 / (2*sigma[0]**2)) +\
-        (np.sin(theta)**2 / (2*sigma[1]**2))
-    b = -(np.sin(2*theta) / (4*sigma[0]**2)) +\
-        (np.sin(2*theta) / (4*sigma[1]**2))
-    c = (np.sin(theta)**2 / (2*sigma[0]**2)) +\
-        (np.cos(theta)**2 / (2*sigma[1]**2))
+    a = (np.cos(theta) ** 2 / (2 * sigma[0] ** 2)) + (
+        np.sin(theta) ** 2 / (2 * sigma[1] ** 2)
+    )
+    b = -(np.sin(2 * theta) / (4 * sigma[0] ** 2)) + (
+        np.sin(2 * theta) / (4 * sigma[1] ** 2)
+    )
+    c = (np.sin(theta) ** 2 / (2 * sigma[0] ** 2)) + (
+        np.cos(theta) ** 2 / (2 * sigma[1] ** 2)
+    )
 
     # create Gaussian
-    gaussian = np.exp(-(a*(x-center[0])**2 +
-                      2*b*(x-center[0])*(y-center[1]) +
-                      c*(y-center[1])**2))
+    gaussian = np.exp(
+        -(
+            a * (x - center[0]) ** 2
+            + 2 * b * (x - center[0]) * (y - center[1])
+            + c * (y - center[1]) ** 2
+        )
+    )
 
     return gaussian
 
 
-def odog(x, y,
-         sigma,
-         orientation=(0, 0)):
+def odog(x, y, sigma, orientation=(0, 0)):
     # TODO: convert ODoG to class
     # TODO: typehints
     # TODO: docstring
@@ -87,8 +89,7 @@ def odog(x, y,
     return odog
 
 
-def dog(x, y,
-        sigma):
+def dog(x, y, sigma):
     # TODO: docstring
     # TODO: typehints
 
