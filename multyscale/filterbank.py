@@ -59,6 +59,26 @@ class DOGBank:
         return filters_output
 
 
+def BM1997(filtershape=(1024, 1024), visextent=(24, 24)):
+    # Parameters (BM1999)
+    num_scales = 7
+    largest_center_sigma = 3  # in degrees
+    center_sigmas = utils.octave_intervals(num_scales) * largest_center_sigma
+    cs_ratio = 2  # center-surround ratio
+
+    # Convert to filterbank parameters
+    sigmas = [(s, cs_ratio * s) for s in center_sigmas]
+
+    # Create image coordinate system:
+    axish = np.linspace(visextent[0], visextent[1], filtershape[0])
+    axisv = np.linspace(visextent[2], visextent[3], filtershape[1])
+    (x, y) = np.meshgrid(axish, axisv)
+
+    # Create filterbank
+    bank = DOGBank(sigmas, x, y)
+    return bank
+
+
 class ODOGBank:
     def __init__(self, orientations, sigmas, x, y):
         # TODO: docstring
