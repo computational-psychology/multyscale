@@ -7,6 +7,34 @@ from . import filters, filterbank, normalization
 # TODO: refactor filter-output datastructures
 
 
+class DOG_BM1997:
+    def __init__(self, shape, visextent):
+        self.shape = shape
+        self.visextent = visextent
+
+        self.bank = filterbank.BM1997(shape, visextent)
+
+        self.center_sigmas = [sigma[0] for sigma in self.bank.sigmas]
+        self.weights_slope = 0.1
+        self.scale_weights = filterbank.scale_weights(
+            self.center_sigmas, self.weights_slope
+        )
+
+    def weight_outputs(self, filters_output):
+        return filterbank.weight_multiscale_outputs(filters_output, self.scale_weights)
+
+    def apply(self, image):
+        # TODO: docstring
+
+        # Sum over spatial scales
+        filters_output = self.bank.apply(image)
+        weighted_outputs = self.weight_outputs(filters_output)
+
+        # Sum over scales
+        output = weighted_outputs.sum(axis=0)
+        return output
+
+
 class ODOG_BM1999:
     # TODO: docstring
 
