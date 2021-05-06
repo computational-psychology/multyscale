@@ -128,6 +128,7 @@ class LODOG_RHS2007(ODOG_BM1999):
             normalizers_RMS[o, s] = filters.apply(
                 spatial_avg_filters[o, s], normalizers_RMS[o, s]
             )
+        normalizers_RMS += 1e-6
         normalizers_RMS = np.sqrt(normalizers_RMS)
         return normalizers_RMS
 
