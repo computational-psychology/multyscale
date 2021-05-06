@@ -39,13 +39,13 @@ def scale_norm_weights_equal(n_scales):
 def scale_norm_weights_gaussian(n_scales, sdmix):
     scale_norm_weights = np.ndarray((n_scales, n_scales))
     for s in range(n_scales):
-        rel_i = s - np.asarray(range(n_scales))
+        rel_i = np.asarray(range(n_scales)) - s
 
         # Gaussian weights, based on relative index
-        scale_norm_weights[s, ...] = np.exp(-(rel_i ** 2) / 2 * sdmix ** 2) / (
+        scale_norm_weights[s, ...] = np.exp(-(rel_i ** 2) / (2 * sdmix ** 2)) / (
             sdmix * np.sqrt(2 * np.pi)
         )
-    scale_norm_weights = scale_norm_weights / scale_norm_weights.sum((0))
+    # scale_norm_weights = scale_norm_weights / scale_norm_weights.sum((0))
     return scale_norm_weights
 
 
