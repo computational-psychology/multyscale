@@ -11,7 +11,7 @@ def apply(image, filt, pad=False):
     if pad:
         pad_size = np.array(filt.shape) - np.array([1, 0])
         pad_width = np.array([pad_size / 2, pad_size / 2], dtype="int")
-        pad_image = np.pad(image, pad_width, "constant", constant_values=128)
+        pad_image = np.pad(image, pad_width, "constant", constant_values=0.5)
         filtered_image = signal.fftconvolve(pad_image, filt, mode="valid")
     else:
         filtered_image = signal.fftconvolve(image, filt, mode="same")
