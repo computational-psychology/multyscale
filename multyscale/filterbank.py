@@ -228,8 +228,11 @@ def BM1999(
     # Parameters (BM1999)
     n_orientations = 6
     num_scales = 7
-    largest_center_sigma = 3  # in degrees
-    center_sigmas = utils.octave_intervals(num_scales) * largest_center_sigma
+    largest_center_space_const = 3  # in degrees
+    center_space_consts = (
+        utils.octave_intervals(num_scales) * largest_center_space_const
+    )
+    center_sigmas = center_space_consts / np.sqrt(2)
     cs_ratio = 2  # center-surround ratio
 
     # Convert to filterbank parameters
