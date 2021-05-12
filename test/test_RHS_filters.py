@@ -29,11 +29,11 @@ axisv = np.linspace(visextent[2], visextent[3], shape[1])
 (x, y) = np.meshgrid(axish, axisv)
 
 # %% Circular Gaussian
-std1 = 33.9411
-sigmas = ((std1 / (1024 / 32)), (std1 / (1024 / 32)))
+sigma1 = 2
+sigmas = np.array([1, 1]) * sigma1
 f = multyscale.filters.gaussian2d(x, y, (sigmas[0], sigmas[1]))
 f = f / f.sum()
-f_2 = RHS_filters.d2gauss(shape[0], std1, shape[1], std1, 0)
+f_2 = RHS_filters.d2gauss(shape[0], sigmas[0] * 32, shape[1], sigmas[0] * 32, 0)
 
 plt.subplot(2, 2, 1)
 plt.imshow(f)
@@ -46,12 +46,14 @@ plt.plot(f_2[512, :])
 
 np.allclose(f, f_2)
 # %% Elliptical Gaussian
-std2 = 60
 orientation = 40
-sigmas = ((std1 / (1024 / 32)), (std2 / (1024 / 32)))
+sigma2 = 2 * sigma1
+sigmas = np.array([1, 1]) * np.array([sigma1, sigma2])
 f = multyscale.filters.gaussian2d(x, y, (sigmas[0], sigmas[1]), orientation=orientation)
 f = f / f.sum()
-f_2 = RHS_filters.d2gauss(shape[0], std1, shape[1], std2, orientation)
+f_2 = RHS_filters.d2gauss(
+    shape[0], sigmas[0] * 32, shape[1], sigmas[1] * 32, orientation
+)
 
 plt.subplot(2, 2, 1)
 plt.imshow(f)
@@ -65,9 +67,9 @@ plt.plot(f_2[512, :])
 np.allclose(f, f_2)
 # %% ODOG
 orientation = 150
-std1 = 60
-sigmas = np.array([[std1, std1], [std1, 2 * std1]]) / (1024 / 32)
-rhs_odog = RHS_filters.odog(shape[0], shape[1], std1, orientation=orientation)
+sigma3 = 2
+sigmas = np.array([[1, 1], [1, 2]]) * sigma3
+rhs_odog = RHS_filters.odog(shape[0], shape[1], sigma3 * 32, orientation=orientation)
 multy_odog = multyscale.filters.odog(
     x, y, sigmas, orientation=(orientation, orientation)
 )
