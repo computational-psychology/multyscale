@@ -236,8 +236,8 @@ def BM1999(
     cs_ratio = 2  # center-surround ratio
 
     # Convert to filterbank parameters
-    orientations = np.arange(0, 180, 180 / n_orientations)
-    sigmas = [((s, s), (s, cs_ratio * s)) for s in center_sigmas]
+    orientations = -np.arange(0, 180, 180 / n_orientations)
+    sigmas = [((s, s), (cs_ratio * s, s)) for s in center_sigmas]
 
     # Create image coordinate system:
     axish = np.linspace(visextent[0], visextent[1], filtershape[0])
