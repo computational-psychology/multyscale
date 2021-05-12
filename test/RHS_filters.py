@@ -47,11 +47,11 @@ def gauss(x, std):
 
 def d2gauss(n1, std1, n2, std2, theta):
     # rotation transformation
-    theta = np.deg2rad(theta)
+    theta = np.deg2rad(90 - theta)
     r = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
 
     # create X and Y grids
-    Xs = np.linspace(-((n1) / 2), (n1) / 2, n1)
+    Xs = np.linspace(-((n1 - 1) / 2), (n1 - 1) / 2, n1)
     Xs, Ys = np.meshgrid(Xs, Xs)
 
     # reshape into vectors

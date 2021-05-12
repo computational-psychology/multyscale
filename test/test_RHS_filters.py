@@ -23,7 +23,7 @@ rhs_matlab = np.array(io.loadmat("odog_matlab.mat")["filters"].tolist())
 # %% Visualise
 for i in range(rhs_bank.shape[0]):
     plt.subplot(rhs_bank.shape[0], 2, i * 2 + 1)
-    plt.imshow(rhs_bank[i, 6, ...], extent=visextent)
+    plt.imshow(rhs_bank[i, 6, ...])
     plt.subplot(rhs_bank.shape[0], 2, i * 2 + 2)
     plt.imshow(rhs_matlab[i, 6, ...])
 np.allclose(rhs_matlab, rhs_bank)
@@ -47,10 +47,11 @@ plt.plot(f_2[512, :])
 np.allclose(f, f_2)
 # %% Elliptical Gaussian
 std2 = 60
+orientation = 40
 sigmas = ((std1 / (511.5 / 16)), (std2 / (511.5 / 16)))
-f = multyscale.filters.gaussian2d(x, y, (sigmas[0], sigmas[1]), orientation=90)
+f = multyscale.filters.gaussian2d(x, y, (sigmas[0], sigmas[1]), orientation=orientation)
 f = f / f.sum()
-f_2 = RHS_filters.d2gauss(shape[0], std1, shape[1], std2, 0)
+f_2 = RHS_filters.d2gauss(shape[0], std1, shape[1], std2, orientation)
 
 plt.subplot(2, 2, 1)
 plt.imshow(f)
@@ -65,10 +66,10 @@ np.allclose(f, f_2)
 # %% ODOG
 orientation = 150
 std1 = 60
-sigmas = np.array([[std1, std1], [std1 * 2, std1]]) / (511.5 / 16)
+sigmas = np.array([[std1, std1], [std1, 2 * std1]]) / (511.5 / 16)
 rhs_odog = RHS_filters.odog(shape[0], shape[1], std1, orientation=orientation)
 multy_odog = multyscale.filters.odog(
-    x, y, sigmas, orientation=(-orientation, -orientation)
+    x, y, sigmas, orientation=(orientation, orientation)
 )
 
 plt.subplot(2, 2, 1)
