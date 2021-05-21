@@ -11,6 +11,7 @@ Welcome to multyscale's documentation!
    :caption: Contents:
 
    install
+   multyscale
 
 
 Indices and tables
