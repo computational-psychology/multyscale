@@ -35,6 +35,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
+    "sphinx_tabs.tabs",
 ]
 autodoc_typehints = "description"
 napoleon_google_docstring = False
