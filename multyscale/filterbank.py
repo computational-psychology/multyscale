@@ -9,8 +9,10 @@ and Robinson, Hammon, & de Sa (2007) filters.
 
 
 # Third party imports
+from __future__ import annotations
+from collections.abc import Sequence
 import numpy as np
-from typing import Iterable
+
 
 # Local application imports
 from . import filters, utils
@@ -32,7 +34,9 @@ def scale_weights(center_sigmas, slope):
 def weight_multiscale_outputs(multiscale_filters, scale_weights):
     # TODO: docstring
     # Weight multiscale filters outputs according to filter spatial scale
-    weighted_multiscale = [f * w for f, w in zip(multiscale_filters, scale_weights)]
+    weighted_multiscale = [
+        f * w for f, w in zip(multiscale_filters, scale_weights)
+    ]
     return np.asarray(weighted_multiscale)
 
 
@@ -52,15 +56,17 @@ class DOGBank:
 
     Parameters
     ----------
-    sigmas : Iterable[float]
+    sigmas : array-like[array-like[float,float]]
         Standard deviations, two (center, surround) for each filter
-    x : np.ndarray
+    x : numpy.ndarray
         image grid of x coordinates for each pixel; easily created with meshgrid
-    y : np.ndarray
+    y : numpy.ndarray
         image grid of y coordinates for each pixel; easily created with meshgrid
     """
 
-    def __init__(self, sigmas: Iterable[float], x: np.ndarray, y: np.ndarray):
+    def __init__(
+        self, sigmas: Sequence[Sequence[float]], x: np.ndarray, y: np.ndarray
+    ):
         self.sigmas = sigmas
         self.x = x
         self.y = y
@@ -75,23 +81,42 @@ class DOGBank:
 
         Parameters
         ----------
-        image : np.ndarray
-            Image (as numpy.ndarray) to be filtered
+        image : numpy.ndarray
+            Image matrix to be filtered
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Multidimensional (N,X,Y) array of filter outputs, where
             N is the number of spatial scales in filterbank,
             X, Y are the (pixel)shape of the input image
         """
         filters_output = np.empty(self.filters.shape)
         for i in range(self.filters.shape[0]):
-            filters_output[i, ...] = filters.apply(image, self.filters[i, ...], pad=True)
+            filters_output[i, ...] = filters.apply(
+                image, self.filters[i, ...], pad=True
+            )
         return filters_output
 
 
-def BM1997(filtershape=(1024, 1024), visextent=(-16, 16, -16, 16)) -> DOGBank:
+def BM1997(
+    filtershape: Sequence[int] = (1024, 1024),
+    visextent: Sequence[float] = (-16, 16, -16, 16),
+) -> DOGBank:
+    """Bank of isotropic DoG filters with sizes used by Blakeslee & McCourt (1999)
+
+    Parameters
+    ----------
+    filtershape : array-like[int], optional
+        [description], by default (1024, 1024)
+    visextent : array-like[float], optional
+        [description], by default (-16, 16, -16, 16)
+
+    Returns
+    -------
+    DOGBank
+        [description]
+    """
     # Parameters (BM1997)
     num_scales = 7
     largest_center_sigma = 3  # in degrees
@@ -117,20 +142,22 @@ class ODOGBank:
 
     Parameters
     ----------
-    orientations : Iterable
-        Iterable of orientations, one per filter, in degrees
-    sigmas : Iterable
-        Iterable of standard deviations, 4 per filter
-    x : np.ndarray
+    orientations : array-like[float]
+        Array-like of orientations, one per filter, in degrees
+    sigmas : array-like[array-like[[float, float],[float, float]]]]
+        Array-like of standard deviations,
+        two (center, surround) sets of
+        two (major, minor axis) per filter
+    x : numpy.ndarray
         image grid of x coordinates for each pixel; easily created with meshgrid
-    y : np.ndarray
+    y : numpy.ndarray
         image grid of y coordinates for each pixel; easily created with meshgrid
     """
 
     def __init__(
         self,
-        orientations: Iterable[float],
-        sigmas: Iterable[float],
+        orientations: Sequence[float],
+        sigmas: Sequence[Sequence[Sequence[float]]],
         x: np.ndarray,
         y: np.ndarray,
     ):
@@ -141,7 +168,9 @@ class ODOGBank:
         self.x = x
         self.y = y
 
-        self.filters = np.empty((len(orientations), len(sigmas), x.shape[0], x.shape[1]))
+        self.filters = np.empty(
+            (len(orientations), len(sigmas), x.shape[0], x.shape[1])
+        )
 
         for i, angle in enumerate(orientations):
             for j, sigma in enumerate(sigmas):
@@ -153,12 +182,12 @@ class ODOGBank:
 
         Parameters
         ----------
-        image : np.ndarray
-            Image (as numpy.ndarray) to be filtered
+        image : numpy.ndarray
+            Image matrix to be filtered
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Multidimensional (M,N,X,Y) array of filter outputs, where
             M is the number of orientations in filterbank,
             N is the number of spatial scales in filterbank,
@@ -174,17 +203,18 @@ class ODOGBank:
 
 
 def BM1999(
-    filtershape: Iterable[int] = (1024, 1024),
-    visextent: Iterable[float] = (-16, 16, -16, 16),
+    filtershape: Sequence[int] = (1024, 1024),
+    visextent: Sequence[float] = (-16, 16, -16, 16),
 ) -> ODOGBank:
     """ODOG bank with orientations and spatial scales as used by BM1999 and RHS2007
 
     Parameters
     ----------
-    filtershape : Iterable, optional
+    filtershape : array-like[int], optional
         Pixel size (W,H) of filters, by default (1024, 1024)
-    visextent : Iterable, optional
-        Extent in degrees visual angle, (left, right, top, bottom), by default (-16, 16, -16, 16)
+    visextent : array-like[float], optional
+        Extent in degrees visual angle, (left, right, top, bottom),
+        by default (-16, 16, -16, 16)
 
     Returns
     -------
