@@ -1,3 +1,7 @@
+# Python Standard Library
+from __future__ import annotations
+from collections.abc import Sequence
+
 # Third party imports
 import numpy as np
 from scipy import signal
@@ -5,8 +9,29 @@ from scipy import signal
 # TODO: (Abstract) base class Filter with apply-method,...
 
 
-def apply(image, filt, pad=False):
-    # TODO: docstring
+def apply(
+    image: np.ndarray, filt: np.ndarray, pad: bool = False
+) -> np.ndarray:
+    """Apply filter to image, optionally pad input
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        image to filter
+    filt : numpy.ndarray
+        filter to use
+    pad : bool, optional
+        whether to pad the input image, by default False.
+        If true, input will be padded equally around all borders
+        with the constant value 0.5
+        to be the size of the filter,
+
+    Returns
+    -------
+    numpy.ndarray
+        Filtered image
+    """
+
     # TODO: make method
     if pad:
         pad_size = np.array(filt.shape) - np.array([1, 0])
@@ -18,10 +43,34 @@ def apply(image, filt, pad=False):
     return filtered_image
 
 
-def gaussian2d(x, y, sigma, center=(0, 0), orientation=0):
+def gaussian2d(
+    x: np.ndarray,
+    y: np.ndarray,
+    sigma: Sequence[float],
+    center: Sequence[int] = (0, 0),
+    orientation: float = 0,
+) -> np.ndarray:
+    """Create 2D Gaussian
+
+    Parameters
+    ----------
+    x : numpy.ndarray
+        x coordinates of each pixel
+    y : numpy.ndarray
+        y coordinates of each pixel
+    sigma : Sequence[float]
+        standard deviation along each axis (2-vector) or both axes (scalar)
+    center : Sequence[int], optional
+        coordinates to center Gaussian on, by default (0, 0)
+    orientation : float, optional
+        degrees of counterclockwise rotation of Gaussian axes, by default 0
+
+    Returns
+    -------
+    numpy.ndarray
+        image matrix, of shape = x.shape, with a Gaussian kernel
+    """
     # TODO: convert Gaussian to class
-    # TODO: typehints
-    # TODO: docstring
 
     # Sigma is tuple of two sigmas, one for each axis.
     # Units of x,y, determine units of sigma:
@@ -76,9 +125,30 @@ def gaussian2d(x, y, sigma, center=(0, 0), orientation=0):
 
 
 def odog(x, y, sigma, orientation=(0, 0)):
+    """Create oriented difference-of-Gaussian filter
+
+    Parameters
+    ----------
+    x : numpy.ndarray
+        x coordinates of each pixel
+    y : numpy.ndarray
+        y coordinates of each pixel
+    sigma : Sequence[Sequence[float]]
+        standard deviation along each axis (2-vector) or both axes (scalar)
+        for center Gaussian,
+        and similar for surround Gaussian
+    center : Sequence[int], optional
+        coordinates to center Gaussian on, by default (0, 0)
+    orientation : Sequence[float], optional
+        degrees of counterclockwise rotation of axes of each Gaussian, by default (0, 0)
+
+    Returns
+    -------
+    numpy.ndarray
+        image matrix, of shape = x.shape, with oriented DoG kernel
+    """
+
     # TODO: convert ODoG to class
-    # TODO: typehints
-    # TODO: docstring
 
     # Sigma is tuple of two tuples, one for Gaussian.
     # Orientation is tuple of two floats, one for each
@@ -99,9 +169,31 @@ def odog(x, y, sigma, orientation=(0, 0)):
     return odog
 
 
-def dog(x, y, sigma):
-    # TODO: docstring
-    # TODO: typehints
+def dog(
+    x: np.ndarray,
+    y: np.ndarray,
+    sigma: Sequence[float],
+    center: Sequence[int] = (0, 0),
+) -> np.ndarray:
+    """Create isotropic (unoriented) difference-of-Gaussian filter
+
+    Parameters
+    ----------
+    x : numpy.ndarray
+        x coordinates of each pixel
+    y : numpy.ndarray
+        y coordinates of each pixel
+    sigma : Sequence[float]
+        standard deviation along both axes (scalar)
+        for center Gaussian, and for surround Gaussian
+    center : Sequence[int], optional
+        coordinates to center Gaussian on, by default (0, 0)
+
+    Returns
+    -------
+    numpy.ndarray
+        image matrix, of shape = x.shape, with isotropic DoG kernel
+    """
 
     # Isotropic difference of Gaussian;
     # Sigma is tuple of two floats, one for each Gaussian.
@@ -112,7 +204,19 @@ def dog(x, y, sigma):
     return dog
 
 
-def global_avg(shape):
+def global_avg(shape: Sequence[int]) -> np.ndarray:
+    """Create filter to calculate global mean
+
+    Parameters
+    ----------
+    shape : Sequence[int]
+        Size (h,w), in pixels of filter
+
+    Returns
+    -------
+    np.ndarray
+        Image matrix defining filter, where each entry is 1/(h * w).
+    """
     filt_avg = np.ones(shape)
     filt_avg = filt_avg / filt_avg.sum(axis=(-1, -2))
     return filt_avg
