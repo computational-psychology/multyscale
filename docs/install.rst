@@ -50,3 +50,21 @@ After downloading the repository, it can be installed (from the main directory):
 .. [#fn_PyPI] This will be fixed in an upcoming update.
 
 .. TODO: add conda installation
+
+Requirements
+-------------
+
+Multyscale requires:
+
+- numpy
+- scipy
+
+and recommends working with:
+
+- pillow
+- matplotlib
+
+as well as:
+
+- ipython
+- jupyter
