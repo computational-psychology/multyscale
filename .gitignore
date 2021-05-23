@@ -2,3 +2,7 @@
 __pycache__/
 
 .vscode/
+
+multyscale.egg-info/
+
+docs/_build/
