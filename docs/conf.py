@@ -36,6 +36,8 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
     "sphinx_tabs.tabs",
+    "nbsphinx",
+    "nbsphinx_link",
 ]
 autodoc_typehints = "description"
 napoleon_google_docstring = False

@@ -48,6 +48,8 @@ def gaussian2d(x, y, sigma, center=(0, 0), orientation=0):
     # c = (sin(th)^2 / 2sigma_x^2) + (cos(th)^2 / 2sigma_y^2)
 
     # convert orientation parameter to radians
+    sigma = np.array(sigma) * [1, 1]
+
     theta = np.deg2rad(orientation)
 
     # determine a, b, c coefficients
@@ -80,6 +82,8 @@ def odog(x, y, sigma, orientation=(0, 0)):
 
     # Sigma is tuple of two tuples, one for Gaussian.
     # Orientation is tuple of two floats, one for each
+
+    orientation = np.array(orientation) * [1, 1]
 
     # Create center and surround anisotropic Gaussian filters
     center = gaussian2d(x, y, sigma=sigma[0], orientation=orientation[0])
