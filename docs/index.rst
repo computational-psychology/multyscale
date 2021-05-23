@@ -6,13 +6,23 @@
 Welcome to multyscale's documentation!
 ======================================
 
+.. note::
+   This documentation uses `The Documentation System`_'s four sections:
+   Explanations, Tutorials, a "Cookbook" of How-To guides, and the API reference.
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
    install
-   multyscale
+   topics/topics
+   tutorials/tutorials
+   cookbook/cookbook.rst
 
+.. toctree::
+   :maxdepth: 1
+
+   reference/multyscale
 
 Indices and tables
 ==================
@@ -20,3 +30,5 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+.. _The Documentation System: https://documentation.divio.com/

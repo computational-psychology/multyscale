@@ -1,13 +1,10 @@
-multyscale package
-==================
+API reference
+=========================
 
 .. automodule:: multyscale
    :members:
    :undoc-members:
    :show-inheritance:
-
-Submodules
-----------
 
 .. toctree::
    :maxdepth: 4
