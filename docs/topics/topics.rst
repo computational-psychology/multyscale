@@ -15,3 +15,7 @@ are multiscale spatial filtering models, examplified in the -ODOG genus of model
     :caption: Topic Guides:
 
     brightness_modeling
+
+.. image:: diagram.pdf
+    :width: 400
+    :alt: Historical roadmap and modular overview of -ODOG genus of models
