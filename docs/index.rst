@@ -6,6 +6,10 @@
 Welcome to multyscale's documentation!
 ======================================
 
+Multyscale aims to provide a modular and flexible, yet intuitive and robust library
+for implementing multiscale spatial filtering models of early vision
+(initially and primarily for modeling brightness perception).
+
 .. note::
    This documentation uses `The Documentation System`_'s four sections:
    Explanations, Tutorials, a "Cookbook" of How-To guides, and the API reference.
@@ -24,11 +28,6 @@ Welcome to multyscale's documentation!
 
    reference/multyscale
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+:ref:`genindex`
 
 .. _The Documentation System: https://documentation.divio.com/
