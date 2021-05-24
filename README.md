@@ -31,7 +31,7 @@ Multyscale is not yet available on package registries (e.g., PyPI). Instead:
 
 ## Using
 
-Documentation available on [multyscale.readthedocs.io](multyscale.readthedocs.io)
+Documentation available on [multyscale.readthedocs.io](https://multyscale.readthedocs.io/en/latest/)
 ```python
 import multyscale
 ```
