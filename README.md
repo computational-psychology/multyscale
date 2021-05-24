@@ -1,4 +1,6 @@
 # Multyscale spatial filtering models of brightness/lightness perception
+[![Documentation Status](https://readthedocs.org/projects/multyscale/badge/?version=latest)](https://multyscale.readthedocs.io/en/latest/?badge=latest)
+
 
 ## Installing
 
@@ -29,6 +31,7 @@ Multyscale is not yet available on package registries (e.g., PyPI). Instead:
 
 ## Using
 
+Documentation available on [multyscale.readthedocs.io](multyscale.readthedocs.io)
 ```python
 import multyscale
 ```
