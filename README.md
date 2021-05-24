@@ -6,10 +6,10 @@
 
 Multyscale is not yet available on package registries (e.g., PyPI). Instead:
 
-1. clone from GitLab (TUB):
+1. clone from GitHub (TUB):
 
    ```git
-   git clone git@git.tu-berlin.de:computational-psychology/multyscale.git
+   git clone git@github.com:computational-psychology/multyscale.git
    ```
 
 1. Multyscale can then be installed using pip. From top-level directory (which contains `setup.py`) run:
