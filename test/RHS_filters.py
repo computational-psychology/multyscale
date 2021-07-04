@@ -49,7 +49,9 @@ def gauss(x, std):
 def d2gauss(n1, std1, n2, std2, theta):
     # rotation transformation
     theta = np.deg2rad(90 - theta)
-    r = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+    r = np.array(
+        [[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]]
+    )
 
     # create X and Y grids
     Xs = np.linspace(-((n1 - 1) / 2), (n1 - 1) / 2, n1)
@@ -83,7 +85,9 @@ def odog(model_x, model_y, stdev_pixels, orientation):
 
 # %%
 def filterbank():
-    filters = np.empty((orientations.size, stdev_pixels.size, model_x, model_y))
+    filters = np.empty(
+        (orientations.size, stdev_pixels.size, model_x, model_y)
+    )
     for i, orient in enumerate(orientations):
         for j, stdev in enumerate(stdev_pixels):
             filters[i, j, ...] = odog(model_x, model_y, stdev, orient)
