@@ -3,6 +3,7 @@ import multyscale
 import RHS_filters
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy.io as io
 
 # %% Parameters of image
 shape = (1024, 1024)  # filtershape in pixels
@@ -14,6 +15,18 @@ axish = np.linspace(visextent[0], visextent[1], shape[0])
 axisv = np.linspace(visextent[2], visextent[3], shape[1])
 
 (x, y) = np.meshgrid(axish, axisv)
+
+# %% Create RHS filterbanks, load from Matlab
+rhs_bank = RHS_filters.filterbank()
+rhs_matlab = np.array(io.loadmat("odog_matlab.mat")["filters"].tolist())
+
+# %% Visualise
+for i in range(rhs_bank.shape[0]):
+    plt.subplot(rhs_bank.shape[0], 2, i * 2 + 1)
+    plt.imshow(rhs_bank[i, 6, ...], extent=visextent)
+    plt.subplot(rhs_bank.shape[0], 2, i * 2 + 2)
+    plt.imshow(rhs_matlab[i, 6, ...])
+np.allclose(rhs_matlab, rhs_bank)
 
 # %% Circular Gaussian
 std1 = 33.9411
@@ -69,7 +82,7 @@ plt.plot(multy_odog[512, :])
 
 np.allclose(rhs_odog, multy_odog)
 # %% Filterbank
-rhs_bank = RHS_filters.filterbank()
+
 multy_bank = multyscale.filterbank.BM1999(shape, visextent)
 
 # %% Visualise filterbank
