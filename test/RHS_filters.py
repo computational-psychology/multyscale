@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import fft
 
 # %% Model params
 orientations = np.linspace(0, 150, 6)  # 6 steps of 30 degrees
@@ -87,3 +88,33 @@ def filterbank():
         for j, stdev in enumerate(stdev_pixels):
             filters[i, j, ...] = odog(model_x, model_y, stdev, orient)
     return filters
+
+
+def ourconv(image, filt):
+    # pad
+    padded_size = np.array(image.shape) + np.array(filt.shape)
+    pad_img = pad_RHS(image, padded_size, padval=0.5)
+    pad_filt = pad_RHS(filt, padded_size, padval=0)
+
+    # Paul's slightly corrected version
+    temp = np.real(fft.ifft2(fft.fft2(pad_img) * fft.fft2(pad_filt)))
+
+    # extract the appropriate portion of the filtered image
+    filtered = unpad_RHS(temp, image.shape)
+
+    return filtered
+
+
+def pad_RHS(image, shape, padval):
+    # pad the images
+    pad_img = np.ones(shape) * padval
+    pad_img[0 : image.shape[0], 0 : image.shape[1]] = image
+    return pad_img
+
+
+def unpad_RHS(pad_image, shape):
+    image = pad_image[
+        int(shape[0] / 2) : -int(shape[0] / 2),
+        int(shape[1] / 2) : -int(shape[1] / 2),
+    ]
+    return image
