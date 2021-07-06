@@ -37,7 +37,7 @@ class DOG_BM1997:
         return output
 
 
-class ODOG_BM1999:
+class ODOG_RHS2007:
     # TODO: docstring
 
     def __init__(self, shape, visextent):
@@ -109,7 +109,7 @@ class ODOG_BM1999:
         return output
 
 
-class LODOG_RHS2007(ODOG_BM1999):
+class LODOG_RHS2007(ODOG_RHS2007):
     # TODO: docstring
 
     def __init__(self, shape, visextent):
