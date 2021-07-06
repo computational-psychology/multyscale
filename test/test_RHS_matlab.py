@@ -1,44 +1,8 @@
 # %%
-import RHS_filters
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy.io as io
 
-import pytest
-import os
-
-current_dir = os.path.abspath(__file__ + "../../")
-
-
-@pytest.fixture()
-def rhs_bank():
-    # Create RHS filterbank from Python transplation
-    return RHS_filters.filterbank()
-
-
-@pytest.fixture()
-def matlab_bank():
-    # Load RHS bank from MATLAB implementation
-    return np.array(
-        io.loadmat(current_dir + os.sep + "odog_matlab.mat")[
-            "filters"
-        ].tolist()
-    )
-
-
-@pytest.fixture()
-def stimulus():
-    return io.loadmat(current_dir + os.sep + "odog_matlab.mat")["illusion"]
-
-
-@pytest.fixture()
-def matlab_filteroutput():
-    # Load RHS bank from MATLAB implementation
-    return np.array(
-        io.loadmat(current_dir + os.sep + "odog_matlab.mat")[
-            "filter_response"
-        ].tolist()
-    )
+import RHS_filters
 
 
 def test_filterbank(rhs_bank, matlab_bank):
