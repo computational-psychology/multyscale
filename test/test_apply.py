@@ -40,30 +40,6 @@ def matlab_filteroutput():
     )
 
 
-def test_RHSconv_matlab(matlab_filteroutput, matlab_bank, stimulus):
-    # RHS convolution with matlab filters matches matlab output
-    filters_output = np.empty(matlab_bank.shape)
-    for i in range(matlab_bank.shape[0]):
-        for j in range(matlab_bank.shape[1]):
-            filters_output[i, j, ...] = RHS_filters.ourconv(
-                stimulus, matlab_bank[i, j, ...]
-            )
-
-    assert np.allclose(matlab_filteroutput, filters_output)
-
-
-def test_RHSconv_RHS(matlab_filteroutput, stimulus, rhs_bank):
-    # RHS convolution with python RHS filters matches matlab output
-    filters_output = np.empty(rhs_bank.shape)
-    for i in range(rhs_bank.shape[0]):
-        for j in range(rhs_bank.shape[1]):
-            filters_output[i, j, ...] = RHS_filters.ourconv(
-                stimulus, rhs_bank[i, j, ...]
-            )
-
-    assert np.allclose(matlab_filteroutput, filters_output)
-
-
 def test_apply_matlab(matlab_filteroutput, matlab_bank, stimulus):
     # multyscale apply with matlab filters matches matlab output
     filters_output = np.empty(matlab_bank.shape)
