@@ -12,7 +12,7 @@ visextent = np.array([-0.5, 0.5, -0.5, 0.5]) * (1023 / 32)
 
 # %% Filterbank
 def test_filterbank(matlab_bank):
-    multy_bank = filterbank.BM1999((1024, 1024), visextent)
+    multy_bank = filterbank.RHS2007((1024, 1024), visextent)
     #  Visualise filterbank
     for i in range(multy_bank.filters.shape[0]):
         plt.subplot(multy_bank.filters.shape[0], 2, i * 2 + 1)
@@ -24,7 +24,7 @@ def test_filterbank(matlab_bank):
 
 
 def test_filterbank_apply(stimulus, matlab_filteroutput):
-    multy_bank = filterbank.BM1999((1024, 1024), visextent)
+    multy_bank = filterbank.RHS2007((1024, 1024), visextent)
     multy_output = multy_bank.apply(stimulus)
 
     assert np.allclose(matlab_filteroutput, multy_output)

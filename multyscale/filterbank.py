@@ -202,11 +202,11 @@ class ODOGBank:
         return filters_output
 
 
-def BM1999(
+def RHS2007(
     filtershape: Sequence[int] = (1024, 1024),
     visextent: Sequence[float] = (-16, 16, -16, 16),
 ) -> ODOGBank:
-    """ODOG bank with orientations and spatial scales as used by BM1999 and RHS2007
+    """ODOG bank with orientations and spatial scales as used by Robinson, Hammon, de Sa (2007)
 
     Parameters
     ----------
@@ -219,7 +219,7 @@ def BM1999(
     Returns
     -------
     ODOGBank
-        Bank of ODOG filters as used by BM1999 and RHS2007, with
+        Bank of ODOG filters as used by RHS2007, with
         6 orientations: [0, 30, 60, 90, 120, 150] degrees
         7 spatial scales: octave intervals, down from 3 degrees visual angle
     """
