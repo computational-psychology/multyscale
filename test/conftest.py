@@ -34,3 +34,13 @@ def matlab_filteroutput():
 @pytest.fixture()
 def output_odog_matlab():
     return io.loadmat(filepath_matlab_output)["odog_output"]
+
+
+@pytest.fixture()
+def output_lodog_matlab():
+    return io.loadmat(filepath_matlab_output)["lodog_output"]
+
+
+@pytest.fixture()
+def output_flodog_matlab():
+    return io.loadmat(filepath_matlab_output)["flodog_output"]
