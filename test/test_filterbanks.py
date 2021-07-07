@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 
 from multyscale import filterbank
 
+import RHS_filters
+
 # %% Parameters of image
 shape = (1024, 1024)  # filtershape in pixels
 # visual extent, same convention as pyplot:
@@ -28,3 +30,10 @@ def test_filterbank_apply(stimulus, matlab_filteroutput):
     multy_output = multy_bank.apply(stimulus)
 
     assert np.allclose(matlab_filteroutput, multy_output)
+
+
+def test_scale_weights():
+    bank = filterbank.RHS2007(shape, visextent)
+    center_sigmas = np.array(bank.sigmas)[:, 0, 0]
+    scale_weights = filterbank.scale_weights(center_sigmas, 0.1)
+    assert np.allclose(scale_weights, RHS_filters.w_val)
