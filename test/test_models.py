@@ -6,7 +6,7 @@ from multyscale import models
 # %% Parameters of image
 # visual extent, same convention as pyplot:
 visextent = np.array([-0.5, 0.5, -0.5, 0.5]) * (1023 / 32)
-# NOTE: this is NOT (-16,16,-16,16), because RHS implementation doesn't actually use that
+# NOTE: RHS implementation doesn't actually use (-16,16,-16,16)
 
 
 # %% Tests

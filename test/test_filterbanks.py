@@ -9,7 +9,7 @@ import RHS_filters
 shape = (1024, 1024)  # filtershape in pixels
 # visual extent, same convention as pyplot:
 visextent = np.array([-0.5, 0.5, -0.5, 0.5]) * (1023 / 32)
-# NOTE: this is NOT (-16,16,-16,16), because RHS implementation doesn't actually use that
+# NOTE: RHS implementation doesn't actually use (-16,16,-16,16)
 
 
 # %% Filterbank
