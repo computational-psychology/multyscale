@@ -130,10 +130,10 @@ def odog_normalize(filter_responses):
     modelOut = np.zeros(filter_responses.shape[-2:])
 
     # loop over the orientations
-    for o, x in enumerate(orientations):
+    for o in range(filter_responses.shape[0]):
         this_norm = np.zeros(filter_responses.shape[-2:])
         # loop over spatial frequencies
-        for f, s in enumerate(stdev_pixels):
+        for f in range(filter_responses.shape[1]):
             # get the filtered response
             filt_img = filter_responses[o, f]
 
