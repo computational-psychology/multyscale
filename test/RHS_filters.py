@@ -83,7 +83,7 @@ def odog(model_x, model_y, stdev_pixels, orientation):
     return dog(model_y, model_x, stdev_pixels, stdev_pixels, 2, orientation)
 
 
-# %%
+# %% Filterbank
 def filterbank():
     filters = np.empty(
         (orientations.size, stdev_pixels.size, model_x, model_y)
@@ -94,6 +94,7 @@ def filterbank():
     return filters
 
 
+# %% Convolution
 def ourconv(image, filt):
     # pad
     padded_size = np.array(image.shape) + np.array(filt.shape)
@@ -122,3 +123,31 @@ def unpad_RHS(pad_image, shape):
         int(shape[1] / 2) : -int(shape[1] / 2),
     ]
     return image
+
+
+# %% Normalizations
+def odog_normalize(filter_responses):
+    # to hold model output
+    modelOut = np.zeros(filter_responses.shape[-2:])
+
+    # loop over the orientations
+    for o, x in enumerate(orientations):
+        this_norm = np.zeros(filter_responses.shape[-2:])
+        # loop over spatial frequencies
+        for f, s in enumerate(stdev_pixels):
+            # get the filtered response
+            filt_img = filter_responses[o, f]
+
+            # create the proper weight
+            temp = filt_img * w_val[f]
+
+            this_norm = temp + this_norm
+        # do normalization
+        this_norm = this_norm / np.sqrt(np.mean(this_norm * this_norm))
+
+        # add in normalized image
+        modelOut = modelOut + this_norm
+    return modelOut
+
+
+# %%
