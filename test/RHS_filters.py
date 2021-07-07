@@ -13,14 +13,13 @@ STD_TO_SPACE_CONST = 1 / SPACE_CONST_TO_STD
 
 space_const = 2 ** freqs * 1.5  # in pixels
 
-std = space_const * SPACE_CONST_TO_STD  # in pixels
-
 # matches Table 1 in BM(1999)
 space_const_deg = space_const * DEG_PER_PIXEL  # in deg.
 
 # compute the standard deviations of the different Gaussian in pixels
 # space_const = 2.^freqs * 1.5; % space constant of Gaussians
 stdev_pixels = space_const * SPACE_CONST_TO_STD  # in pixels
+std = space_const_deg * SPACE_CONST_TO_STD  # in degrees
 
 # (almost matches) points along x-axis of Fig. 10 BM(1997)
 cpd = 1 / (2 * space_const_deg * SPACE_CONST_TO_WIDTH)
