@@ -18,7 +18,7 @@ shape = stimulus.shape  # filtershape in pixels
 visextent = (-16, 16, -16, 16)
 
 # %% Create models
-ODOG = models.ODOG_BM1999(shape, visextent)
+ODOG = models.ODOG_RHS2007(shape, visextent)
 LODOG = models.LODOG_RHS2007(shape, visextent)
 
 # %%

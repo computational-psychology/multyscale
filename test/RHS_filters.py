@@ -13,14 +13,13 @@ STD_TO_SPACE_CONST = 1 / SPACE_CONST_TO_STD
 
 space_const = 2 ** freqs * 1.5  # in pixels
 
-std = space_const * SPACE_CONST_TO_STD  # in pixels
-
 # matches Table 1 in BM(1999)
 space_const_deg = space_const * DEG_PER_PIXEL  # in deg.
 
 # compute the standard deviations of the different Gaussian in pixels
 # space_const = 2.^freqs * 1.5; % space constant of Gaussians
 stdev_pixels = space_const * SPACE_CONST_TO_STD  # in pixels
+std = space_const_deg * SPACE_CONST_TO_STD  # in degrees
 
 # (almost matches) points along x-axis of Fig. 10 BM(1997)
 cpd = 1 / (2 * space_const_deg * SPACE_CONST_TO_WIDTH)
@@ -83,7 +82,7 @@ def odog(model_x, model_y, stdev_pixels, orientation):
     return dog(model_y, model_x, stdev_pixels, stdev_pixels, 2, orientation)
 
 
-# %%
+# %% Filterbank
 def filterbank():
     filters = np.empty(
         (orientations.size, stdev_pixels.size, model_x, model_y)
@@ -94,6 +93,7 @@ def filterbank():
     return filters
 
 
+# %% Convolution
 def ourconv(image, filt):
     # pad
     padded_size = np.array(image.shape) + np.array(filt.shape)
@@ -122,3 +122,31 @@ def unpad_RHS(pad_image, shape):
         int(shape[1] / 2) : -int(shape[1] / 2),
     ]
     return image
+
+
+# %% Normalizations
+def odog_normalize(filter_responses):
+    # to hold model output
+    modelOut = np.zeros(filter_responses.shape[-2:])
+
+    # loop over the orientations
+    for o in range(filter_responses.shape[0]):
+        this_norm = np.zeros(filter_responses.shape[-2:])
+        # loop over spatial frequencies
+        for f in range(filter_responses.shape[1]):
+            # get the filtered response
+            filt_img = filter_responses[o, f]
+
+            # create the proper weight
+            temp = filt_img * w_val[f]
+
+            this_norm = temp + this_norm
+        # do normalization
+        this_norm = this_norm / np.sqrt(np.mean(this_norm * this_norm))
+
+        # add in normalized image
+        modelOut = modelOut + this_norm
+    return modelOut
+
+
+# %%

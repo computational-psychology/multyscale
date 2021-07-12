@@ -89,30 +89,3 @@ def test_ODOG():
     plt.plot(multy_odog[512, :])
 
     assert np.allclose(rhs_odog, multy_odog)
-
-
-# %% Filterbank
-def test_filterbank():
-    multy_bank = multyscale.filterbank.BM1999(shape, visextent)
-
-    #  Visualise filterbank
-    for i in range(multy_bank.filters.shape[0]):
-        plt.subplot(multy_bank.filters.shape[0], 2, i * 2 + 1)
-        plt.imshow(multy_bank.filters[i, 6, ...], extent=visextent)
-        plt.subplot(multy_bank.filters.shape[0], 2, i * 2 + 2)
-        plt.imshow(rhs_bank[i, 6, ...])
-
-    assert np.allclose(rhs_bank, multy_bank.filters)
-
-    # Spot check
-    idc_filter = (5, 6)
-    plt.subplot(2, 2, 1)
-    plt.imshow(rhs_bank[idc_filter])
-    plt.subplot(2, 2, 2)
-    plt.imshow(multy_bank.filters[idc_filter])
-    plt.subplot(2, 2, 3)
-    plt.plot(rhs_bank[idc_filter][512, :])
-    plt.subplot(2, 2, 4)
-    plt.plot(multy_bank.filters[idc_filter][512, :])
-
-    assert np.allclose(rhs_bank[idc_filter], multy_bank.filters[idc_filter])

@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 # Import local module
-from multyscale.models import FLODOG_RHS2007, ODOG_BM1999
+from multyscale.models import FLODOG_RHS2007, ODOG_RHS2007
 import multyscale
 
 
 # %%
-class FODOG(ODOG_BM1999):
+class FODOG(ODOG_RHS2007):
     def __init__(self, shape, visextent):
         super().__init__(shape, visextent)
 
@@ -35,7 +35,7 @@ shape = stimulus.shape  # filtershape in pixels
 visextent = (-16, 16, -16, 16)
 
 # %% Create models
-model_ODOG = ODOG_BM1999(shape, visextent)
+model_ODOG = ODOG_RHS2007(shape, visextent)
 model_FODOG = FODOG(shape, visextent)
 model_FLODOG = FLODOG_RHS2007(shape, visextent)
 
