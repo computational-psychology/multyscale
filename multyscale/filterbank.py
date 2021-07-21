@@ -248,7 +248,7 @@ def RHS2007(
     # Create image coordinate system:
     axish = np.linspace(visextent[0], visextent[1], filtershape[0])
     axisv = np.linspace(visextent[2], visextent[3], filtershape[1])
-    (x, y) = np.meshgrid(axish, axisv)
+    (x, y) = np.meshgrid(axisv, axish)
 
     # Create filterbank
     bank = ODOGBank(orientations, sigmas, x, y)
