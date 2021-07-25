@@ -1,7 +1,16 @@
 
 __pycache__/
+.pytest_cache/
 
 .vscode/
+
+# ignore .swp files from vim
+*.sw?
+
+# ignore .idea/ directory from pycharm
+.idea/
+
+*.pyc
 
 multyscale.egg-info/
 
