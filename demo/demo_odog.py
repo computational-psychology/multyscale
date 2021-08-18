@@ -16,7 +16,7 @@ shape = stimulus.shape  # filtershape in pixels
 visextent = (-16, 16, -16, 16)
 
 # %% Create model
-model = models.ODOG_BM1999(shape, visextent)
+model = models.ODOG_RHS2007(shape, visextent)
 
 # %% Integrated run
 output_1 = model.apply(stimulus)

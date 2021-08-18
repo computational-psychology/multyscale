@@ -21,7 +21,9 @@ class DOG_BM1997:
         )
 
     def weight_outputs(self, filters_output):
-        return filterbank.weight_multiscale_outputs(filters_output, self.scale_weights)
+        return filterbank.weight_multiscale_outputs(
+            filters_output, self.scale_weights
+        )
 
     def apply(self, image):
         # TODO: docstring
@@ -35,14 +37,14 @@ class DOG_BM1997:
         return output
 
 
-class ODOG_BM1999:
+class ODOG_RHS2007:
     # TODO: docstring
 
     def __init__(self, shape, visextent):
         self.shape = shape
         self.visextent = visextent
 
-        self.bank = filterbank.BM1999(shape, visextent)
+        self.bank = filterbank.RHS2007(shape, visextent)
 
         self.center_sigmas = [sigma[0][0] for sigma in self.bank.sigmas]
         self.weights_slope = 0.1
@@ -107,7 +109,7 @@ class ODOG_BM1999:
         return output
 
 
-class LODOG_RHS2007(ODOG_BM1999):
+class LODOG_RHS2007(ODOG_RHS2007):
     # TODO: docstring
 
     def __init__(self, shape, visextent):

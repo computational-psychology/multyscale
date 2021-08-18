@@ -32,7 +32,7 @@ def create_normalization_weights(
 
 def scale_norm_weights_equal(n_scales):
     scale_norm_weights = np.ones((n_scales, n_scales))
-    scale_norm_weights = scale_norm_weights / scale_norm_weights.sum((0))
+    # scale_norm_weights = scale_norm_weights / scale_norm_weights.sum((0))
     return scale_norm_weights
 
 
@@ -68,8 +68,8 @@ def normalizers(filters_output, normalization_weights):
         normalizer = np.tensordot(filters_output, weights, axes=([0, 1], [0, 1]))
 
         # Normalize normalizer...
-        area = weights.sum()
-        normalizer = normalizer / area
+        # area = weights.sum()
+        # normalizer = normalizer / area
 
         # Accumulate
         normalizers[o, s, ...] = normalizer

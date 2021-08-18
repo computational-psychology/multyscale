@@ -26,7 +26,13 @@ from . import filters, utils
 # Defining the scale weights
 def scale_weights(center_sigmas, slope):
     # TODO: docstring
-    scale_weights = (1 / np.asarray(center_sigmas)) ** slope
+    bandwidth = 2 * np.array(center_sigmas) * np.sqrt(2 * np.log(2))
+    frequencies = 1 / (2 * bandwidth)
+    scale_weights = frequencies ** slope
+    scale_weights = (
+        scale_weights / scale_weights[int(np.ceil(scale_weights.size / 2)) - 1]
+    )
+    scale_weights = np.round(scale_weights, 5)
     return scale_weights
 
 
@@ -202,11 +208,11 @@ class ODOGBank:
         return filters_output
 
 
-def BM1999(
+def RHS2007(
     filtershape: Sequence[int] = (1024, 1024),
     visextent: Sequence[float] = (-16, 16, -16, 16),
 ) -> ODOGBank:
-    """ODOG bank with orientations and spatial scales as used by BM1999 and RHS2007
+    """ODOG bank with orientations and spatial scales as used by Robinson, Hammon, de Sa (2007)
 
     Parameters
     ----------
@@ -219,7 +225,7 @@ def BM1999(
     Returns
     -------
     ODOGBank
-        Bank of ODOG filters as used by BM1999 and RHS2007, with
+        Bank of ODOG filters as used by RHS2007, with
         6 orientations: [0, 30, 60, 90, 120, 150] degrees
         7 spatial scales: octave intervals, down from 3 degrees visual angle
     """
@@ -228,8 +234,11 @@ def BM1999(
     # Parameters (BM1999)
     n_orientations = 6
     num_scales = 7
-    largest_center_sigma = 3  # in degrees
-    center_sigmas = utils.octave_intervals(num_scales) * largest_center_sigma
+    largest_center_space_const = 3  # in degrees
+    center_space_consts = (
+        utils.octave_intervals(num_scales) * largest_center_space_const
+    )
+    center_sigmas = center_space_consts / np.sqrt(2)
     cs_ratio = 2  # center-surround ratio
 
     # Convert to filterbank parameters
@@ -239,7 +248,7 @@ def BM1999(
     # Create image coordinate system:
     axish = np.linspace(visextent[0], visextent[1], filtershape[0])
     axisv = np.linspace(visextent[2], visextent[3], filtershape[1])
-    (x, y) = np.meshgrid(axish, axisv)
+    (x, y) = np.meshgrid(axisv, axish)
 
     # Create filterbank
     bank = ODOGBank(orientations, sigmas, x, y)
