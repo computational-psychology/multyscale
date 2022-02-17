@@ -45,11 +45,11 @@ def test_RHSconv_RHS(MATLAB_filteroutput, stimulus, rhs_bank):
     assert np.allclose(MATLAB_filteroutput, filters_output)
 
 
-def test_ODOG(output_odog_MATLAB, MATLAB_filteroutput):
+def test_ODOG(output_ODOG_MATLAB, MATLAB_filteroutput):
     """Python ODOG normalization & output matches RHS MATLAB ODOG output"""
 
     # Normalize and read out
     output = RHS_implementation.odog_normalize(MATLAB_filteroutput)
 
     # Compare
-    assert np.allclose(output, output_odog_MATLAB)
+    assert np.allclose(output, output_ODOG_MATLAB)
