@@ -127,10 +127,10 @@ class LODOG_RHS2007(ODOG_RHS2007):
 class FLODOG_RHS2007(LODOG_RHS2007):
     # TODO: docstring
 
-    def __init__(self, shape, visextent):
+    def __init__(self, shape, visextent, sdmix, spatial_window_scalar):
         super().__init__(shape, visextent)
 
-        self.sdmix = 0.5  # stdev of Gaussian weights for scale mixing
+        self.sdmix = sdmix  # stdev of Gaussian weights for scale mixing
         self.scale_norm_weights = normalization.scale_norm_weights_gaussian(
             len(self.scale_weights), self.sdmix
         )
@@ -138,7 +138,7 @@ class FLODOG_RHS2007(LODOG_RHS2007):
             6, 7, self.scale_norm_weights, self.orientation_norm_weights
         )
 
-        self.spatial_window_scalar = 2
+        self.spatial_window_scalar = spatial_window_scalar
         self.window_sigmas = np.broadcast_to(
             np.array(self.center_sigmas)[None, ..., None], (6, 7, 2)
         )
