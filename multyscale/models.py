@@ -139,6 +139,6 @@ class FLODOG_RHS2007(LODOG_RHS2007):
         )
 
         self.spatial_window_scalar = spatial_window_scalar
-        self.window_sigmas = np.broadcast_to(
+        self.window_sigmas = self.spatial_window_scalar * np.broadcast_to(
             np.array(self.center_sigmas)[None, ..., None], (6, 7, 2)
         )
