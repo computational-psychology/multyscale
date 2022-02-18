@@ -100,7 +100,7 @@ class ODOG_RHS2007:
 class LODOG_RHS2007(ODOG_RHS2007):
     # TODO: docstring
 
-    def __init__(self, shape, visextent, window_sigma=2):
+    def __init__(self, shape, visextent, window_sigma=4):
         self.window_sigma = window_sigma
         self.window_sigmas = np.ones(shape=(6, 7, 2)) * self.window_sigma
 
@@ -127,7 +127,7 @@ class LODOG_RHS2007(ODOG_RHS2007):
 class FLODOG_RHS2007(LODOG_RHS2007):
     # TODO: docstring
 
-    def __init__(self, shape, visextent, sdmix, spatial_window_scalar):
+    def __init__(self, shape, visextent, sdmix=0.5, spatial_window_scalar=4):
         super().__init__(shape, visextent)
 
         self.sdmix = sdmix  # stdev of Gaussian weights for scale mixing
