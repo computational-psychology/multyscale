@@ -47,9 +47,9 @@ class ODOG_RHS2007:
         self.scale_weights = filterbank.scale_weights(self.center_sigmas, self.weights_slope)
 
         self.scale_norm_weights = normalization.scale_norm_weights_equal(len(self.scale_weights))
-        self.orientation_norm_weights = normalization.orientation_norm_weights(6)
+        self.orientation_norm_weights = normalization.orientation_norm_weights(self.bank.shape[0])
         self.normalization_weights = normalization.create_normalization_weights(
-            6, 7, self.scale_norm_weights, self.orientation_norm_weights
+            *self.bank.shape[:2], self.scale_norm_weights, self.orientation_norm_weights
         )
 
     def weight_outputs(self, filters_output):
@@ -101,10 +101,10 @@ class LODOG_RHS2007(ODOG_RHS2007):
     # TODO: docstring
 
     def __init__(self, shape, visextent, window_sigma=4):
-        self.window_sigma = window_sigma
-        self.window_sigmas = np.ones(shape=(6, 7, 2)) * self.window_sigma
-
         super().__init__(shape, visextent)
+
+        self.window_sigma = window_sigma
+        self.window_sigmas = np.ones(shape=(*self.bank.shape[:2], 2)) * self.window_sigma
 
     def normalizers_to_RMS(self, normalizers):
         # Expand sigmas
@@ -135,10 +135,10 @@ class FLODOG_RHS2007(LODOG_RHS2007):
             len(self.scale_weights), self.sdmix
         )
         self.normalization_weights = normalization.create_normalization_weights(
-            6, 7, self.scale_norm_weights, self.orientation_norm_weights
+            *self.bank.shape[:2], self.scale_norm_weights, self.orientation_norm_weights
         )
 
         self.spatial_window_scalar = spatial_window_scalar
         self.window_sigmas = self.spatial_window_scalar * np.broadcast_to(
-            np.array(self.center_sigmas)[None, ..., None], (6, 7, 2)
+            np.array(self.center_sigmas)[None, ..., None], (*self.bank.shape[:2], 2)
         )
