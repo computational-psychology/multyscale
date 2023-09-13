@@ -1,0 +1,35 @@
+[project]
+name = "multyscale"
+description = "Composable multiscale spatial filtering models"
+readme = "README.md"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+]
+keywords = [
+    "visual perception",
+    "spatial filtering",
+    "multiscale",
+    "computational modeling",
+]
+
+license = { file = "LICENSE" }
+maintainers = [{ name = "Joris Vincent", email = "joris.vincent@tu-berlin.de" }]
+version = "0.2.0"
+
+requires-python = ">=3.8"
+dependencies = ["numpy", "scipy", "matplotlib", "Pillow"]
+
+
+[build-system]
+requires = ["setuptools >= 40.9.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."] # list of folders that contain the packages (["."] by default)
+include = [
+    "multyscale*",
+] # package names should match these glob patterns (["*"] by default)
+namespaces = false # to disable scanning PEP 420 namespaces (true by default)
