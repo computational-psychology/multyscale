@@ -22,6 +22,38 @@ version = "0.2.0"
 requires-python = ">=3.8"
 dependencies = ["numpy", "scipy", "matplotlib", "Pillow"]
 
+[project.optional-dependencies]
+dev = ["pytest"]
+docs = [
+    "Sphinx",
+    "sphinx-autodoc-typehints",
+    "sphinx-rtd-theme",
+    "sphinx-tabs",
+    "sphinxcontrib-applehelp",
+    "sphinxcontrib-bibtex",
+    "sphinxcontrib-devhelp",
+    "sphinxcontrib-htmlhelp",
+    "sphinxcontrib-jsmath",
+    "sphinxcontrib-napoleon",
+    "sphinxcontrib-qthelp",
+    "sphinxcontrib-serializinghtml",
+    "ipykernel",
+    "ipython",
+    "ipython-genutils",
+    "ipywidgets",
+    "jupyter-client",
+    "jupyter-core",
+    "jupyterlab-pygments",
+    "jupyterlab-widgets",
+    "nbclient",
+    "nbconvert",
+    "nbformat",
+    "nbsphinx",
+    "nbsphinx-link",
+    "notebook",
+    "rstcheck",
+    "widgetsnbextension",
+]
 
 [build-system]
 requires = ["setuptools >= 40.9.0"]
