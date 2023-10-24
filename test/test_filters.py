@@ -1,8 +1,9 @@
 # %%
-import multyscale
-import RHS_filters
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import RHS_filters
+
+import multyscale
 
 # %% RHS bank
 rhs_bank = RHS_filters.filterbank()
@@ -25,9 +26,7 @@ def test_circular_Gaussian():
     sigmas = np.array([1, 1]) * sigma1
     f = multyscale.filters.gaussian2d(x, y, (sigmas[0], sigmas[1]))
     f = f / f.sum()
-    f_2 = RHS_filters.d2gauss(
-        shape[0], sigmas[0] * 32, shape[1], sigmas[0] * 32, 0
-    )
+    f_2 = RHS_filters.d2gauss(shape[0], sigmas[0] * 32, shape[1], sigmas[0] * 32, 0)
 
     plt.subplot(2, 2, 1)
     plt.imshow(f)
@@ -47,13 +46,9 @@ def test_elliptical_Gaussian():
     orientation = 40
     sigma2 = 2 * sigma1
     sigmas = np.array([1, 1]) * np.array([sigma1, sigma2])
-    f = multyscale.filters.gaussian2d(
-        x, y, (sigmas[0], sigmas[1]), orientation=orientation
-    )
+    f = multyscale.filters.gaussian2d(x, y, (sigmas[0], sigmas[1]), orientation=orientation)
     f = f / f.sum()
-    f_2 = RHS_filters.d2gauss(
-        shape[0], sigmas[0] * 32, shape[1], sigmas[1] * 32, orientation
-    )
+    f_2 = RHS_filters.d2gauss(shape[0], sigmas[0] * 32, shape[1], sigmas[1] * 32, orientation)
 
     plt.subplot(2, 2, 1)
     plt.imshow(f)
@@ -72,12 +67,8 @@ def test_ODOG():
     orientation = 150
     sigma3 = 2
     sigmas = np.array([[1, 1], [1, 2]]) * sigma3
-    rhs_odog = RHS_filters.odog(
-        shape[0], shape[1], sigma3 * 32, orientation=orientation
-    )
-    multy_odog = multyscale.filters.odog(
-        x, y, sigmas, orientation=(orientation, orientation)
-    )
+    rhs_odog = RHS_filters.odog(shape[0], shape[1], sigma3 * 32, orientation=orientation)
+    multy_odog = multyscale.filters.odog(x, y, sigmas, orientation=(orientation, orientation))
 
     plt.subplot(2, 2, 1)
     plt.imshow(rhs_odog)

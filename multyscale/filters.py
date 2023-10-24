@@ -1,5 +1,6 @@
 # Python Standard Library
 from __future__ import annotations
+
 from collections.abc import Sequence
 
 # Third party imports
@@ -9,9 +10,7 @@ from scipy import signal
 # TODO: (Abstract) base class Filter with apply-method,...
 
 
-def apply(
-    image: np.ndarray, filt: np.ndarray, pad: bool = False
-) -> np.ndarray:
+def apply(image: np.ndarray, filt: np.ndarray, pad: bool = False) -> np.ndarray:
     """Apply filter to image, optionally pad input
 
     Parameters
@@ -82,7 +81,7 @@ def gaussian2d(
     # Units of x,y, determine units of sigma:
     # if x,y are in pixels, e.g., [0,1024],
     # sigma should be specified in pixels as well;
-    # if x,y are in degress, e.g., [-16, 16],
+    # if x,y are in degrees, e.g., [-16, 16],
     # sigma should be specified in degrees as well.
 
     # General equation for a 2D elliptical Gaussian:
@@ -108,15 +107,9 @@ def gaussian2d(
     theta = np.deg2rad(orientation)
 
     # determine a, b, c coefficients
-    a = (np.cos(theta) ** 2 / (2 * sigma[0] ** 2)) + (
-        np.sin(theta) ** 2 / (2 * sigma[1] ** 2)
-    )
-    b = -(np.sin(2 * theta) / (4 * sigma[0] ** 2)) + (
-        np.sin(2 * theta) / (4 * sigma[1] ** 2)
-    )
-    c = (np.sin(theta) ** 2 / (2 * sigma[0] ** 2)) + (
-        np.cos(theta) ** 2 / (2 * sigma[1] ** 2)
-    )
+    a = (np.cos(theta) ** 2 / (2 * sigma[0] ** 2)) + (np.sin(theta) ** 2 / (2 * sigma[1] ** 2))
+    b = -(np.sin(2 * theta) / (4 * sigma[0] ** 2)) + (np.sin(2 * theta) / (4 * sigma[1] ** 2))
+    c = (np.sin(theta) ** 2 / (2 * sigma[0] ** 2)) + (np.cos(theta) ** 2 / (2 * sigma[1] ** 2))
 
     # create Gaussian
     gaussian = np.exp(

@@ -1,7 +1,7 @@
 # %% Imports
 import numpy as np
-from multyscale import models
 
+from multyscale import models
 
 # %% Parameters of image
 # visual extent, same convention as pyplot:
@@ -19,9 +19,7 @@ def test_odog_output(output_odog_matlab, stimulus):
 def test_lodog_output(stimulus, output_lodog_matlab):
     window_sigma = 128 / 32
 
-    model = models.LODOG_RHS2007(
-        stimulus.shape, visextent, window_sigma=window_sigma
-    )
+    model = models.LODOG_RHS2007(stimulus.shape, visextent, window_sigma=window_sigma)
     output = model.apply(stimulus)
     assert np.allclose(output, output_lodog_matlab)
 

@@ -11,7 +11,7 @@ SPACE_CONST_TO_WIDTH = 2 * np.sqrt(np.log(2))
 SPACE_CONST_TO_STD = 1 / np.sqrt(2)
 STD_TO_SPACE_CONST = 1 / SPACE_CONST_TO_STD
 
-space_const = 2 ** freqs * 1.5  # in pixels
+space_const = 2**freqs * 1.5  # in pixels
 
 # matches Table 1 in BM(1999)
 space_const_deg = space_const * DEG_PER_PIXEL  # in deg.
@@ -25,7 +25,7 @@ std = space_const_deg * SPACE_CONST_TO_STD  # in degrees
 cpd = 1 / (2 * space_const_deg * SPACE_CONST_TO_WIDTH)
 
 # (almost matches) points along y-axis of Fig. 10 BM(1997)
-w_val = cpd ** 0.1
+w_val = cpd**0.1
 w_val = w_val / w_val[int(np.ceil(w_val.size / 2)) - 1]
 w_val = np.round(w_val, 5)
 
@@ -42,15 +42,13 @@ model_x = 1024
 
 # %%
 def gauss(x, std):
-    return np.exp(-(x ** 2) / (2 * std ** 2)) / (std * np.sqrt(2 * np.pi))
+    return np.exp(-(x**2) / (2 * std**2)) / (std * np.sqrt(2 * np.pi))
 
 
 def d2gauss(n1, std1, n2, std2, theta):
     # rotation transformation
     theta = np.deg2rad(90 - theta)
-    r = np.array(
-        [[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]]
-    )
+    r = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
 
     # create X and Y grids
     Xs = np.linspace(-((n1 - 1) / 2), (n1 - 1) / 2, n1)
@@ -84,9 +82,7 @@ def odog(model_x, model_y, stdev_pixels, orientation):
 
 # %% Filterbank
 def filterbank():
-    filters = np.empty(
-        (orientations.size, stdev_pixels.size, model_x, model_y)
-    )
+    filters = np.empty((orientations.size, stdev_pixels.size, model_x, model_y))
     for i, orient in enumerate(orientations):
         for j, stdev in enumerate(stdev_pixels):
             filters[i, j, ...] = odog(model_x, model_y, stdev, orient)

@@ -1,3 +1,0 @@
--r requirements.txt
--r requirements_testing.txt
--r requirements_docs.txt

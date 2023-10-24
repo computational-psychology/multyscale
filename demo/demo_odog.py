@@ -1,7 +1,7 @@
 # %%
 # Third party libraries
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from PIL import Image
 
 # Import local module
@@ -60,7 +60,7 @@ for i in range(multiscale_output.shape[0]):
 
 # %%  Normalize oriented multiscale outputs by their RMS
 normalized_multiscale_output = np.empty(multiscale_output.shape)
-rms = np.ndarray((6))
+rms = np.ndarray(6)
 for i in range(multiscale_output.shape[0]):
     image = multiscale_output[i]
     rms[i] = np.sqrt(np.square(image).mean((-1, -2)))  # image-wide RMS

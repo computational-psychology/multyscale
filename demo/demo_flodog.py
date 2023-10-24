@@ -1,11 +1,11 @@
 # %%
 # Third party libraries
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from PIL import Image
 
 # Import local module
-from multyscale import models, filters
+from multyscale import filters, models
 
 # %% Load example stimulus
 stimulus = np.asarray(Image.open("example_stimulus.png").convert("L"))
@@ -64,7 +64,7 @@ sdmix = model.sdmix  # stdev of Gaussian weights for scale mixing
 
 # Create normalizer images
 normalizers = np.empty(weighted_outputs.shape)
-for o, multiscale in enumerate(weighted_outputs):  # seperate for orientations
+for o, multiscale in enumerate(weighted_outputs):  # separate for orientations
     for i, filt in enumerate(multiscale):
         normalizer = np.empty(filt.shape)
 
@@ -72,7 +72,7 @@ for o, multiscale in enumerate(weighted_outputs):  # seperate for orientations
         rel_i = i - np.asarray(range(multiscale.shape[0]))
 
         # Gaussian weights, based on relative index
-        gweights = np.exp(-(rel_i ** 2) / 2 * sdmix ** 2) / (sdmix * np.sqrt(2 * np.pi))
+        gweights = np.exp(-(rel_i**2) / 2 * sdmix**2) / (sdmix * np.sqrt(2 * np.pi))
 
         # Sum filter outputs, by Gaussian weights
         normalizer = np.tensordot(multiscale, gweights, axes=(0, 0))
@@ -86,9 +86,7 @@ for o, multiscale in enumerate(weighted_outputs):  # seperate for orientations
 
 # %% Blur normalizers
 # Create Gaussian window
-window = filters.gaussian2d(
-    model.bank.x, model.bank.y, (model.window_sigma, model.window_sigma)
-)
+window = filters.gaussian2d(model.bank.x, model.bank.y, (model.window_sigma, model.window_sigma))
 
 # Normalize window to unit-sum (== spatial averaging filter)
 window = window / window.sum()
