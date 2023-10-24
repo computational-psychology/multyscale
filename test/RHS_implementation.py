@@ -120,6 +120,17 @@ def unpad_RHS(pad_image, shape):
     return image
 
 
+def weight(filter_responses):
+    weighted_responses = np.ndarray(filter_responses.shape)
+
+    # loop over the orientations
+    for o in range(filter_responses.shape[0]):
+        # loop over spatial frequencies
+        for f in range(filter_responses.shape[1]):
+            weighted_responses[o, f] = filter_responses[o, f] * w_val[f]
+    return weighted_responses
+
+
 # %% Normalizations
 def odog_normalize(filter_responses):
     # to hold model output
