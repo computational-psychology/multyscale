@@ -30,7 +30,7 @@ def test_conv_apply(rhs_bank, stimulus):
     for i in range(rhs_bank.shape[0]):
         for j in range(rhs_bank.shape[1]):
             f = rhs_bank[i, j]
-            o_conv[i, j, ...] = RHS_implementation.ourconv(stimulus, f)
+            o_conv[i, j, ...] = RHS_implementation.ourconv(stimulus, f, pad=0.5)
             o_apply[i, j, ...] = filters.apply(stimulus, f, padval=0.5)
 
     assert np.allclose(o_conv, o_apply)

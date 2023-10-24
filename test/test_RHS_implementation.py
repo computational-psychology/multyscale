@@ -27,7 +27,9 @@ def test_RHSconv_MATLAB(MATLAB_filteroutput, MATLAB_bank, stimulus):
     """Python convolution with RHS MATLAB filters matches RHS MATLAB filters output"""
     filters_output = np.empty(MATLAB_bank.shape)
     for o, s in np.ndindex(MATLAB_bank.shape[:2]):
-        filters_output[o, s, ...] = RHS_implementation.ourconv(stimulus, MATLAB_bank[o, s, ...])
+        filters_output[o, s, ...] = RHS_implementation.ourconv(
+            stimulus, MATLAB_bank[o, s, ...], pad=0.5
+        )
 
     assert np.allclose(MATLAB_filteroutput, filters_output)
 
@@ -36,7 +38,9 @@ def test_RHSconv_RHS(MATLAB_filteroutput, stimulus, rhs_bank):
     """Python convolution with Python filters matches RHS MATLAB filters output"""
     filters_output = np.empty(rhs_bank.shape)
     for o, s in np.ndindex(rhs_bank.shape[:2]):
-        filters_output[o, s, ...] = RHS_implementation.ourconv(stimulus, rhs_bank[o, s, ...])
+        filters_output[o, s, ...] = RHS_implementation.ourconv(
+            stimulus, rhs_bank[o, s, ...], pad=0.5
+        )
 
     assert np.allclose(MATLAB_filteroutput, filters_output)
 
