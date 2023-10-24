@@ -18,34 +18,34 @@ import numpy as np
 import RHS_implementation
 
 
-def test_filterbank(rhs_bank, matlab_bank):
+def test_filterbank(rhs_bank, MATLAB_bank):
     """Python filterbank matches RHS MATLAB filterbank"""
-    assert np.allclose(rhs_bank, matlab_bank)
+    assert np.allclose(rhs_bank, MATLAB_bank)
 
 
-def test_RHSconv_matlab(matlab_filteroutput, matlab_bank, stimulus):
+def test_RHSconv_MATLAB(MATLAB_filteroutput, MATLAB_bank, stimulus):
     """Python convolution with RHS MATLAB filters matches RHS MATLAB filters output"""
-    filters_output = np.empty(matlab_bank.shape)
-    for o, s in np.ndindex(matlab_bank.shape[:2]):
-        filters_output[o, s, ...] = RHS_implementation.ourconv(stimulus, matlab_bank[o, s, ...])
+    filters_output = np.empty(MATLAB_bank.shape)
+    for o, s in np.ndindex(MATLAB_bank.shape[:2]):
+        filters_output[o, s, ...] = RHS_implementation.ourconv(stimulus, MATLAB_bank[o, s, ...])
 
-    assert np.allclose(matlab_filteroutput, filters_output)
+    assert np.allclose(MATLAB_filteroutput, filters_output)
 
 
-def test_RHSconv_RHS(matlab_filteroutput, stimulus, rhs_bank):
+def test_RHSconv_RHS(MATLAB_filteroutput, stimulus, rhs_bank):
     """Python convolution with Python filters matches RHS MATLAB filters output"""
     filters_output = np.empty(rhs_bank.shape)
     for o, s in np.ndindex(rhs_bank.shape[:2]):
         filters_output[o, s, ...] = RHS_implementation.ourconv(stimulus, rhs_bank[o, s, ...])
 
-    assert np.allclose(matlab_filteroutput, filters_output)
+    assert np.allclose(MATLAB_filteroutput, filters_output)
 
 
-def test_ODOG(stimulus, rhs_bank, output_odog_matlab):
+def test_ODOG(output_odog_MATLAB, MATLAB_filteroutput):
     """Python ODOG normalization & output matches RHS MATLAB ODOG output"""
-    filters_output = np.empty(rhs_bank.shape)
-    for o, s in np.ndindex(rhs_bank.shape[:2]):
-        filters_output[o, s, ...] = RHS_implementation.ourconv(stimulus, rhs_bank[o, s, ...])
 
-    output = RHS_implementation.odog_normalize(filters_output)
-    assert np.allclose(output, output_odog_matlab)
+    # Normalize and read out
+    output = RHS_implementation.odog_normalize(MATLAB_filteroutput)
+
+    # Compare
+    assert np.allclose(output, output_odog_MATLAB)

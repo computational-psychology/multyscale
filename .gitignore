@@ -15,4 +15,4 @@ __pycache__/
 multyscale.egg-info/
 
 docs/_build/
-test/odog_matlab.mat
+test/odog_MATLAB.mat
