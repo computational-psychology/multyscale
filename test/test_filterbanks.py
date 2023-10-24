@@ -1,9 +1,8 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import RHS_filters
 
 from multyscale import filterbank
-
-import RHS_filters
 
 # %% Parameters of image
 shape = (1024, 1024)  # filtershape in pixels

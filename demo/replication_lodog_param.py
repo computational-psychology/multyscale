@@ -1,9 +1,8 @@
 # %%
 # Third party libraries
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from cycler import cycler
-
 from PIL import Image
 
 # Import local module

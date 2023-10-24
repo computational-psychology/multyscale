@@ -1,11 +1,11 @@
 # %%
 # Third party libraries
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from PIL import Image
 
 # Import local module
-from multyscale import models, filters
+from multyscale import filters, models
 
 # %% Load example stimulus
 stimulus = np.asarray(Image.open("example_stimulus.png").convert("L"))
@@ -60,9 +60,7 @@ for i in range(multiscale_output.shape[0]):
 
 # %%  Normalize oriented multiscale outputs by local mean
 # Create Gaussian window
-window = filters.gaussian2d(
-    model.bank.x, model.bank.y, (model.window_sigma, model.window_sigma)
-)
+window = filters.gaussian2d(model.bank.x, model.bank.y, (model.window_sigma, model.window_sigma))
 
 # Normalize window to unit-sum (== spatial averaging filter)
 window = window / window.sum()

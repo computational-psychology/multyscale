@@ -1,7 +1,7 @@
 # %%
 # Third party libraries
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from PIL import Image
 
 # Import local module
@@ -32,9 +32,7 @@ model.scale_norm_weights = multyscale.normalization.scale_norm_weights_gaussian(
 model.normalization_weights = multyscale.normalization.create_normalization_weights(
     6, 7, model.scale_norm_weights, model.orientation_norm_weights
 )
-model.window_sigmas = np.broadcast_to(
-    np.array(model.center_sigmas)[None, ..., None], (6, 7, 2)
-)
+model.window_sigmas = np.broadcast_to(np.array(model.center_sigmas)[None, ..., None], (6, 7, 2))
 
 # %%
 output_4_05 = model.normalize_outputs(weighted_outputs).sum((0, 1))

@@ -1,11 +1,12 @@
 # Third party libraries
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from PIL import Image
+
+import multyscale
 
 # Import local module
 from multyscale.models import FLODOG_RHS2007, ODOG_RHS2007
-import multyscale
 
 
 # %%
@@ -17,10 +18,8 @@ class FODOG(ODOG_RHS2007):
         self.scale_norm_weights = multyscale.normalization.scale_norm_weights_gaussian(
             len(self.scale_weights), self.sdmix
         )
-        self.normalization_weights = (
-            multyscale.normalization.create_normalization_weights(
-                6, 7, self.scale_norm_weights, self.orientation_norm_weights
-            )
+        self.normalization_weights = multyscale.normalization.create_normalization_weights(
+            6, 7, self.scale_norm_weights, self.orientation_norm_weights
         )
 
     pass

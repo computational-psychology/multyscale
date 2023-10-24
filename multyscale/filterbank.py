@@ -1,7 +1,7 @@
 """Structured sets of different types of filters, and functions for weighting outputs
 
 Primarily classes for banks of different filter types,
-but also includes convience functions to produce banks of filters
+but also includes convenience functions to produce banks of filters
 that correspond to Blakeslee & McCourt (1997; 1999)
 and Robinson, Hammon, & de Sa (2007) filters.
 
@@ -10,9 +10,10 @@ and Robinson, Hammon, & de Sa (2007) filters.
 
 # Third party imports
 from __future__ import annotations
-from collections.abc import Sequence
-import numpy as np
 
+from collections.abc import Sequence
+
+import numpy as np
 
 # Local application imports
 from . import filters, utils
@@ -28,10 +29,8 @@ def scale_weights(center_sigmas, slope):
     # TODO: docstring
     bandwidth = 2 * np.array(center_sigmas) * np.sqrt(2 * np.log(2))
     frequencies = 1 / (2 * bandwidth)
-    scale_weights = frequencies ** slope
-    scale_weights = (
-        scale_weights / scale_weights[int(np.ceil(scale_weights.size / 2)) - 1]
-    )
+    scale_weights = frequencies**slope
+    scale_weights = scale_weights / scale_weights[int(np.ceil(scale_weights.size / 2)) - 1]
     scale_weights = np.round(scale_weights, 5)
     return scale_weights
 
@@ -40,9 +39,7 @@ def scale_weights(center_sigmas, slope):
 def weight_multiscale_outputs(multiscale_filters, scale_weights):
     # TODO: docstring
     # Weight multiscale filters outputs according to filter spatial scale
-    weighted_multiscale = [
-        f * w for f, w in zip(multiscale_filters, scale_weights)
-    ]
+    weighted_multiscale = [f * w for f, w in zip(multiscale_filters, scale_weights)]
     return np.asarray(weighted_multiscale)
 
 
@@ -50,9 +47,7 @@ def weight_multiscale_outputs(multiscale_filters, scale_weights):
 def weight_oriented_multiscale_outputs(filters_output, scale_weights):
     # TODO: docstring
     # Weight each filter output according to filter spatial scale
-    weighted_filters_output = [
-        weight_multiscale_outputs(m, scale_weights) for m in filters_output
-    ]
+    weighted_filters_output = [weight_multiscale_outputs(m, scale_weights) for m in filters_output]
     return np.asarray(weighted_filters_output)
 
 
@@ -70,9 +65,7 @@ class DOGBank:
         image grid of y coordinates for each pixel; easily created with meshgrid
     """
 
-    def __init__(
-        self, sigmas: Sequence[Sequence[float]], x: np.ndarray, y: np.ndarray
-    ):
+    def __init__(self, sigmas: Sequence[Sequence[float]], x: np.ndarray, y: np.ndarray):
         self.sigmas = sigmas
         self.x = x
         self.y = y
@@ -99,9 +92,7 @@ class DOGBank:
         """
         filters_output = np.empty(self.filters.shape)
         for i in range(self.filters.shape[0]):
-            filters_output[i, ...] = filters.apply(
-                image, self.filters[i, ...], pad=True
-            )
+            filters_output[i, ...] = filters.apply(image, self.filters[i, ...], pad=True)
         return filters_output
 
 
@@ -167,16 +158,13 @@ class ODOGBank:
         x: np.ndarray,
         y: np.ndarray,
     ):
-
         # TODO: don't store filtes as ND-array
         self.orientations = orientations
         self.sigmas = sigmas
         self.x = x
         self.y = y
 
-        self.filters = np.empty(
-            (len(orientations), len(sigmas), x.shape[0], x.shape[1])
-        )
+        self.filters = np.empty((len(orientations), len(sigmas), x.shape[0], x.shape[1]))
 
         for i, angle in enumerate(orientations):
             for j, sigma in enumerate(sigmas):
@@ -202,9 +190,7 @@ class ODOGBank:
         filters_output = np.empty(self.filters.shape)
         for i in range(self.filters.shape[0]):
             for j in range(self.filters.shape[1]):
-                filters_output[i, j, ...] = filters.apply(
-                    image, self.filters[i, j, ...], pad=True
-                )
+                filters_output[i, j, ...] = filters.apply(image, self.filters[i, j, ...], pad=True)
         return filters_output
 
 
@@ -235,9 +221,7 @@ def RHS2007(
     n_orientations = 6
     num_scales = 7
     largest_center_space_const = 3  # in degrees
-    center_space_consts = (
-        utils.octave_intervals(num_scales) * largest_center_space_const
-    )
+    center_space_consts = utils.octave_intervals(num_scales) * largest_center_space_const
     center_sigmas = center_space_consts / np.sqrt(2)
     cs_ratio = 2  # center-surround ratio
 

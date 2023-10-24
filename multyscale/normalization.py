@@ -4,8 +4,8 @@ import numpy as np
 # Local application imports
 from . import filters
 
-
 # DOG_BM1997 normalization
+
 
 # ODOG_BM1999 normalization
 # Each filter is normalized by other filters of same orientation,
@@ -19,9 +19,7 @@ def create_normalization_weights(
     # Each filter can, in theory, normalized by every (other) filter
     # But the weight for how much every filter normalizes, can vary
     # For each filter, create a tensor with weights for each other filter
-    normalization_weights = np.ndarray(
-        shape=(n_orientations, n_scales, n_orientations, n_scales)
-    )
+    normalization_weights = np.ndarray(shape=(n_orientations, n_scales, n_orientations, n_scales))
 
     for o, s in np.ndindex(n_orientations, n_scales):
         normalization_weights[o, s, ...] = np.outer(
@@ -42,7 +40,7 @@ def scale_norm_weights_gaussian(n_scales, sdmix):
         rel_i = np.asarray(range(n_scales)) - s
 
         # Gaussian weights, based on relative index
-        scale_norm_weights[s, ...] = np.exp(-(rel_i ** 2) / (2 * sdmix ** 2)) / (
+        scale_norm_weights[s, ...] = np.exp(-(rel_i**2) / (2 * sdmix**2)) / (
             sdmix * np.sqrt(2 * np.pi)
         )
     # scale_norm_weights = scale_norm_weights / scale_norm_weights.sum((0))
@@ -51,9 +49,7 @@ def scale_norm_weights_gaussian(n_scales, sdmix):
 
 def orientation_norm_weights(n_orientations):
     orientation_norm_weights = np.eye(n_orientations)
-    orientation_norm_weights = orientation_norm_weights / orientation_norm_weights.sum(
-        (0)
-    )
+    orientation_norm_weights = orientation_norm_weights / orientation_norm_weights.sum(0)
     return orientation_norm_weights
 
 

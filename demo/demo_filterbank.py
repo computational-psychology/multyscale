@@ -1,11 +1,11 @@
 # %%
 # Third party libraries
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from PIL import Image
 
 # Import local module
-from multyscale import utils, filterbank
+from multyscale import filterbank, utils
 
 # %% Load example stimulus
 stimulus = np.asarray(Image.open("example_stimulus.png").convert("L"))

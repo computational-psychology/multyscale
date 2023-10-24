@@ -2,7 +2,7 @@
 import numpy as np
 
 # Local application imports
-from . import filters, filterbank, normalization
+from . import filterbank, filters, normalization
 
 # TODO: refactor filter-output datastructures
 
@@ -16,14 +16,10 @@ class DOG_BM1997:
 
         self.center_sigmas = [sigma[0] for sigma in self.bank.sigmas]
         self.weights_slope = 0.1
-        self.scale_weights = filterbank.scale_weights(
-            self.center_sigmas, self.weights_slope
-        )
+        self.scale_weights = filterbank.scale_weights(self.center_sigmas, self.weights_slope)
 
     def weight_outputs(self, filters_output):
-        return filterbank.weight_multiscale_outputs(
-            filters_output, self.scale_weights
-        )
+        return filterbank.weight_multiscale_outputs(filters_output, self.scale_weights)
 
     def apply(self, image):
         # TODO: docstring
@@ -48,28 +44,20 @@ class ODOG_RHS2007:
 
         self.center_sigmas = [sigma[0][0] for sigma in self.bank.sigmas]
         self.weights_slope = 0.1
-        self.scale_weights = filterbank.scale_weights(
-            self.center_sigmas, self.weights_slope
-        )
+        self.scale_weights = filterbank.scale_weights(self.center_sigmas, self.weights_slope)
 
-        self.scale_norm_weights = normalization.scale_norm_weights_equal(
-            len(self.scale_weights)
-        )
+        self.scale_norm_weights = normalization.scale_norm_weights_equal(len(self.scale_weights))
         self.orientation_norm_weights = normalization.orientation_norm_weights(6)
         self.normalization_weights = normalization.create_normalization_weights(
             6, 7, self.scale_norm_weights, self.orientation_norm_weights
         )
 
     def weight_outputs(self, filters_output):
-        return filterbank.weight_oriented_multiscale_outputs(
-            filters_output, self.scale_weights
-        )
+        return filterbank.weight_oriented_multiscale_outputs(filters_output, self.scale_weights)
 
     def normalizers(self, filters_output):
         # Get normalizers
-        normalizers = normalization.normalizers(
-            filters_output, self.normalization_weights
-        )
+        normalizers = normalization.normalizers(filters_output, self.normalization_weights)
         return normalizers
 
     def normalizers_to_RMS(self, normalizers):
@@ -127,9 +115,7 @@ class LODOG_RHS2007(ODOG_RHS2007):
         normalizers_RMS = normalizers.copy()
         normalizers_RMS = np.square(normalizers_RMS)
         for o, s in np.ndindex(normalizers_RMS.shape[:2]):
-            normalizers_RMS[o, s] = filters.apply(
-                spatial_avg_filters[o, s], normalizers_RMS[o, s]
-            )
+            normalizers_RMS[o, s] = filters.apply(spatial_avg_filters[o, s], normalizers_RMS[o, s])
         normalizers_RMS += 1e-6
         normalizers_RMS = np.sqrt(normalizers_RMS)
         return normalizers_RMS

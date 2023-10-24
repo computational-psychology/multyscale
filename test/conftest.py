@@ -1,9 +1,9 @@
 import os
-import pytest
-import numpy as np
-from scipy import io
 
+import numpy as np
+import pytest
 import RHS_filters
+from scipy import io
 
 filepath_matlab_output = os.path.abspath(__file__ + "../../odog_matlab.mat")
 
@@ -28,9 +28,7 @@ def stimulus():
 @pytest.fixture()
 def matlab_filteroutput():
     # Load RHS bank from MATLAB implementation
-    return np.array(
-        io.loadmat(filepath_matlab_output)["filter_response"].tolist()
-    )
+    return np.array(io.loadmat(filepath_matlab_output)["filter_response"].tolist())
 
 
 @pytest.fixture()
