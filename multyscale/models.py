@@ -100,8 +100,8 @@ class ODOG_RHS2007:
 class LODOG_RHS2007(ODOG_RHS2007):
     # TODO: docstring
 
-    def __init__(self, shape, visextent):
-        self.window_sigma = 2
+    def __init__(self, shape, visextent, window_sigma=2):
+        self.window_sigma = window_sigma
         self.window_sigmas = np.ones(shape=(6, 7, 2)) * self.window_sigma
 
         super().__init__(shape, visextent)
