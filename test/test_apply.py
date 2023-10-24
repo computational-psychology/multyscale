@@ -4,24 +4,24 @@ import RHS_implementation
 from multyscale import filters
 
 
-def test_apply_matlab(matlab_filteroutput, matlab_bank, stimulus):
-    # multyscale apply with matlab filters matches matlab output
-    filters_output = np.empty(matlab_bank.shape)
-    for i in range(matlab_bank.shape[0]):
-        for j in range(matlab_bank.shape[1]):
-            filters_output[i, j, ...] = filters.apply(stimulus, matlab_bank[i, j, ...], pad=True)
+def test_apply_MATLAB(MATLAB_filteroutput, MATLAB_bank, stimulus):
+    # multyscale apply with MATLAB filters matches MATLAB output
+    filters_output = np.empty(MATLAB_bank.shape)
+    for i in range(MATLAB_bank.shape[0]):
+        for j in range(MATLAB_bank.shape[1]):
+            filters_output[i, j, ...] = filters.apply(stimulus, MATLAB_bank[i, j, ...], pad=True)
 
-    assert np.allclose(matlab_filteroutput, filters_output)
+    assert np.allclose(MATLAB_filteroutput, filters_output)
 
 
-def test_apply_RHS(matlab_filteroutput, rhs_bank, stimulus):
-    # multyscale apply with RHS filters matches matlab output
+def test_apply_RHS(MATLAB_filteroutput, rhs_bank, stimulus):
+    # multyscale apply with RHS filters matches MATLAB output
     filters_output = np.empty(rhs_bank.shape)
     for i in range(rhs_bank.shape[0]):
         for j in range(rhs_bank.shape[1]):
             filters_output[i, j, ...] = filters.apply(stimulus, rhs_bank[i, j, ...], pad=True)
 
-    assert np.allclose(matlab_filteroutput, filters_output)
+    assert np.allclose(MATLAB_filteroutput, filters_output)
 
 
 def test_conv_apply(rhs_bank, stimulus):

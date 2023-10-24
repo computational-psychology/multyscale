@@ -11,18 +11,17 @@ visextent = np.array([-0.5, 0.5, -0.5, 0.5]) * (1023 / 32)
 # NOTE: RHS implementation doesn't actually use (-16,16,-16,16)
 
 
-# %% Filterbank
-def test_filterbank(matlab_bank):
+def test_filterbank(MATLAB_bank):
     multy_bank = filterbank.RHS2007((1024, 1024), visextent)
 
-    assert np.allclose(matlab_bank, multy_bank.filters)
+    assert np.allclose(MATLAB_bank, multy_bank.filters)
 
 
-def test_filterbank_apply(stimulus, matlab_filteroutput):
+def test_filterbank_apply(stimulus, MATLAB_filteroutput):
     multy_bank = filterbank.RHS2007((1024, 1024), visextent)
     multy_output = multy_bank.apply(stimulus)
 
-    assert np.allclose(matlab_filteroutput, multy_output)
+    assert np.allclose(MATLAB_filteroutput, multy_output)
 
 
 def test_scale_weights():
