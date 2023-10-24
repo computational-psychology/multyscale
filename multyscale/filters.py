@@ -10,7 +10,7 @@ from scipy import signal
 # TODO: (Abstract) base class Filter with apply-method,...
 
 
-def apply(image: np.ndarray, filt: np.ndarray, pad: bool = False) -> np.ndarray:
+def apply(image: np.ndarray, filt: np.ndarray, padval: float = 0.5) -> np.ndarray:
     """Apply filter to image, optionally pad input
 
     Parameters
@@ -19,10 +19,10 @@ def apply(image: np.ndarray, filt: np.ndarray, pad: bool = False) -> np.ndarray:
         image to filter
     filt : numpy.ndarray
         filter to use
-    pad : bool, optional
-        whether to pad the input image, by default False.
-        If true, input will be padded equally around all borders
-        with the constant value 0.5
+    padval : float, optional
+        whether to pad the input image, by default 0.5.
+        If truthy, input will be padded equally around all borders
+        with the constant value in here
         to be the size of the filter,
 
     Returns
@@ -32,7 +32,7 @@ def apply(image: np.ndarray, filt: np.ndarray, pad: bool = False) -> np.ndarray:
     """
 
     # TODO: make method
-    if pad:
+    if padval:
         pad_vertical, pad_horizontal = np.array(filt.shape)
         padding = np.array(
             [
@@ -41,7 +41,7 @@ def apply(image: np.ndarray, filt: np.ndarray, pad: bool = False) -> np.ndarray:
             ],
             dtype="int",
         )
-        pad_image = np.pad(image, padding, "constant", constant_values=0.5)
+        pad_image = np.pad(image, padding, "constant", constant_values=padval)
         filtered_image = signal.fftconvolve(pad_image, filt, mode="valid")
     else:
         filtered_image = signal.fftconvolve(image, filt, mode="same")

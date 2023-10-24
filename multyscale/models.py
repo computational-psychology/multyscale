@@ -115,7 +115,9 @@ class LODOG_RHS2007(ODOG_RHS2007):
         normalizers_RMS = normalizers.copy()
         normalizers_RMS = np.square(normalizers_RMS)
         for o, s in np.ndindex(normalizers_RMS.shape[:2]):
-            normalizers_RMS[o, s] = filters.apply(spatial_avg_filters[o, s], normalizers_RMS[o, s])
+            normalizers_RMS[o, s] = filters.apply(
+                spatial_avg_filters[o, s], normalizers_RMS[o, s], padval=0
+            )
         normalizers_RMS += 1e-6
         normalizers_RMS = np.sqrt(normalizers_RMS)
         return normalizers_RMS

@@ -90,10 +90,10 @@ def filterbank():
 
 
 # %% Convolution
-def ourconv(image, filt):
+def ourconv(image, filt, pad=0.5):
     # pad
     padded_size = np.array(image.shape) + np.array(filt.shape)
-    pad_img = pad_RHS(image, padded_size, padval=0.5)
+    pad_img = pad_RHS(image, padded_size, padval=pad)
     pad_filt = pad_RHS(filt, padded_size, padval=0)
 
     # Paul's slightly corrected version
