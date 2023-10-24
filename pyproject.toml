@@ -23,7 +23,7 @@ requires-python = ">=3.8"
 dependencies = ["numpy", "scipy", "matplotlib", "Pillow"]
 
 [project.optional-dependencies]
-dev = ["pytest"]
+dev = ["pytest", "black", "pyupgrade", "flake8"]
 docs = [
     "Sphinx",
     "sphinx-autodoc-typehints",
@@ -65,3 +65,16 @@ include = [
     "multyscale*",
 ] # package names should match these glob patterns (["*"] by default)
 namespaces = false # to disable scanning PEP 420 namespaces (true by default)
+
+
+[tool.black]
+line-length = 99
+target-version = ["py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 99
+
+[tool.codespell]
+skip = "./docs/_build/*,*.ipynb"
+#exclude-file = ".codespell.ignore"
