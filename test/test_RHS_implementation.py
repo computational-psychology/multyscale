@@ -26,11 +26,8 @@ def test_filterbank(rhs_bank, matlab_bank):
 def test_RHSconv_matlab(matlab_filteroutput, matlab_bank, stimulus):
     """Python convolution with RHS MATLAB filters matches RHS MATLAB filters output"""
     filters_output = np.empty(matlab_bank.shape)
-    for i in range(matlab_bank.shape[0]):
-        for j in range(matlab_bank.shape[1]):
-            filters_output[i, j, ...] = RHS_implementation.ourconv(
-                stimulus, matlab_bank[i, j, ...]
-            )
+    for o, s in np.ndindex(matlab_bank.shape[:2]):
+        filters_output[o, s, ...] = RHS_implementation.ourconv(stimulus, matlab_bank[o, s, ...])
 
     assert np.allclose(matlab_filteroutput, filters_output)
 
@@ -38,9 +35,8 @@ def test_RHSconv_matlab(matlab_filteroutput, matlab_bank, stimulus):
 def test_RHSconv_RHS(matlab_filteroutput, stimulus, rhs_bank):
     """Python convolution with Python filters matches RHS MATLAB filters output"""
     filters_output = np.empty(rhs_bank.shape)
-    for i in range(rhs_bank.shape[0]):
-        for j in range(rhs_bank.shape[1]):
-            filters_output[i, j, ...] = RHS_implementation.ourconv(stimulus, rhs_bank[i, j, ...])
+    for o, s in np.ndindex(rhs_bank.shape[:2]):
+        filters_output[o, s, ...] = RHS_implementation.ourconv(stimulus, rhs_bank[o, s, ...])
 
     assert np.allclose(matlab_filteroutput, filters_output)
 
@@ -48,9 +44,8 @@ def test_RHSconv_RHS(matlab_filteroutput, stimulus, rhs_bank):
 def test_ODOG(stimulus, rhs_bank, output_odog_matlab):
     """Python ODOG normalization & output matches RHS MATLAB ODOG output"""
     filters_output = np.empty(rhs_bank.shape)
-    for i in range(rhs_bank.shape[0]):
-        for j in range(rhs_bank.shape[1]):
-            filters_output[i, j, ...] = RHS_implementation.ourconv(stimulus, rhs_bank[i, j, ...])
+    for o, s in np.ndindex(rhs_bank.shape[:2]):
+        filters_output[o, s, ...] = RHS_implementation.ourconv(stimulus, rhs_bank[o, s, ...])
 
     output = RHS_implementation.odog_normalize(filters_output)
     assert np.allclose(output, output_odog_matlab)
