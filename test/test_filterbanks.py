@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import RHS_filters
+import RHS_implementation
 
 from multyscale import filterbank
 
@@ -35,4 +35,4 @@ def test_scale_weights():
     bank = filterbank.RHS2007(shape, visextent)
     center_sigmas = np.array(bank.sigmas)[:, 0, 0]
     scale_weights = filterbank.scale_weights(center_sigmas, 0.1)
-    assert np.allclose(scale_weights, RHS_filters.w_val)
+    assert np.allclose(scale_weights, RHS_implementation.w_val)

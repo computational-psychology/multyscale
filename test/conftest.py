@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 import pytest
-import RHS_filters
+import RHS_implementation
 from scipy import io
 
 filepath_matlab_output = os.path.abspath(__file__ + "../../odog_matlab.mat")
@@ -11,7 +11,7 @@ filepath_matlab_output = os.path.abspath(__file__ + "../../odog_matlab.mat")
 @pytest.fixture()
 def rhs_bank():
     # Create RHS filterbank from Python transplation
-    return RHS_filters.filterbank()
+    return RHS_implementation.filterbank()
 
 
 @pytest.fixture()
