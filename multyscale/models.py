@@ -120,6 +120,7 @@ class LODOG_RHS2007(ODOG_RHS2007):
             )
         normalizers_RMS += 1e-6
         normalizers_RMS = np.sqrt(normalizers_RMS)
+        normalizers_RMS += 1e-6
         return normalizers_RMS
 
 
