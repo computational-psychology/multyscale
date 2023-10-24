@@ -40,16 +40,16 @@ def scale_norm_weights_gaussian(n_scales, sdmix):
         rel_i = np.asarray(range(n_scales)) - s
 
         # Gaussian weights, based on relative index
-        scale_norm_weights[s, ...] = np.exp(-(rel_i**2) / (2 * sdmix**2)) / (
-            sdmix * np.sqrt(2 * np.pi)
-        )
-    # scale_norm_weights = scale_norm_weights / scale_norm_weights.sum((0))
+        weights = np.exp(-(rel_i**2) / (2 * sdmix**2)) / (sdmix * np.sqrt(2 * np.pi))
+        weights /= weights.sum()
+        scale_norm_weights[s, :] = weights
+
     return scale_norm_weights
 
 
 def orientation_norm_weights(n_orientations):
     orientation_norm_weights = np.eye(n_orientations)
-    orientation_norm_weights = orientation_norm_weights / orientation_norm_weights.sum(0)
+    orientation_norm_weights /= orientation_norm_weights.sum(0)
     return orientation_norm_weights
 
 
