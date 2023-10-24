@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import RHS_filters
 import RHS_implementation
 
 from multyscale import filterbank

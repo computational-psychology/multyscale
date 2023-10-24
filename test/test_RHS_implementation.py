@@ -1,22 +1,30 @@
-# %%
-import matplotlib.pyplot as plt
+""" Test that Python transplementation matches original MATLAB output
+
+The original Robinson, Hammon, de Sa (2007) implementation of (F)(L)ODOG is in MATLAB.
+The multyscale testsuite provides a Python "transplementation" of the algorithms of this
+original MATLAB code.
+
+This module tests that the model output (and some in between steps) produced by this
+Python transplementation matches numerically with the comparable output from original
+MATLAB implementation
+
+The "ground-truth" MATLAB output should be provided in file output_MATLAB.mat,
+which is accessed by the pytest fixtures in MATLAB_comparison.py.
+
+Note that this is selected output, for just a single stimulus.
+"""
+
 import numpy as np
 import RHS_implementation
 
 
 def test_filterbank(rhs_bank, matlab_bank):
-    # %% Visualise
-    for i in range(rhs_bank.shape[0]):
-        plt.subplot(rhs_bank.shape[0], 2, i * 2 + 1)
-        plt.imshow(rhs_bank[i, 6, ...])
-        plt.subplot(rhs_bank.shape[0], 2, i * 2 + 2)
-        plt.imshow(rhs_bank[i, 6, ...])
-
+    """Python filterbank matches RHS MATLAB filterbank"""
     assert np.allclose(rhs_bank, matlab_bank)
 
 
 def test_RHSconv_matlab(matlab_filteroutput, matlab_bank, stimulus):
-    # RHS convolution with matlab filters matches matlab output
+    """Python convolution with RHS MATLAB filters matches RHS MATLAB filters output"""
     filters_output = np.empty(matlab_bank.shape)
     for i in range(matlab_bank.shape[0]):
         for j in range(matlab_bank.shape[1]):
@@ -28,7 +36,7 @@ def test_RHSconv_matlab(matlab_filteroutput, matlab_bank, stimulus):
 
 
 def test_RHSconv_RHS(matlab_filteroutput, stimulus, rhs_bank):
-    # RHS convolution with python RHS filters matches matlab output
+    """Python convolution with Python filters matches RHS MATLAB filters output"""
     filters_output = np.empty(rhs_bank.shape)
     for i in range(rhs_bank.shape[0]):
         for j in range(rhs_bank.shape[1]):
@@ -38,7 +46,7 @@ def test_RHSconv_RHS(matlab_filteroutput, stimulus, rhs_bank):
 
 
 def test_ODOG(stimulus, rhs_bank, output_odog_matlab):
-    # RHS convolution with python RHS filters matches matlab output
+    """Python ODOG normalization & output matches RHS MATLAB ODOG output"""
     filters_output = np.empty(rhs_bank.shape)
     for i in range(rhs_bank.shape[0]):
         for j in range(rhs_bank.shape[1]):
