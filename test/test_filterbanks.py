@@ -14,12 +14,6 @@ visextent = np.array([-0.5, 0.5, -0.5, 0.5]) * (1023 / 32)
 # %% Filterbank
 def test_filterbank(matlab_bank):
     multy_bank = filterbank.RHS2007((1024, 1024), visextent)
-    #  Visualise filterbank
-    for i in range(multy_bank.filters.shape[0]):
-        plt.subplot(multy_bank.filters.shape[0], 2, i * 2 + 1)
-        plt.imshow(multy_bank.filters[i, 6, ...], extent=visextent)
-        plt.subplot(multy_bank.filters.shape[0], 2, i * 2 + 2)
-        plt.imshow(matlab_bank[i, 6, ...])
 
     assert np.allclose(matlab_bank, multy_bank.filters)
 
