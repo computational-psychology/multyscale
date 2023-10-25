@@ -67,8 +67,8 @@ def test_normalized_outputs(stimulus):
     assert np.allclose(normed_outputs, RHS_normalized_outputs)
 
 
-def test_lodog_output(stimulus, output_lodog_MATLAB):
+def test_lodog_output(stimulus, output_LODOG_MATLAB):
     model = multyscale.models.LODOG_RHS2007(stimulus.shape, visextent, window_sigma=window_sigma)
 
     output = model.apply(stimulus)
-    assert np.allclose(output, output_lodog_MATLAB)
+    assert np.allclose(output, output_LODOG_MATLAB)

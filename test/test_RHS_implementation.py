@@ -55,7 +55,7 @@ def test_ODOG(output_ODOG_MATLAB, MATLAB_filteroutput):
     assert np.allclose(output, output_ODOG_MATLAB)
 
 
-def test_LODOG(output_lodog_MATLAB, MATLAB_filteroutput):
+def test_LODOG(output_LODOG_MATLAB, MATLAB_filteroutput):
     """Python ODOG normalization & output matches RHS MATLAB LODOG output"""
 
     # Weight filteroutput by scale
@@ -66,4 +66,4 @@ def test_LODOG(output_lodog_MATLAB, MATLAB_filteroutput):
 
     # Sum to accumulate model output
     output = np.sum(normed_multi_responses, (0, 1))
-    assert np.allclose(output, output_lodog_MATLAB)
+    assert np.allclose(output, output_LODOG_MATLAB)
