@@ -156,4 +156,83 @@ def odog_normalize(filter_responses):
     return modelOut
 
 
+def lodog_RMS(this_norm, sig1, sr):
+    # square
+    img_sqr = this_norm**2
+
+    # create Gaussian mask
+    mask = lodog_mask(sig1, sr)
+
+    # filter the image (using unit-sum mask --> mean)
+    filter_out = ourconv(img_sqr, mask, pad=0)
+
+    # make sure there are no negative numbers due to fft inaccuracies.
+    filter_out = filter_out + 1e-6
+
+    # take the square root, last part of doing RMS
+    filter_out = np.sqrt(filter_out)
+
+    filter_out += 1e-6
+    return filter_out
+
+
+def lodog_mask(sig1, sr=1, o=0):
+    # sig1= size of gaussian window in the direction of the filter
+    # sig2= size of gaussian window perpendicular to filter
+    sig2 = sig1 * sr
+
+    # directed along main axis of filter
+    rot = orientations[o] * np.pi / 180
+
+    # create a unit volume gaussian for filtering
+    mask = d2gauss(model_x, sig1, model_y, sig2, rot)
+    mask = mask / mask.sum()
+    return mask
+
+
 # %%
+def lodog_normalize(filter_responses, sig1, sr=1):
+    # normalizers
+    norms = lodog_normalizers(filter_responses)
+
+    # lRMS
+    RMSs = lodog_RMSs(norms, sig1, sr)
+
+    # loop over the orientations
+    normed_resps = np.ndarray(filter_responses.shape)
+    for o in range(filter_responses.shape[0]):
+        # loop over spatial frequencies
+        for f in range(filter_responses.shape[1]):
+            filter_out = RMSs[o, f]
+            normed_resps[o, f] = filter_responses[o, f] / filter_out
+    return normed_resps
+
+
+def lodog_normalizers(filter_responses):
+    norms = np.zeros(filter_responses.shape)
+
+    # loop over the orientations
+    for o in range(filter_responses.shape[0]):
+        this_norm = np.zeros(filter_responses.shape[-2:])
+
+        # loop over spatial frequencies to accumulate
+        for f in range(filter_responses.shape[1]):
+            this_norm += filter_responses[o, f]  # * w_val[f]
+
+        for f in range(filter_responses.shape[1]):
+            norms[o, f] = this_norm
+    return norms
+
+
+def lodog_RMSs(norms, sig1, sr=1):
+    RMSs = np.ndarray(norms.shape)
+    # loop over the orientations
+    for o in range(norms.shape[0]):
+        # loop over spatial frequencies to accumulate
+        for f in range(norms.shape[1]):
+            RMSs[o, f] = lodog_RMS(norms[o, f], sig1, sr)
+    return RMSs
+
+
+def flodog_normalize(filter_response, sigx, sr, sdmix):
+    pass
