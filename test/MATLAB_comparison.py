@@ -44,7 +44,7 @@ def output_ODOG_MATLAB():
 
 
 @pytest.fixture()
-def output_lodog_MATLAB():
+def output_LODOG_MATLAB():
     return io.loadmat(filepath_MATLAB_output)["lodog_output"]
 
 

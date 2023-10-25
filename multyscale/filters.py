@@ -32,19 +32,19 @@ def apply(image: np.ndarray, filt: np.ndarray, padval: float = 0.5) -> np.ndarra
     """
 
     # TODO: make method
-    if padval:
-        pad_vertical, pad_horizontal = np.array(filt.shape)
-        padding = np.array(
-            [
-                [pad_vertical / 2 - 1, pad_vertical / 2],
-                [pad_horizontal / 2 - 1, pad_horizontal / 2],
-            ],
-            dtype="int",
-        )
-        pad_image = np.pad(image, padding, "constant", constant_values=padval)
-        filtered_image = signal.fftconvolve(pad_image, filt, mode="valid")
-    else:
-        filtered_image = signal.fftconvolve(image, filt, mode="same")
+    # if padval:
+    pad_vertical, pad_horizontal = np.array(filt.shape)
+    padding = np.array(
+        [
+            [pad_vertical / 2 - 1, pad_vertical / 2],
+            [pad_horizontal / 2 - 1, pad_horizontal / 2],
+        ],
+        dtype="int",
+    )
+    pad_image = np.pad(image, padding, "constant", constant_values=padval)
+    filtered_image = signal.fftconvolve(pad_image, filt, mode="valid")
+    # else:
+    # filtered_image = signal.fftconvolve(image, filt, mode="same")
     return filtered_image
 
 
