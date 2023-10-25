@@ -39,7 +39,7 @@ def MATLAB_filteroutput():
 
 
 @pytest.fixture()
-def output_odog_MATLAB():
+def output_ODOG_MATLAB():
     return io.loadmat(filepath_MATLAB_output)["odog_output"]
 
 

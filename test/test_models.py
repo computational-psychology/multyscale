@@ -10,10 +10,10 @@ visextent = np.array([-0.5, 0.5, -0.5, 0.5]) * (1023 / 32)
 
 
 # %% Tests
-def test_odog_output(output_odog_MATLAB, stimulus):
+def test_odog_output(output_ODOG_MATLAB, stimulus):
     model = models.ODOG_RHS2007(stimulus.shape, visextent)
     output = model.apply(stimulus)
-    assert np.allclose(output, output_odog_MATLAB)
+    assert np.allclose(output, output_ODOG_MATLAB)
 
 
 def test_lodog_output(stimulus, output_lodog_MATLAB):
