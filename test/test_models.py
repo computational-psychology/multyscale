@@ -24,10 +24,12 @@ def test_lodog_output(stimulus, output_LODOG_MATLAB):
     assert np.allclose(output, output_LODOG_MATLAB)
 
 
-def test_flodog_output(stimulus, output_flodog_MATLAB):
-    windowSizeScalar = 4
-    m = 0.5
-
-    model = models.FLODOG_RHS2007(stimulus.shape, visextent)
+def test_flodog_output(stimulus, output_FLODOG_MATLAB, MATLAB_FLODOG_params):
+    model = models.FLODOG_RHS2007(
+        stimulus.shape,
+        visextent,
+        sdmix=MATLAB_FLODOG_params["sdmix"],
+        spatial_window_scalar=MATLAB_FLODOG_params["sigx"],
+    )
     output = model.apply(stimulus)
-    assert np.allclose(output, output_flodog_MATLAB)
+    assert np.allclose(output, output_FLODOG_MATLAB)
