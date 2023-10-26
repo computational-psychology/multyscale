@@ -71,7 +71,7 @@ def test_FLODOG_RMS(model, MATLAB_filteroutput, MATLAB_FLODOG_params):
 
 def test_normalized_outputs(model, MATLAB_filteroutput, MATLAB_FLODOG_params):
     weighted_outputs = RHS_implementation.weight(MATLAB_filteroutput)
-    RHS_normalized_outputs = RHS_implementation.flodog_normalize(
+    RHS_normalized_outputs = RHS_implementation.FLODOG_normalize(
         weighted_outputs,
         sigx=MATLAB_FLODOG_params["sigx"],
         sdmix=MATLAB_FLODOG_params["sdmix"],

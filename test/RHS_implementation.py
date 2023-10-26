@@ -156,12 +156,13 @@ def odog_normalize(filter_responses):
     return modelOut
 
 
-def lodog_RMS(this_norm, sig1, sr):
+# %% LODOG
+def LODOG_RMS(this_norm, sig1, sr):
     # square
     img_sqr = this_norm**2
 
     # create Gaussian mask
-    mask = lodog_mask(sig1, sr)
+    mask = LODOG_mask(sig1, sr)
 
     # filter the image (using unit-sum mask --> mean)
     filter_out = ourconv(img_sqr, mask, pad=0)
@@ -176,7 +177,7 @@ def lodog_RMS(this_norm, sig1, sr):
     return filter_out
 
 
-def lodog_mask(sig1, sr=1, o=0):
+def LODOG_mask(sig1, sr=1, o=0):
     # sig1= size of gaussian window in the direction of the filter
     # sig2= size of gaussian window perpendicular to filter
     sig2 = sig1 * sr
@@ -190,13 +191,12 @@ def lodog_mask(sig1, sr=1, o=0):
     return mask
 
 
-# %%
-def lodog_normalize(filter_responses, sig1, sr=1):
+def LODOG_normalize(filter_responses, sig1, sr=1):
     # normalizers
-    norms = lodog_normalizers(filter_responses)
+    norms = LODOG_normalizers(filter_responses)
 
     # lRMS
-    RMSs = lodog_RMSs(norms, sig1, sr)
+    RMSs = LODOG_RMSs(norms, sig1, sr)
 
     # loop over the orientations
     normed_resps = np.ndarray(filter_responses.shape)
@@ -208,7 +208,7 @@ def lodog_normalize(filter_responses, sig1, sr=1):
     return normed_resps
 
 
-def lodog_normalizers(filter_responses):
+def LODOG_normalizers(filter_responses):
     norms = np.zeros(filter_responses.shape)
 
     # loop over the orientations
@@ -224,18 +224,18 @@ def lodog_normalizers(filter_responses):
     return norms
 
 
-def lodog_RMSs(norms, sig1, sr=1):
+def LODOG_RMSs(norms, sig1, sr=1):
     RMSs = np.ndarray(norms.shape)
     # loop over the orientations
     for o in range(norms.shape[0]):
         # loop over spatial frequencies to accumulate
         for f in range(norms.shape[1]):
-            RMSs[o, f] = lodog_RMS(norms[o, f], sig1, sr)
+            RMSs[o, f] = LODOG_RMS(norms[o, f], sig1, sr)
     return RMSs
 
 
 # %% FLODOG
-def flodog_normalize(filter_responses, sigx, sdmix, sr=1):
+def FLODOG_normalize(filter_responses, sigx, sdmix, sr=1):
     # Normalizers are combination of filters, weighted by scale
     norms = FLODOG_normalizers(filter_responses, sdmix)
 
@@ -289,7 +289,7 @@ def FLODOG_masks(sigx, sr=1):
         for f in range(len(stdev_pixels)):
             sig1 = sigx * stdev_pixels[f]
 
-            masks[o, f] = lodog_mask(sig1, sr)
+            masks[o, f] = LODOG_mask(sig1, sr)
 
     return masks
 
@@ -303,5 +303,5 @@ def FLODOG_RMSs(norms, sigx, sr=1):
             # localization extent along direction of filter - function of frequency
             sig1 = sigx * stdev_pixels[f]
 
-            RMSs[o, f] = lodog_RMS(norms[o, f], sig1, sr)
+            RMSs[o, f] = LODOG_RMS(norms[o, f], sig1, sr)
     return RMSs

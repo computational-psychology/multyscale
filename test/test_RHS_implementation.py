@@ -62,7 +62,7 @@ def test_LODOG(output_LODOG_MATLAB, MATLAB_filteroutput, MATLAB_LODOG_params):
     filters_output = RHS_implementation.weight(MATLAB_filteroutput)
 
     # Normalize
-    normed_multi_responses = RHS_implementation.lodog_normalize(
+    normed_multi_responses = RHS_implementation.LODOG_normalize(
         filters_output,
         **MATLAB_LODOG_params,
     )
@@ -81,7 +81,7 @@ def test_FLODOG(output_FLODOG_MATLAB, MATLAB_filteroutput, MATLAB_FLODOG_params)
     filters_output = RHS_implementation.weight(MATLAB_filteroutput)
 
     # Normalize
-    normed_multi_responses = RHS_implementation.flodog_normalize(
+    normed_multi_responses = RHS_implementation.FLODOG_normalize(
         filters_output,
         **MATLAB_FLODOG_params,
     )

@@ -16,10 +16,12 @@ def test_odog_output(output_ODOG_MATLAB, stimulus):
     assert np.allclose(output, output_ODOG_MATLAB)
 
 
-def test_lodog_output(stimulus, output_LODOG_MATLAB):
-    window_sigma = 128 / 32
-
-    model = models.LODOG_RHS2007(stimulus.shape, visextent, window_sigma=window_sigma)
+def test_lodog_output(stimulus, output_LODOG_MATLAB, MATLAB_LODOG_params):
+    model = models.LODOG_RHS2007(
+        stimulus.shape,
+        visextent,
+        window_sigma=MATLAB_LODOG_params["sig1"] / 32,
+    )
     output = model.apply(stimulus)
     assert np.allclose(output, output_LODOG_MATLAB)
 
