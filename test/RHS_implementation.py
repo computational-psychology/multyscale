@@ -254,22 +254,28 @@ def flodog_normalize(filter_responses, sigx, sdmix, sr=1):
     return normed_resps
 
 
+def FLODOG_normweights(sdmix):
+    weights = np.ndarray((len(stdev_pixels), len(stdev_pixels)))
+    for f in range(len(stdev_pixels)):
+        for wf in range(len(stdev_pixels)):
+            weights[f, wf] = gauss(f - wf, sdmix)
+        weights[f, :] /= weights[f, :].sum()
+    return weights
+
+
 def FLODOG_normalizers(filter_responses, sdmix):
     """Build weighted normalizers"""
 
     norms = np.zeros(filter_responses.shape)
+    weights = FLODOG_normweights(sdmix)
 
     # loop over the orientations
     for o in range(filter_responses.shape[0]):
         # loop over spatial frequencies to accumulate
         for f in range(filter_responses.shape[1]):
             normalizer = 0
-            area = 0
             for wf in range(len(stdev_pixels)):
-                gweight = gauss(f - wf, sdmix)
-                area = area + gweight
-                normalizer = normalizer + (filter_responses[o, wf] * gweight)
-            normalizer = normalizer / area
+                normalizer += filter_responses[o, wf] * weights[f, wf]
 
             norms[o, f, ...] = normalizer
 
