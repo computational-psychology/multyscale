@@ -67,3 +67,24 @@ def test_LODOG(output_LODOG_MATLAB, MATLAB_filteroutput):
     # Sum to accumulate model output
     output = np.sum(normed_multi_responses, (0, 1))
     assert np.allclose(output, output_LODOG_MATLAB)
+
+
+def test_FLODOG(output_FLODOG_MATLAB, MATLAB_filteroutput):
+    """Python ODOG normalization & output matches RHS MATLAB FLODOG output"""
+
+    # Weight filteroutput by scale
+    filters_output = RHS_implementation.weight(MATLAB_filteroutput)
+
+    # Normalize
+    normed_outputs = RHS_implementation.flodog_normalize(
+        filters_output,
+        sigx=4,
+        sr=1,
+        sdmix=0.5,
+    )
+
+    # Sum normalized channel outputs, to read out model output
+    output = np.sum(normed_outputs, (0, 1))
+
+    # Compare
+    assert np.allclose(output, output_FLODOG_MATLAB)

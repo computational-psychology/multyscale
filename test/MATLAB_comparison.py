@@ -49,5 +49,5 @@ def output_LODOG_MATLAB():
 
 
 @pytest.fixture()
-def output_flodog_MATLAB():
+def output_FLODOG_MATLAB():
     return io.loadmat(filepath_MATLAB_output)["flodog_output"]
