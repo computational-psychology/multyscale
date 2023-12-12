@@ -1,5 +1,5 @@
 # `multyscale` API
-<!-- ```{eval-rst}
+```{eval-rst}
 .. autosummary::
    :toctree: _api
    :recursive:
@@ -8,4 +8,4 @@
    multyscale.filterbanks
    multyscale.normalization
    multyscale.models
-``` -->
+```
