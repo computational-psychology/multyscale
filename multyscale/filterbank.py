@@ -69,6 +69,11 @@ class DOGBank:
         self.sigmas = sigmas
         self.x = x
         self.y = y
+        self.shape = (
+            len(self.sigmas),
+            x.shape[0],
+            x.shape[1],
+        )
 
         self.filters = np.empty((len(sigmas), x.shape[0], x.shape[1]))
         for i, sigma in enumerate(sigmas):
@@ -168,6 +173,12 @@ class ODOGBank:
         self.sigmas = sigmas
         self.x = x
         self.y = y
+        self.shape = (
+            len(self.orientations),
+            len(self.sigmas),
+            x.shape[0],
+            x.shape[1],
+        )
 
         self.filters = np.empty((len(orientations), len(sigmas), x.shape[0], x.shape[1]))
 
