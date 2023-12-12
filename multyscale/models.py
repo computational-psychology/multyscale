@@ -2,7 +2,7 @@
 import numpy as np
 
 # Local application imports
-from . import filterbank, filters, normalization
+from . import filterbanks, filters, normalization
 
 # TODO: refactor filter-output datastructures
 
@@ -12,14 +12,14 @@ class DOG_BM1997:
         self.shape = shape
         self.visextent = visextent
 
-        self.bank = filterbank.BM1997(shape, visextent)
+        self.bank = filterbanks.BM1997(shape, visextent)
 
         self.center_sigmas = [sigma[0] for sigma in self.bank.sigmas]
         self.weights_slope = 0.1
-        self.scale_weights = filterbank.scale_weights(self.center_sigmas, self.weights_slope)
+        self.scale_weights = filterbanks.scale_weights(self.center_sigmas, self.weights_slope)
 
     def weight_outputs(self, filters_output):
-        return filterbank.weight_multiscale_outputs(filters_output, self.scale_weights)
+        return filterbanks.weight_multiscale_outputs(filters_output, self.scale_weights)
 
     def apply(self, image):
         # TODO: docstring
@@ -40,11 +40,11 @@ class ODOG_RHS2007:
         self.shape = shape
         self.visextent = visextent
 
-        self.bank = filterbank.RHS2007(shape, visextent)
+        self.bank = filterbanks.RHS2007(shape, visextent)
 
         self.center_sigmas = [sigma[0][0] for sigma in self.bank.sigmas]
         self.weights_slope = 0.1
-        self.scale_weights = filterbank.scale_weights(self.center_sigmas, self.weights_slope)
+        self.scale_weights = filterbanks.scale_weights(self.center_sigmas, self.weights_slope)
 
         self.scale_norm_weights = normalization.scale_norm_weights_equal(len(self.scale_weights))
         self.orientation_norm_weights = normalization.orientation_norm_weights(self.bank.shape[0])
@@ -53,7 +53,7 @@ class ODOG_RHS2007:
         )
 
     def weight_outputs(self, filters_output):
-        return filterbank.weight_oriented_multiscale_outputs(filters_output, self.scale_weights)
+        return filterbanks.weight_oriented_multiscale_outputs(filters_output, self.scale_weights)
 
     def normalizers(self, filters_output):
         # Get normalizers

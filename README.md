@@ -37,5 +37,5 @@ import multyscale
 ```
 
 - `multyscale.filters` contains functions to generate filters
-- `multyscale.filterbank` contains classes defining specific sets (banks) of filters
+- `multyscale.filterbanks` contains classes defining specific sets (banks) of filters
 - `multsycale.models` implements some common models from the literature

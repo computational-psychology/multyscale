@@ -5,7 +5,7 @@ import numpy as np
 from PIL import Image
 
 # Import local module
-from multyscale import filterbank, utils
+from multyscale import filterbanks, utils
 
 # %% Load example stimulus
 stimulus = np.asarray(Image.open("example_stimulus.png").convert("L"))
@@ -34,7 +34,7 @@ orientations = np.arange(0, 180, 180 / n_orientations)
 sigmas = [((s, s), (s, cs_ratio * s)) for s in center_sigmas]
 
 # %% Create filterbank
-bank = filterbank.ODOGBank(orientations, sigmas, x, y)
+bank = filterbanks.ODOGBank(orientations, sigmas, x, y)
 
 # %% Visualise filterbank
 for i in range(bank.filters.shape[0]):

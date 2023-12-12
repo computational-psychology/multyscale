@@ -5,7 +5,7 @@ import numpy as np
 from PIL import Image
 
 # Import local module
-from multyscale import filterbank, utils
+from multyscale import filterbanks, utils
 
 # %% Load example stimulus
 stimulus = np.asarray(Image.open("example_stimulus.png").convert("L"))
@@ -31,7 +31,7 @@ cs_ratio = 2  # center-surround ratio
 sigmas = [(s, cs_ratio * s) for s in center_sigmas]
 
 # %% Create filterbank
-bank = filterbank.DOGBank(sigmas, x, y)
+bank = filterbanks.DOGBank(sigmas, x, y)
 
 # %% Visualise filterbank
 for i in range(bank.filters.shape[0]):
