@@ -1,0 +1,24 @@
+# Table of contents
+# Learn more at https://jupyterbook.org/customize/toc.html
+
+format: jb-book
+root: index
+parts:
+  - caption: Getting started with multyscale
+    chapters:
+    - file: getting_started/installation
+    - file: getting_started/getting_started
+    - file: howtos/howtos
+  - caption: Topic guides
+    chapters:
+    - file: topic_guides/history
+    # - file: topic_guides/normalization_ODOG
+    # - file: topic_guides/normalization_LODOG
+    # - file: topic_guides/normalization_FLODOG
+  - caption: Reference
+    chapters:
+    - file: reference/api.md
+  - caption: Get in touch
+    chapters:
+    - file: contributing/get_in_touch
+    - file: contributing/contribute

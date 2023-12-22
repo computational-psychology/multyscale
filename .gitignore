@@ -16,3 +16,5 @@ multyscale.egg-info/
 
 docs/_build/
 test/odog_MATLAB.mat
+
+docs/reference/_api/

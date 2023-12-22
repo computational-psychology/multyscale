@@ -1,2 +1,0 @@
-Modeling brightness perception
-===============================
