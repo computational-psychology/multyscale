@@ -10,26 +10,27 @@ for implementing multiscale spatial filtering models of early vision
 ::::{grid} 2
 :gutter: 3
 
-:::{grid-item-card} Get started
-:link: getting_started/getting_started
+:::{grid-item-card} Quickstart
+:link: quickstart/quickstart
 :link-type: doc
 :text-align: center
 🏃
 ^^^
 
 Install `multyscale`
-and follow an introductory tutorial
+and get started,
+if you're already familiar with multiscale filtering
 :::
 
 :::{grid-item-card} Learn more
-:link: topic_guides/topic_guides
+:link: overview/overview
 :link-type: doc
 :text-align: center
 🧑‍🏫
 ^^^
 
-Learn more about design decisions
-and particular conventions and topics within `multyscale`
+Learn more about multiscale spatial filtering,
+and how `multyscale` implements these ideas
 :::
 
 :::{grid-item-card} Reference

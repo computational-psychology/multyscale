@@ -4,17 +4,33 @@
 format: jb-book
 root: index
 parts:
-  - caption: Getting started with multyscale
+  - caption: Quickstart with `multyscale`
+    numbered: False
     chapters:
-    - file: getting_started/installation
-    - file: getting_started/getting_started
-    - file: howtos/howtos
-  - caption: Topic guides
+    - file: quickstart/installation
+    - file: quickstart/quickstart
+  - caption: Overiew
     chapters:
+    - file: topic_guides/overview
     - file: topic_guides/history
-    # - file: topic_guides/normalization_ODOG
-    # - file: topic_guides/normalization_LODOG
-    # - file: topic_guides/normalization_FLODOG
+  - caption: Filtering
+    numbered: True
+    chapters:
+    - file: filtering/filters
+    - file: filtering/multiscale
+    - file: filtering/filterbanks
+  - caption: Normalization
+    numbered: True
+    chapters:
+    - file: normalization/normalization_ODOG
+    - file: normalization/normalization_LODOG
+      sections:
+      - file: normalization/explore_LODOG_parameter
+    - file: normalization/normalization_FLODOG
+      sections:
+      - file: normalization/explore_FLODOG_parameters
+  # - caption: Decoding
+  #   numbered: False
   - caption: Reference
     chapters:
     - file: reference/api.md

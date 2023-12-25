@@ -9,6 +9,7 @@ logo: logo.png
 # See https://jupyterbook.org/content/execute.html
 execute:
   execute_notebooks: force
+  timeout: 300
 
 # Define the name of the latex output file for PDF builds
 #latex:
@@ -44,6 +45,10 @@ sphinx:
     - hoverxref.extension
 
   config:
+    nb_custom_formats:
+        .py:
+          - jupytext.reads
+          - fmt: py:percent
     exclude_patterns: ['_build', '_templates']
     suppress_warnings: ["etoc.toctree"]
     #autosummary_generate: True      # autosummary generates module-level .rst files?
