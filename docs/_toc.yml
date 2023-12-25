@@ -1,0 +1,40 @@
+# Table of contents
+# Learn more at https://jupyterbook.org/customize/toc.html
+
+format: jb-book
+root: index
+parts:
+  - caption: Quickstart with `multyscale`
+    numbered: False
+    chapters:
+    - file: quickstart/installation
+    - file: quickstart/quickstart
+  - caption: Overiew
+    chapters:
+    - file: topic_guides/overview
+    - file: topic_guides/history
+  - caption: Filtering
+    numbered: True
+    chapters:
+    - file: filtering/filters
+    - file: filtering/multiscale
+    - file: filtering/filterbanks
+  - caption: Normalization
+    numbered: True
+    chapters:
+    - file: normalization/normalization_ODOG
+    - file: normalization/normalization_LODOG
+      sections:
+      - file: normalization/explore_LODOG_parameter
+    - file: normalization/normalization_FLODOG
+      sections:
+      - file: normalization/explore_FLODOG_parameters
+  # - caption: Decoding
+  #   numbered: False
+  - caption: Reference
+    chapters:
+    - file: reference/api.md
+  - caption: Get in touch
+    chapters:
+    - file: contributing/get_in_touch
+    - file: contributing/contribute
