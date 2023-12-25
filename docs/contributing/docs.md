@@ -6,12 +6,6 @@ and consists of a collection of Markdown (`.md`) files,
 specifically in the [MyST Markdown](https://jupyterbook.org/en/stable/content/myst.html) flavor
 (as well as some ReStructured Text).
 
-The documentation is generally organized along [The Documentation System](https://documentation.divio.com/),
-consisting of the following categories:
-- learning-oriented tutorials, under <project:getting_started/getting_started>
-- understanding-oriented <project:topic_guides/topic_guides>
-- information-oriented <project:reference/reference>
-
 
 ## Building the documentation
 `multyscale`'s documentation is build using [Jupyter Book](https://jupyterbook.org/en/stable/intro.html)
@@ -24,13 +18,25 @@ which will then provide an output message on how to view the locally-built docum
 
 ## Executable content
 Some pages are pure (MyST) Markdown files;
-others (e.g. the tutorials) are executable notebooks, in the same MyST Markdown format.
-These MyST Notebooks can contain both Markdown syntax,
+others (e.g. the tutorials) are executable notebooks,
+either in the same MyST format,
+or in `.py` Python files.
+Both of these are automatically executed and converted
+to Jupyter Notebook style documents
+using [JupyText](https://jupytext.readthedocs.io/en/latest/).
+
+The MyST Notebooks can contain both Markdown syntax,
 as well as `code-cell` blocks which are executed during the build
 and their output is "woven" into the resulting page.
-These MyST Notebooks have a YAML frontmatter
-directing [JupyText](https://jupytext.readthedocs.io/en/latest/)
-how to convert them.
+They also have a YAML frontmatter specifying how they should be converted.
+
+The `.py`-files have a similar structure,
+although here all cells are specified with the 
+["percent format"](https://jupytext.readthedocs.io/en/latest/formats-scripts.html#the-percent-format)
+`# %%` demarking the beginning of a new cell.
+Markdown cells starting with `# %% [markdown]` will be interpreted entirely
+as containing only markdown, no executable code.
+
 
 ## Contributing back to `multyscale`
 
