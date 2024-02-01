@@ -40,7 +40,7 @@ def normalizers(multioutput: np.ndarray, normalization_weights: np.ndarray) -> n
     return norms
 
 
-def norm_coeff(normalizer: np.ndarray, spatial_kernel: np.ndarray) -> np.ndarray:
+def norm_coeff(normalizer: np.ndarray, spatial_kernel: np.ndarray, eps=0.0) -> np.ndarray:
     """Construct normalization coefficient: denominator for divisive normalization
 
     Parameters
@@ -49,6 +49,8 @@ def norm_coeff(normalizer: np.ndarray, spatial_kernel: np.ndarray) -> np.ndarray
         single 2D normalizer image; weighted combination of all filter outputs
     spatial_kernel : numpy.ndarray
         single kernel to spatially average (2D; over x,y) the normalizer
+    eps : float, optional
+        precision offset, used to avoid square-root of negative numbers, by default 0.0
 
     Returns
     -------
@@ -57,11 +59,13 @@ def norm_coeff(normalizer: np.ndarray, spatial_kernel: np.ndarray) -> np.ndarray
     """
     norm = normalizer**2
     spatial_average = filters.apply(norm, spatial_kernel, padval=0)
-    coeff = np.sqrt(spatial_average)
+    coeff = np.sqrt(spatial_average + eps)
     return coeff
 
 
-def divisive_normalization(filter_output: np.ndarray, norm_coeff: np.ndarray) -> np.ndarray:
+def divisive_normalization(
+    filter_output: np.ndarray, norm_coeff: np.ndarray, eps=0.0
+) -> np.ndarray:
     """Apply divisive normalization to a single filter output
 
     Parameters
@@ -70,13 +74,15 @@ def divisive_normalization(filter_output: np.ndarray, norm_coeff: np.ndarray) ->
         output from a single filter, 2D of shape (x,y)
     norm_coeff : np.ndarray
         single normalization coefficient: denominator for divisive normalization
+    eps : float, optional
+        precision offset, used to avoid DivideByZero errors, by default 0.0
 
     Returns
     -------
     np.ndarray
         normalized filter output, 2D of shape (x, y)
     """
-    return filter_output / norm_coeff
+    return filter_output / (norm_coeff + eps)
 
 
 def spatial_kernel_globalmean(shape: Sequence[int]) -> np.ndarray:
