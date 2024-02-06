@@ -1,45 +1,107 @@
 # %% [markdown]
 # # Generalized -ODOG normalization
-# Here we introduce a generalized way of formulating the normalization step of the -ODOG family of models,
-# such that the F-, L-, and ODOG models differ only in parameterization of this step,
-# and show that this formulation is numerically equivalent to the original formulation.
+# Here we introduce a generalized formulation of the normalization step
+# of the -ODOG family of models.
+# In this generalized formulation,
+# the F-, L-, and ODOG models differ only in parameterization of this step.
+# We also show that this formulation is numerically equivalent to the original formulation.
+# This is pointed to, and inspired by, a note and Figure 4e
+# in Robinson, Hammon & de Sa (2007)
 
-# %%
+# %% [markdown]
+# ## Generalizing normalization steps
+# Generally, the -ODOG normalization step consists of three parts:
+#
+# 1. The _normalizing coefficients_: weighted combinations of all filter outputs
+# 2. Energy-calculating (as spatial averaging) of the normalizing coefficients
+# 3. Divisive normalization, where a filter output is divided by the energy (2)
+#    of its normalizing coefficient (1)
+#
+# However, the different (F)(L)ODOG models differ in their exact implementation,
+# particularly in steps (1) and (2).
+# Initially, these differences may seem structural,
+# different models using different calculations.
+# Yet, as we show here, these can be expressed as parametric differences:
+# the same structural components for each step,
+# but with different parameter values.
+#
+# `multyscale` thus implements a _generalized_ version of the -ODOG normalization,
+# such that the individual models are different parameterizations of this generalization.
+# This formulation is intriguing because
+# it exposes the possibility of other parameter values,
+# but also because other forms of normalization
+# (from other models of early vision)
+# may map onto this or an even more generalized version.
+
+# %% Setup
 # Third party libraries
+import matplotlib.pyplot as plt
 import numpy as np
-from PIL import Image
 
 # Import local module
 import multyscale
 
 # %% [markdown]
 # ## Frontend
-
-# %%
-# %% Load example stimulus
-stimulus = np.asarray(Image.open("example_stimulus.png").convert("L"))
-
-# %% Parameters of image
-# visual extent, same convention as pyplot:
-visextent = (-16, 16, -16, 16)
-
-# %%
-ODOG = multyscale.models.ODOG_RHS2007(shape=stimulus.shape, visextent=visextent)
-
-# %%
-# Frontend filterbank of ODOG implementation by Robinson et al. (2007)
-O, S = ODOG.bank.filters.shape[:2]
-
-# %%
-# Filter the example stimulus
-filters_output = ODOG.bank.apply(stimulus)
-
-# %%
-# Weight individual filter(outputs) according to spatial size (frequency)
-filters_output = ODOG.weight_outputs(filters_output)
+# The three models differ in their normalization step,
+# but share the same filterbank frontend,
+# so it's only necessary to apply this bank
+# (and weight the filteroutputs)
+# once.
 
 # %% [markdown]
-# This preamble defines a filterbank output which is not already normalized by any function.
+# The example stimulus used for this exploration
+# is a version of White's (1979) classic illusion,
+# as also used by Robinson, Hammon, & de Sa (2007) as `WE_thick`.
+#
+# This stimulus is provided here
+# as an NumPy `.npy` file,
+# so it can be loaded in directly as a NumPy ndarray.
+#
+# The image of $1024 \times 1024$ pixels represent $32° \times 32°$ of the visual field;
+# if centered, the visual extent of this stimulus subtends
+# from $-16°$ on the left, to $16°$ on the right,
+# and from $-16°$ on top, to $16°$ on the bottom.
+
+# %% Load example stimulus
+stimulus = np.load("example_stimulus.npy")
+
+# visual extent, in degrees visual angle,
+# same convention as pyplot (left, right, top, bottom):
+#
+# NOTE that Robinson, Hammon, & de Sa (2007) actually implement
+# a visual extent slightly smaller: (1023/32)
+visextent = tuple(np.asarray((-0.5, 0.5, -0.5, 0.5)) * (1023 / 32))
+
+# Visualise
+plt.subplot(1, 2, 1)
+plt.imshow(stimulus, cmap="gray", extent=visextent)
+plt.axhline(y=0, color="black", dashes=(1, 1))
+plt.subplot(1, 2, 2)
+plt.plot(
+    np.linspace(visextent[2], visextent[3], stimulus.shape[1])[256:768],
+    stimulus[512, 256:768],
+    color="black",
+)
+plt.show()
+
+# %% [markdown]
+# In the stimulus image on the left, the left gray patch appears brighter than the right gray patch.
+# On the right, the pixel intensity/gray scale values along the horizontal cut
+# (indicated by the dashed line in the image) are shown.
+# These reveal that, in fact, the two gray patches are identical in their physical intensity.
+
+# %% Initialize models
+ODOG = multyscale.models.ODOG_RHS2007(shape=stimulus.shape, visextent=visextent)
+LODOG = multyscale.models.LODOG_RHS2007(shape=stimulus.shape, visextent=visextent)
+FLODOG = multyscale.models.FLODOG_RHS2007(shape=stimulus.shape, visextent=visextent)
+assert np.array_equal(LODOG.bank.filters, ODOG.bank.filters)
+assert np.array_equal(FLODOG.bank.filters, LODOG.bank.filters)
+
+# %% Apply filterbank
+# And weight outputs
+filters_output = FLODOG.bank.apply(stimulus)
+filters_output = FLODOG.weight_outputs(filters_output)
 
 # %% [markdown]
 # ## Normalization steps
