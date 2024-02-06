@@ -104,7 +104,48 @@ filters_output = FLODOG.bank.apply(stimulus)
 filters_output = FLODOG.weight_outputs(filters_output)
 
 # %% [markdown]
-# ## Normalization steps
+# ## Normalization
+# Generally, the -ODOG normalization step consists of three parts:
+#
+# 1. The _normalizing coefficients_: weighted combinations of all filter outputs
+# 2. Energy-calculating (as spatial averaging) of the normalizing coefficients
+# 3. Divisive normalization, where a filter output is divided by the energy (2)
+#    of its normalizing coefficient (1)
+#
+# This can be formalized as:
+#
+# 1. $ n_{o, s, y, x}  := w_{o, s} \cdot \mathbf{F} $, where:
+#   - $n_{o, s, y, x}$ is a pixel in the _normalizing coefficient_ for filter $o, s$.
+#   - $\mathbf{F}$ is the whole set of filteroutputs,
+#     and each f_{o, s, y, x} is a specific pixel ($y, x$)
+#     in the output of filter with specific orientation and spatial scale ($o, s$).
+#     Thus, $\mathbf{F}$ is a 4D tensor ($O, S, Y, X$)
+#   - $\mathbf{w}$ is a set of interaction weights, indicating for each $(o, s)$ filter
+#     how all other $O, S$ filters combine.
+#     Thus, this is a 4D tensor ($O, S, O, S$).
+#   - $\cdot$ is a tensor dot-product operation
+#
+# 2. $ e_{o, s, y, x}  := \sqrt{\mathrm{avg_{xy}}(n_{o, s}^2)} $, where:
+#   - $e_{o, s, y, x} is a pixel in the _energy estimate_ for filter $o, s$
+#   - $\mathrm{avg_{xy}}$ is a spatial averaging function,
+#     taking some average over pixels ($X, Y$) in the _normalizing coefficient_ $n_{o, s}$.
+#
+# 3. $ f'_{o, s, y, x} := \frac{f_{o, s, y, x}}{e_{o, s, y, x}} $, where:
+#   - $\mathbf{F'}$ is the normalized set of filteroutputs;
+#     a 4D tensor of same dimensions and size as $\mathbf{F}$
+#
+# Combined, this gives:
+# $$
+# f'_{o, s, y, x} :=
+# \frac{f_{o, s, y, x}}
+# {\sqrt{\mathrm{avg_{xy}}(
+# (\mathbf{w}\cdot\mathbf{F})^2
+# )}}
+# $$
+#
+# All three (F)(L)ODOG models can be expressed in this form,
+# by changing the implementation of parts (1) and (2), specifically.
+
 
 # %% [markdown]
 # ### ODOG
@@ -303,48 +344,9 @@ for o, s in np.ndindex(filters_output.shape[:2]):
 
 assert np.allclose(normed, ODOG_outputs)
 
-# %% [markdown]
-# ## Generalization
 
 # %% [markdown]
-# The -ODOG normalization step can now generally be formulated as:
-# $$ f'_{o',s'} =
-# \frac{f_{o',s'}}
-# {\sqrt{\mathbf{A}*(\sum_{o=1}^{O}\sum_{s=1}^{S} {w_{o',s',o,s} f_{o,s,x,y})^2}}}
-# $$
-# where
-# $$
-# w_{o', s', o, s} =
-# \begin{cases}
-#       1 & o = o' & (L)ODOG  \\
-#       G(\sigma, s', s) & o = o' & FLODOG \\
-#       0 & else
-# \end{cases}
-# $$
-# and
-# $$
-# \mathbf{A} =
-# \begin{cases}
-#       \frac{1}{XY} & ODOG  \\
-#       G(\sigma) & LODOG \\
-#       G(\sigma * s') & FLODOG
-# \end{cases}
-# $$
-
-# %% [markdown]
-# This identifies two parts in which the three models differ,
-# which we name as follows:
-# - the _normalization weights_ $\mathbf{W}$
-# - the _spatial averaging kernel_ $\mathbf{A}$
-#
-# These are both featured in the _normalization coefficient_
-# that is the denominator of the _divisive normalization_ function.
-
-# %% [markdown]
-#
-# An implementation of this formulation can be found here:
-
-
+# ## Testing
 # %%
 def divisive_normalization(filter_output, norm_coeff):
     return filter_output / norm_coeff
@@ -366,9 +368,6 @@ def spatial_kernel_LODOG(x, y, sigmas=[0, 0]):
     kernel /= kernel.sum()
     return kernel
 
-
-# %% [markdown]
-# ## Testing
 
 # %% [markdown]
 # ### Unit tests
