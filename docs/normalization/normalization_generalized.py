@@ -429,22 +429,69 @@ assert np.allclose(ODOG_outputs, norm_i_outputs)
 
 
 # %% [markdown]
-# ### Difference(s)
-# The difference between (F)LODOG and ODOG normalization is purely in the denominator $\mathbf{\sqrt{M}}$:
+# ### Localized spatial averaging
+# # Instead of the global image mean,
+# the (F)LODOG model uses a Gaussian window $G$ of some with $\sigma$
+# to average over pixels,
+# giving the _local_ (estimate of) energy:
+#
+# $$ e_\mathrm{local}(n_{o',s'},\sigma) = \sqrt{G(\sigma) * (n_{o',s',x,y})^2}$$
+#
+# Thus, difference between (F)LODOG and ODOG normalization is purely in the denominator $e$:
 # $$
 # \begin{aligned}
-# ODOG: \mathbf{M} &= \frac{1}{XY}\sum_{y=1}^{Y} \sum_{x=1}^{X} n_{o',s'}^2 \\
+# ODOG: e &= \sqrt{\frac{1}{YX}\sum_{y=1}^{Y} \sum_{x=1}^{X} n_{o',s'}^2} \\
 #
-# (F)LODOG: \mathbf{M} &= G(\sigma) * n_{o',s'}^2
+# (F)LODOG: e &= \sqrt{G(\sigma) * n_{o',s',x,y}^2}
 # \end{aligned}
 # $$
 
-# %% [markdown]
-# For ODOG and LODOG, the weights $\mathbf{W}$ are identical,
-# and therefore so are the normalizer images $\mathbf{N}$.
+# %% Spatial Gaussian
+sigmas = LODOG.window_sigmas
+G = multyscale.normalization.spatial_avg_windows_gaussian(LODOG.bank.x, LODOG.bank.y, sigmas)
 
-# %%
-assert np.allclose(ODOG.normalizers(filters_output), LODOG.normalizers(filters_output))
+# %% [markdown]
+# Applying this Gaussian window gives the _local_ (estimate of) of energy
+
+# %% Local RMS
+normalization_local_energy = np.square(normalizing_coefficients.copy())
+for o, s in np.ndindex(normalizing_coefficients.shape[:2]):
+    normalization_local_energy[o, s] = multyscale.filters.apply(
+        G[o, s, :], normalization_local_energy[o, s], padval=0
+    )
+
+normalization_local_energy = (
+    np.sqrt(normalization_local_energy + 1e-6) + 1e-6
+)  # minor offset to avoid negatives/0's
+
+assert np.array_equal(normalization_local_energy, LODOG.normalizers_to_RMS(normalizing_coefficients))
+
+# Visualize each local RMS
+fig, axs = plt.subplots(*normalization_local_energy.shape[:2], sharex="all", sharey="all")
+for o, s in np.ndindex(normalization_local_energy.shape[:2]):
+    axs[o, s].imshow(normalization_local_energy[o, s], cmap="coolwarm", extent=visextent)
+fig.supxlabel("Spatial scale/freq. $s'$")
+fig.supylabel("Orientation $o'$")
+plt.show()
+
+# %% [markdown]
+# Since these local energy estimates are not the same across the "image",
+# here expressing the estimates as 2D matrices is essential.
+# Therefore, it makes sense to also do this for the base ODOG model above,
+# to make the comparison clearer.
+
+# %% Divisive normalization
+# Since the local energies tensor is the same (O, S, X, Y) shape as the filter outputs
+# we can simply divide
+LODOG_outputs = filters_output / normalization_local_energy
+
+# Visualize each normalized f'_{o',s'}
+fig, axs = plt.subplots(*LODOG_outputs.shape[:2], sharex="all", sharey="all")
+for o, s in np.ndindex(LODOG_outputs.shape[:2]):
+    axs[o, s].imshow(LODOG_outputs[o, s], cmap="coolwarm", extent=visextent)
+fig.supxlabel("Spatial scale/freq. $s'$")
+fig.supylabel("Orientation $o'$")
+plt.show()
 
 # %% [markdown]
 # ### Implement global image averaging as a spatial filter
@@ -452,7 +499,7 @@ assert np.allclose(ODOG.normalizers(filters_output), LODOG.normalizers(filters_o
 # %% [markdown]
 # The question then is whether global averaging
 # $$
-# \mathbf{M} = \frac{1}{XY}\sum_{y=1}^{Y}\sum_{x=1}^{X} ...
+# \frac{1}{YX}\sum_{y=1}^{Y}\sum_{x=1}^{X} ...
 # $$
 # can be reformulated as a convolution with 2D kernel
 # $$
@@ -463,7 +510,7 @@ assert np.allclose(ODOG.normalizers(filters_output), LODOG.normalizers(filters_o
 # and this sum is repeated for centering the filter
 # on each pixel in the input image.
 # If we can construct a kernel $\mathbf{A}$ ensures that for every pixel
-# it weights all pixels in the input image by $\frac{1}{XY}$,
+# it weights all pixels in the input image by $\frac{1}{YX}$,
 # then the output of the convolution is simply the global image average.
 
 # %%
@@ -485,7 +532,7 @@ assert np.allclose(mean_filtered, img.mean())
 # - if the kernel were the same size as the input image,
 # then some pixels on the _other_ edge of the image
 # will no longer fall in our image.
-# Thus the spatial kernel $\mathbf{A}$ has $(2X,2Y)$ entries
+# Thus the spatial kernel $\mathbf{A}$ has $(2Y,2X)$ entries
 # to assure that each pixel will take its average from the entire image.
 # - what to do at the edges, to ensure that the filter has values to filter?
 # We pad all the edges with the value $0$,
@@ -494,25 +541,25 @@ assert np.allclose(mean_filtered, img.mean())
 # %% [markdown]
 # The spatial averaging step in the ODOG normalization then becomes:
 # $$
-# \mathbf{M} = \mathbf{A} * (...)
+# \mathbf{A} * (...)
 # $$
-# and thus the RMS step:
+# and thus the energy step:
 # $$
-# \sqrt{\mathbf{M}} = \sqrt{\mathbf{A} * n_{o',s'}^2}
+# e = \sqrt{\mathbf{A} * n_{o',s'}^2}
 # $$
 
-# %%
+# %% Global image averaging as filter
 A = np.ones((1024 * 2, 1024 * 2)) / 1024**2
 
-# calculate RMS using the kernel
-i_RMS2 = np.ndarray(filters_output.shape)
+# calculate energy using the kernel
+ODOG_energies_i2 = np.ndarray(filters_output.shape)
 for o, s in np.ndindex(filters_output.shape[:2]):
     norm = ODOG_normalizers[o, s, ...] ** 2
     mean = multyscale.filters.apply(norm, A, padval=0)
-    i_RMS2[o, s] = np.sqrt(mean)
+    ODOG_energies_i2[o, s] = np.sqrt(mean)
 
 # this replicates the just verified normalizing image
-assert np.allclose(i_RMS2, i_RMS)
+assert np.allclose(ODOG_energies_i2, ODOG_energies_i)
 
 # %% [markdown]
 # Thus, we can now reformulate the ODOG normalization as:
