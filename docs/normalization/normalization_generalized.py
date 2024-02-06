@@ -336,90 +336,97 @@ plt.show()
 # `multyscale` makes it easy and straightforward to implement these different weights,
 # as well as to explore even further with different weights.
 
+# %% [markdown]
+# ## Energy estimate through (localized) averaging
+# The second step in -ODOG normalization,
+# is to use an energy-estimate of, rather than the raw, normalizing coefficients.
+# Rather than normalizing by this weighted sum of all filter outputs at each pixel location,
+# instead the -ODOG models normalize by
+# the _energy_ of the normalizing coefficient.
+# Energy here is expressed as the (spatial) root-mean-square of the signal.
+#
+# 1. Square each ($X \times Y = 1024 \times 1024$) pixel of the normalizing coefficient $n_{o, s}$
+# 2. Average \mathrm{avg_{yx}} across pixels
+# 3. Square-root of this average
+#
+# $$ e_{o, s, y, x}  := \sqrt{\mathrm{avg_{yx}}(n_{o, s}^2)} $$
+#
+# NOTE: this is the _quadratic mean_ of the normalizing coefficient.
 
 # %% [markdown]
-# ### ODOG
-# The ODOG normalization step can be formulated as:
-# $$
-# f'_{o',s',x,y} = \frac{f_{o',s',x,y}}
-# {\sqrt{\frac{1}{XY}\sum_{y=1}^{Y} \sum_{x=1}^{X}n_{o',s'}^2}}
-# $$
-# where $w_{o', s', o, s} =   \begin{cases}
-#       1 & o = o'  \\
-#       0 & else
-#    \end{cases}$
-# and
-# $$
-# n_{o',s'} = \sum_{o=1}^{O}\sum_{s=1}^{S} {w_{o',s',o,s} f_{o,s,x,y}}
-# $$
+# The base ODOG normalization uses the _global image mean_ as the spatial average:
+#
+# $$ \mathrm{avg_{yx}}(n_{o, s, x, y}) = \frac{1}{YX} n_{o, s, x, y} $$
+#
+# This results in a single energy estimate for each $(o, s)$.
 
-# %%
-ODOG_outputs = ODOG.normalize_outputs(filters_output)
-
-# %% [markdown]
-# #### Can also divide by 2D "image" arrays
-# In the original formulation of the ODOG normalization step,
-# the denominator is a single scalar
-# -- the root mean square of the normalizer image $n_{o',s'}$
-
-# %%
+# %% Global image RMS
 ODOG_normalizers = ODOG.normalizers(filters_output)
-ODOG_RMS = ODOG.normalizers_to_RMS(ODOG_normalizers)
-print(ODOG_RMS.shape)
+ODOG_energies = ODOG.normalizers_to_RMS(ODOG_normalizers)
+print(ODOG_energies.shape)
+
+# Visualise
+plt.pcolor(ODOG_energies[::-1, :], cmap="coolwarm", edgecolors="k", linewidths=1)
+plt.ylabel("Orientation $o'$")
+plt.xlabel("Spatial scale $s'$")
+plt.show()
 
 # %% [markdown]
+# These energy estimates are then used as the denominator in the divisive normalization step (3)
+
+# %% Divisive normalization
+ODOG_outputs = np.ndarray(filters_output.shape)
+for o, s in np.ndindex(filters_output.shape[:2]):
+    f = filters_output[o, s, ...]
+    n = ODOG_energies[o, s]
+    ODOG_outputs[o, s] = f / n
+
+# Visualize each normalized f'_{o',s'}
+fig, axs = plt.subplots(*ODOG_outputs.shape[:2], sharex="all", sharey="all")
+for o, s in np.ndindex(ODOG_outputs.shape[:2]):
+    axs[o, s].imshow(
+        ODOG_outputs[o, s],
+        cmap="coolwarm",
+        extent=visextent,
+        vmin=ODOG_outputs.min(),
+        vmax=ODOG_outputs.max(),
+    )
+fig.supxlabel("Spatial scale/freq. $s'$")
+fig.supylabel("Orientation $o'$")
+plt.show()
+
+
+# %% [markdown]
+# ### Energy estimates as matrices ("images")
 # However, it makes conceptual more sense
-# to have a denominator that is the same 2 dimensions
+# to have a denominator that is the same dimensions (Y, X)
 # as the filter that is being normalized.
 
-# %%
-i_RMS = np.tile(ODOG_RMS.reshape(6, 7, 1, 1), (1, 1, 1024, 1024))
-
-norm_i_outputs = np.ndarray(filters_output.shape)
-for o, s in np.ndindex(filters_output.shape[:2]):
-    norm_i_outputs[o, s] = filters_output[o, s, ...] / i_RMS[o, s]
-
-assert np.allclose(ODOG_outputs, norm_i_outputs)
+# %% Energies as tensor
+ODOG_energies_i = np.tile(ODOG_energies.reshape(6, 7, 1, 1), (1, 1, 1024, 1024))
+print(ODOG_energies_i.shape)
 
 # %% [markdown]
 # This is equivalent to implementing the averaging in the denominator
-# as a multiplication with a matrix where each component is the RMS of the normalizer image.
+# as a multiplication with a matrix where each component is the energy of the normalizer image.
 #
 # $$
-# f'_{o',s'} = \frac{f_{o',s'}}{\sqrt{\mathbf{M}}}
+# f'_{o',s'} = \frac{f_{o',s'}}{\mathbf{E}}
 # $$
 # where
 # $$
-# m_{x,y} = \frac{1}{XY}\sum_{y=1}^{Y} \sum_{x=1}^{X}n_{o',s'}^2
+# e_{o', s', y,x} = \sqrt{\frac{1}{YX}\sum_{y=1}^{Y} \sum_{x=1}^{X}n_{o',s'}^2}
 # $$
 #
 # This changes the dimensionality of the denominator,
 # but not actually the result of the division,
 # since image-by-image division is executed pixel-wise.
 
-# %% [markdown]
-# ### (F)LODOG
-# The (F)LODOG normalization step can be formulated as:
-# $$
-# f'_{o',s'} = \frac{f_{o',s'}}
-# {\sqrt{G(\sigma) * (\sum_{o=1}^{O}\sum_{s=1}^{S} w_{o',s',o,s}f_{o,s})^2}}
-# $$
-# where $w_{o', s', o, s} =   \begin{cases}
-#       1 & o = o'  \\
-#       0 & else
-#    \end{cases}$
-# and $G({\sigma}) * ...$ means convolution with a 2D ($X,Y$) kernel
-# -- in this case, a Gaussian with standard deviation $\sigma$ in both directions.
-#
-# NOTE: FLODOG and LODOG differ just in the _values_ for $\sigma$ and $\mathbf{W}$
+# %% Divisive normalization
+norm_i_outputs = filters_output / ODOG_energies_i
 
-# %%
-LODOG = multyscale.models.LODOG_RHS2007(shape=stimulus.shape, visextent=visextent)
-FLODOG = multyscale.models.FLODOG_RHS2007(shape=stimulus.shape, visextent=visextent)
+assert np.allclose(ODOG_outputs, norm_i_outputs)
 
-# %%
-LODOG_outputs = LODOG.normalize_outputs(filters_output)
-FLODOG_outputs = FLODOG.normalize_outputs(filters_output)
 
 # %% [markdown]
 # ### Difference(s)
