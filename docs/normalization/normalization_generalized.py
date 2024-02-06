@@ -562,142 +562,86 @@ for o, s in np.ndindex(filters_output.shape[:2]):
 assert np.allclose(ODOG_energies_i2, ODOG_energies_i)
 
 # %% [markdown]
+# ### Summary
 # Thus, we can now reformulate the ODOG normalization as:
 # $$
 # f'_{o',s'} = \frac{f_{o',s'}}
-# {\sqrt{\mathbf{A} * (\sum_{o=1}^{O}\sum_{s=1}^{S} w_{o',s',o,s}f_{o,s})^2}}
+# {\sqrt{\mathbf{A} * (\mathbf{w} \cdot \mathbf{F})^2}}
 # $$
-# where $w_{o', s', o, s} =   \begin{cases}
-#       1 & o = o'  \\
-#       0 & else
-#    \end{cases}$
-# and $\mathbf{A} * ...$ means the convolution with our 2D ($X,Y$) kernel
-# that implements global averaging.
-
-# %%
-A = np.ones((1024 * 2, 1024 * 2)) / 1024**2
-
-normed = np.ndarray(filters_output.shape)
-for o, s in np.ndindex(filters_output.shape[:2]):
-    norm = ODOG_normalizers[o, s, ...] ** 2
-    mean = multyscale.filters.apply(norm, A, padval=0)
-    normed[o, s] = filters_output[
-        o,
-        s,
-    ] / np.sqrt(mean)
-
-assert np.allclose(normed, ODOG_outputs)
-
+#
+# where:
+#  - $w_{o', s', o, s} =   \begin{cases}
+#      1 & o = o'  \\
+#      0 & else
+#     \end{cases}$
+#  - $\cdot$ is a tensor dot-product
+#  - $\mathbf{A} * ...$ means the convolution with our 2D ($Y,X$) kernel
+#    that implements global averaging.
+#
 
 # %% [markdown]
-# ## Testing
+# ## Generalized formulation
+#
+# All three (F)(L)ODOG can thus be expressed as parameteric variations
+# of the same overall divisive normalization structure:
+# $$
+# f'_{o, s, y, x} :=
+# \frac{f_{o, s, y, x}}
+# {\sqrt{
+#  \mathbf{A} *
+#  (\mathbf{w} \cdot \mathbf{F})^2
+#  }
+# }
+# $$
+#
+# Both $\mathbf{w}$ and $\mathbf{A}$ depend on the specific model:
+# - $\mathbf{w}$ is the same for LODOG and ODOG, where
+#    $$ w_{o', s', o, s} =   \begin{cases}
+#      1 & o = o'  \\
+#      0 & else
+#     \end{cases} $$
+#   For FLODOG, the $w_{o', s'}$ also depends on the relative index of $(s', s)$
+# - $\mathbf{A}$ is Gaussian filter $\mathbf{G(\sigma)}$ for LODOG and FLODOG,
+#   where $\sigma = k$ and $\sigma = ks$, respectively.
+#   For ODOG, $\mathbf{A}$ is a (larger) constant filter.
+#   However, this could even be understood as an infinite-width Gaussian $\mathbf{G(\infty)}$
+
+# %% [markdown]
+# ### Pseudo-implementation
+
 # %%
-def divisive_normalization(filter_output, norm_coeff):
-    return filter_output / norm_coeff
+def divisive_normalization(filter_output, norm_energy):
+    return filter_output / norm_energy
 
 
-def norm_coeff(normalizer, spatial_kernel):
-    norm = normalizer**2
+def norm_energy(norm_coeff, spatial_kernel):
+    norm = norm_coeff**2
     spatial_average = multyscale.filters.apply(norm, spatial_kernel, padval=0)
-    coeff = np.sqrt(spatial_average + 1e-6)
-    return coeff
+    energy = np.sqrt(spatial_average)
+    return energy
 
 
-def spatial_kernel_ODOG(x, y):
-    return np.ones([dim * 2 for dim in x.shape]) / np.prod(x.shape)
+def norm_coeff(filter_outputs, normalization_weights):
+    coeffs = np.zeros_like(filter_outputs)
+    for o, s in np.ndindex(filter_outputs.shape[:2]):
+        weights = normalization_weights[o, s]
+
+        # Tensor dot: multiply filters_output by weights, then sum over axes [0,1]
+        coeff = np.tensordot(filter_outputs, weights, axes=([0, 1], [0, 1]))
+
+        # Accumulate
+        coeffs[o, s, ...] = coeff
+
+    return coeffs
 
 
-def spatial_kernel_LODOG(x, y, sigmas=[0, 0]):
-    kernel = multyscale.filters.gaussian2d(x, y, sigmas)
+def spatial_kernel_ODOG(shape):
+    kernel = np.ones([dim * 2 for dim in shape])
     kernel /= kernel.sum()
     return kernel
 
 
-# %% [markdown]
-# ### Unit tests
-
-# %%
-ODOG_kernel = spatial_kernel_ODOG(ODOG.bank.x, ODOG.bank.y)
-assert np.all(ODOG_kernel == A)
-
-# %%
-LODOG_kernel = spatial_kernel_LODOG(
-    ODOG.bank.x, ODOG.bank.y, sigmas=(LODOG.window_sigma, LODOG.window_sigma)
-)
-LODOG_kernels = multyscale.normalization.spatial_avg_windows_gaussian(
-    ODOG.bank.x, ODOG.bank.y, LODOG.window_sigmas
-)
-
-assert np.allclose(LODOG_kernel, LODOG_kernels[0, 0])
-
-# %%
-img = filters_output[3, 4]
-kernel = spatial_kernel_ODOG(ODOG.bank.x, ODOG.bank.y)
-mean_filtered = multyscale.filters.apply(img, A, padval=0)
-
-assert np.allclose(mean_filtered, img.mean())
-
-# %%
-coeffs = np.ndarray(filters_output.shape)
-for o, s in np.ndindex(filters_output.shape[:2]):
-    coeffs[o, s, ...] = norm_coeff(ODOG_normalizers[o, s, ...], A)
-
-assert np.allclose(coeffs, i_RMS2)
-
-# %% [markdown]
-# ### ODOG
-
-# %%
-ODOG_normalizers = ODOG.normalizers(filters_output)
-
-ODOG_outputs = ODOG.normalize_outputs(filters_output)
-
-kernel = spatial_kernel_ODOG(ODOG.bank.x, ODOG.bank.y)
-
-new_normed = np.ndarray(filters_output.shape)
-for o_prime, s_prime in np.ndindex(filters_output.shape[:2]):
-    normalizer = ODOG_normalizers[o_prime, s_prime]
-    coeff = norm_coeff(normalizer, kernel)
-    new_normed[o_prime, s_prime] = divisive_normalization(filters_output[o_prime, s_prime], coeff)
-
-assert np.allclose(new_normed, ODOG_outputs)
-
-# %% [markdown]
-# ### LODOG
-
-# %%
-ODOG_normalizers = ODOG.normalizers(filters_output)
-
-LODOG_outputs = LODOG.normalize_outputs(filters_output)
-
-kernel = spatial_kernel_LODOG(
-    ODOG.bank.x, ODOG.bank.y, sigmas=(LODOG.window_sigma, LODOG.window_sigma)
-)
-
-new_normed = np.ndarray(filters_output.shape)
-for o_prime, s_prime in np.ndindex(filters_output.shape[:2]):
-    normalizer = ODOG_normalizers[o_prime, s_prime]
-    coeff = norm_coeff(normalizer, kernel)
-    new_normed[o_prime, s_prime] = divisive_normalization(filters_output[o_prime, s_prime], coeff)
-
-assert np.allclose(new_normed, LODOG_outputs)
-
-# %% [markdown]
-# ### FLODOG
-
-# %%
-FLODOG_normalizers = FLODOG.normalizers(filters_output)
-
-FLODOG_outputs = FLODOG.normalize_outputs(filters_output)
-
-kernels = multyscale.normalization.spatial_avg_windows_gaussian(
-    ODOG.bank.x, ODOG.bank.y, FLODOG.window_sigmas
-)
-
-new_normed = np.ndarray(filters_output.shape)
-for o_prime, s_prime in np.ndindex(filters_output.shape[:2]):
-    normalizer = FLODOG_normalizers[o_prime, s_prime]
-    coeff = norm_coeff(normalizer, kernels[o_prime, s_prime]) + 1e-6
-    new_normed[o_prime, s_prime] = divisive_normalization(filters_output[o_prime, s_prime], coeff)
-
-assert np.allclose(new_normed, FLODOG_outputs)
+def spatial_kernel_LODOG(x, y, sigmas=[1.0, 1.0]):
+    kernel = multyscale.filters.gaussian2d(x, y, sigmas)
+    kernel /= kernel.sum()
+    return kernel
