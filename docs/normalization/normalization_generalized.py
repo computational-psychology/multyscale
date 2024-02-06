@@ -148,6 +148,196 @@ filters_output = FLODOG.weight_outputs(filters_output)
 
 
 # %% [markdown]
+# ## Normalizing coefficients
+# The first step in normalization is to define
+# the normalizing coefficient ($n_{o, s}$) for each filter ($f_{o, s}$).
+# This normalizing coefficient is made up of (a subset of)
+# the responses in all $\mathbf{F}$ filter outputs.
+# Thus, the tensor of normalizing coefficients $\mathbf{N}$
+# contains $O \times S$ 2D ($Y \times X$):
+# one normalizing coefficient $n_{o',s'}$ per filter $f_{o',s'}$ to normalize.
+#
+# In `multyscale`, we calculate these normalizing coefficients
+# as a tensor dot-product beween a set of weights $\mathbf{w}$
+# and all filter outputs $\mathbf{F}$.
+# The 4D tensor ($O, S, O, S$) of interaction weights $\mathbf{w}$
+# can be constructed by combined separately defined sets of weights
+# for how different orientations interact,
+# and how different spatial scale interact.
+
+# %% [markdown]
+# In all -ODOG models, filters only normalize other filters with the same orientation,
+# i.e., when $o'=o$. Thus, this forms a diagonal matrix of orientation interaction weights
+
+# %% Orientation normalization weights
+orientation_norm_weights = multyscale.normalization.orientation_norm_weights(6)
+plt.pcolor(
+    orientation_norm_weights[::-1, :], cmap="Greens", edgecolors="k", linewidths=1, vmin=0, vmax=1
+)
+plt.xlabel("Orientation $o'$")
+plt.ylabel("Orientation $o$")
+plt.show()
+
+# %% [markdown]
+# In the base ODOG model, all scales influence all (other) scales equally,
+# thus the matrix of scale interaction weights is all $1$s.
+
+# %% Scale normalization weights
+scale_norm_weights = multyscale.normalization.scale_norm_weights_equal(7)
+plt.pcolor(scale_norm_weights, cmap="Greens", edgecolors="k", linewidths=1, vmin=0, vmax=1)
+plt.xlabel("Spatial scale/freq. $s'$")
+plt.ylabel("Spatial scale/freq. $s$")
+plt.show()
+
+# %% [markdown]
+# These normalization weights along each dimension
+# are then combined into a single
+# $(O' \times S' \times O \times S)$ matrix (tensor) of normalization weights.
+#
+# This tensor $w_{o',s',o,s}$ can be produced
+# using the function `multyscale.normalization.create_normalization_weights()`
+# from the separate sets of weights for orientations and scales.
+#
+# For the example where $(o'=3, s'=4)$,
+# this means that all weights $w_{3,4,o,s}=1$ if $o==3$, regardless of $s$.
+
+# %% ODOG Normalization weights
+interaction_weights = multyscale.normalization.create_normalization_weights(
+    *filters_output.shape[:2], scale_norm_weights, orientation_norm_weights
+)
+
+# Visualize weights
+fig, axs = plt.subplots(*interaction_weights.shape[:2], sharex="all", sharey="all")
+for o, s in np.ndindex(interaction_weights.shape[:2]):
+    axs[o, s].pcolor(
+        interaction_weights[interaction_weights.shape[0] - o - 1, s],
+        cmap="Greens",
+        edgecolors="k",
+        linewidths=1,
+        vmin=0,
+        vmax=1,
+    )
+fig.supxlabel("Spatial scale/freq. $s'$")
+fig.supylabel("Orientation $o'$")
+plt.show()
+
+# %% [markdown]
+# These interaction weights then are used to combine all filter outputs $\mathbf{F}$
+# to create the normalizing coefficients $\mathbf{n}$
+
+# %% Normalizing coefficients
+normalizing_coefficients = multyscale.normalization.normalizers(filters_output, interaction_weights)
+
+# Visualize each normalizing coefficient n_{o,s}, i.e.
+# the normalizer image for each individual filter f_{o,s}
+fig, axs = plt.subplots(*normalizing_coefficients.shape[:2], sharex="all", sharey="all")
+for o, s in np.ndindex(normalizing_coefficients.shape[:2]):
+    axs[o, s].imshow(normalizing_coefficients[o, s], cmap="coolwarm", extent=visextent)
+fig.supxlabel("Spatial scale/freq. $s'$")
+fig.supylabel("Orientation $o'$")
+plt.show()
+
+# %% [markdown]
+# The LODOG model uses the same interaction weights as the base ODOG model.
+
+# %% [markdown]
+# The FLODOG model uses a different set of interaction weights.
+# Specifically, it does not weight all spatial scales equally.
+# (It does weigh the orientations in the same manner as (L)ODOG).
+# Instead of the equal weighting,
+# the FLODOG model uses a 1D Gaussian as the weights profile:
+# centered on the spatial scale of the filter being normalized
+# and dropping off as a Gaussian function of the relative index the other spatial scales.
+
+# %% Define weights
+scale_norm_weights_FLODOG = multyscale.normalization.scale_norm_weights_gaussian(7, sdmix=0.5)
+assert np.array_equal(scale_norm_weights_FLODOG, FLODOG.scale_norm_weights)
+
+# %%
+fig, axs = plt.subplots(2, 2, sharex="row", sharey="row")
+axs[0, 0].pcolor(
+    LODOG.scale_norm_weights,
+    cmap="Greens",
+    edgecolors="k",
+    linewidths=1,
+    vmin=0,
+    vmax=1,
+)
+axs[0, 0].set_ylabel("scale of filter to normalize (idx)")
+axs[0, 0].set_title("LODOG weights")
+
+axs[0, 1].pcolor(
+    FLODOG.scale_norm_weights,
+    cmap="Greens",
+    edgecolors="k",
+    linewidths=1,
+    vmin=0,
+    vmax=1,
+)
+axs[0, 1].set_xlabel("scale of filter to normalize (idx)")
+axs[0, 1].set_title("FLODOG weights")
+
+axs[1, 0].plot(LODOG.scale_norm_weights[3, :], color="black")
+axs[1, 0].set_xlabel("scale of other filter (idx)")
+axs[1, 0].set_ylabel("weight")
+
+axs[1, 1].plot(FLODOG.scale_norm_weights[3, :], color="black")
+axs[1, 1].set_xlabel("scale of other filter (idx)")
+
+plt.show()
+
+# %% [markdown]
+# Since these weights are strongly biased towards same/similar spatial scales,
+# the resulting normalizing coefficients also more strongly resemble
+# the filter outputs at these spatial scales.
+
+# %% Normalizing coefficients
+normalizing_coefficients_LODOG = LODOG.normalizers(filters_output)
+normalizing_coefficients_FLODOG = FLODOG.normalizers(filters_output)
+
+# Visualize each norm. coeff.
+vmin = min(np.min(normalizing_coefficients_LODOG), np.min(normalizing_coefficients_FLODOG))
+vmax = max(np.max(normalizing_coefficients_LODOG), np.max(normalizing_coefficients_FLODOG))
+
+fig, axs = plt.subplots(*normalizing_coefficients_LODOG.shape[:2], sharex="all", sharey="all")
+for o, s in np.ndindex(normalizing_coefficients_LODOG.shape[:2]):
+    axs[o, s].imshow(
+        normalizing_coefficients_LODOG[o, s],
+        cmap="coolwarm",
+        extent=visextent,
+        vmin=vmin,
+        vmax=vmax,
+    )
+fig.supxlabel("Spatial scale/freq. $s'$")
+fig.supylabel("Orientation $o'$")
+fig.suptitle("LODOG")
+plt.show()
+
+fig, axs = plt.subplots(*normalizing_coefficients_FLODOG.shape[:2], sharex="all", sharey="all")
+for o, s in np.ndindex(normalizing_coefficients_FLODOG.shape[:2]):
+    axs[o, s].imshow(
+        normalizing_coefficients_FLODOG[o, s],
+        cmap="coolwarm",
+        extent=visextent,
+        vmin=vmin,
+        vmax=vmax,
+    )
+fig.supxlabel("Spatial scale/freq. $s'$")
+fig.supylabel("Orientation $o'$")
+fig.suptitle("FLODOG")
+plt.show()
+
+# %% [markdown]
+# ### Summary
+# In the first step of normalization,
+# the construction of normalizing coefficients $\mathbf{n}$
+# as weighted combinations of all filter outputs $\mathbf{F}$,
+# we can express the three models as using different sets of interaction weights $\mathbf{w}$.
+# `multyscale` makes it easy and straightforward to implement these different weights,
+# as well as to explore even further with different weights.
+
+
+# %% [markdown]
 # ### ODOG
 # The ODOG normalization step can be formulated as:
 # $$
