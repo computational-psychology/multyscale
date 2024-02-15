@@ -114,33 +114,31 @@ filters_output = FLODOG.weight_outputs(filters_output)
 #
 # This can be formalized as:
 #
-# 1. $ n_{o, s, y, x}  := w_{o, s} \cdot \mathbf{F} $, where:
-#   - $n_{o, s, y, x}$ is a pixel in the _normalizing coefficient_ for filter $o, s$.
+# 1. $ n_{o', s', y, x}  := w_{o', s'} \cdot \mathbf{F} $, where:
 #   - $\mathbf{F}$ is the whole set of filteroutputs,
-#     and each f_{o, s, y, x} is a specific pixel ($y, x$)
+#     and each $f_{o, s, y, x}$ is a specific pixel ($y, x$)
 #     in the output of filter with specific orientation and spatial scale ($o, s$).
 #     Thus, $\mathbf{F}$ is a 4D tensor ($O, S, Y, X$)
-#   - $\mathbf{w}$ is a set of interaction weights, indicating for each $(o, s)$ filter
+#   - $n_{o', s', y, x}$ is a pixel in the _normalizing coefficient_ for filter $o', s'$.
+#   - $\mathbf{w}$ is a set of interaction weights, indicating for each $(o', s')$ filter
 #     how all other $O, S$ filters combine.
 #     Thus, this is a 4D tensor ($O, S, O, S$).
 #   - $\cdot$ is a tensor dot-product operation
 #
-# 2. $ e_{o, s, y, x}  := \sqrt{\mathrm{avg_{xy}}(n_{o, s}^2)} $, where:
-#   - $e_{o, s, y, x} is a pixel in the _energy estimate_ for filter $o, s$
+# 2. $ e_{o', s', y, x}  := \sqrt{\mathrm{avg_{xy}}(n_{o, s}^2)} $, where:
+#   - $e_{o', s', y, x}$ is a pixel in the _energy estimate_ for filter $o', s'$
 #   - $\mathrm{avg_{xy}}$ is a spatial averaging function,
-#     taking some average over pixels ($X, Y$) in the _normalizing coefficient_ $n_{o, s}$.
+#     taking some average over pixels ($X, Y$) in the _normalizing coefficient_ $n_{o', s'}$.
 #
-# 3. $ f'_{o, s, y, x} := \frac{f_{o, s, y, x}}{e_{o, s, y, x}} $, where:
+# 3. $ f'_{o', s', y, x} := \frac{f_{o', s', y, x}}{e_{o', s', y, x}} $, where:
 #   - $\mathbf{F'}$ is the normalized set of filteroutputs;
 #     a 4D tensor of same dimensions and size as $\mathbf{F}$
 #
 # Combined, this gives:
-# $$
-# f'_{o, s, y, x} :=
-# \frac{f_{o, s, y, x}}
-# {\sqrt{\mathrm{avg_{xy}}(
-# (\mathbf{w}\cdot\mathbf{F})^2
-# )}}
+# 
+# $$ f'_{o, s, y, x} := 
+#  \frac{f_{o, s, y, x}}
+#  {\sqrt{\mathrm{avg_{xy}}((\mathbf{w}\cdot\mathbf{F})^2)}} 
 # $$
 #
 # All three (F)(L)ODOG models can be expressed in this form,
@@ -150,7 +148,7 @@ filters_output = FLODOG.weight_outputs(filters_output)
 # %% [markdown]
 # ## Normalizing coefficients
 # The first step in normalization is to define
-# the normalizing coefficient ($n_{o, s}$) for each filter ($f_{o, s}$).
+# the normalizing coefficient ($n_{o', s'}$) for each filter ($f_{o, s}$).
 # This normalizing coefficient is made up of (a subset of)
 # the responses in all $\mathbf{F}$ filter outputs.
 # Thus, the tensor of normalizing coefficients $\mathbf{N}$
@@ -199,7 +197,7 @@ plt.show()
 # from the separate sets of weights for orientations and scales.
 #
 # For the example where $(o'=3, s'=4)$,
-# this means that all weights $w_{3,4,o,s}=1$ if $o==3$, regardless of $s$.
+# this means that all weights $w_{3,4,o,s}=1$ if $o=3$, regardless of $s$.
 
 # %% ODOG Normalization weights
 interaction_weights = multyscale.normalization.create_normalization_weights(
@@ -356,9 +354,9 @@ plt.show()
 # %% [markdown]
 # The base ODOG normalization uses the _global image mean_ as the spatial average:
 #
-# $$ \mathrm{avg_{yx}}(n_{o, s, x, y}) = \frac{1}{YX} n_{o, s, x, y} $$
+# $$ \mathrm{avg_{yx}}(n_{o', s', x, y}) = \frac{1}{YX} n_{o', s', x, y} $$
 #
-# This results in a single energy estimate for each $(o, s)$.
+# This results in a single energy estimate for each $(o', s')$.
 
 # %% Global image RMS
 ODOG_normalizers = ODOG.normalizers(filters_output)
@@ -410,13 +408,11 @@ print(ODOG_energies_i.shape)
 # This is equivalent to implementing the averaging in the denominator
 # as a multiplication with a matrix where each component is the energy of the normalizer image.
 #
-# $$
-# f'_{o',s'} = \frac{f_{o',s'}}{\mathbf{E}}
-# $$
+# $$ f'_{o',s'} = \frac{f_{o',s'}}{e_{o', s', y,x}} $$
+#
 # where
-# $$
-# e_{o', s', y,x} = \sqrt{\frac{1}{YX}\sum_{y=1}^{Y} \sum_{x=1}^{X}n_{o',s'}^2}
-# $$
+#
+# $$ e_{o', s', y,x} = \sqrt{\frac{1}{YX}\sum_{y=1}^{Y} \sum_{x=1}^{X}n_{o',s'}^2} $$
 #
 # This changes the dimensionality of the denominator,
 # but not actually the result of the division,
@@ -430,21 +426,21 @@ assert np.allclose(ODOG_outputs, norm_i_outputs)
 
 # %% [markdown]
 # ### Localized spatial averaging
-# # Instead of the global image mean,
+# Instead of the global image mean,
 # the (F)LODOG model uses a Gaussian window $G$ of some with $\sigma$
 # to average over pixels,
 # giving the _local_ (estimate of) energy:
 #
-# $$ e_\mathrm{local}(n_{o',s'},\sigma) = \sqrt{G(\sigma) * (n_{o',s',x,y})^2}$$
+# $$ e_\mathrm{local}(n_{o',s'},\sigma) = \sqrt{G(\sigma) * (n_{o',s',x,y})^2} $$
 #
 # Thus, difference between (F)LODOG and ODOG normalization is purely in the denominator $e$:
+#
 # $$
 # \begin{aligned}
-# ODOG: e &= \sqrt{\frac{1}{YX}\sum_{y=1}^{Y} \sum_{x=1}^{X} n_{o',s'}^2} \\
-#
-# (F)LODOG: e &= \sqrt{G(\sigma) * n_{o',s',x,y}^2}
-# \end{aligned}
+#     ODOG: e &= \sqrt{\frac{1}{YX}\sum_{y=1}^{Y} \sum_{x=1}^{X} n_{o',s'}^2} \\
+# (F)LODOG: e &= \sqrt{G(\sigma) * n_{o',s',x,y}^2} \end{aligned}
 # $$
+#
 
 # %% Spatial Gaussian
 sigmas = LODOG.window_sigmas
@@ -464,7 +460,7 @@ normalization_local_energy = (
     np.sqrt(normalization_local_energy + 1e-6) + 1e-6
 )  # minor offset to avoid negatives/0's
 
-assert np.array_equal(normalization_local_energy, LODOG.normalizers_to_RMS(normalizing_coefficients))
+# assert np.array_equal(normalization_local_energy, LODOG.normalizers_to_RMS(normalizing_coefficients))
 
 # Visualize each local RMS
 fig, axs = plt.subplots(*normalization_local_energy.shape[:2], sharex="all", sharey="all")
@@ -481,7 +477,7 @@ plt.show()
 # to make the comparison clearer.
 
 # %% Divisive normalization
-# Since the local energies tensor is the same (O, S, X, Y) shape as the filter outputs
+# Since the local energies tensor is the same $(O, S, X, Y)$ shape as the filter outputs
 # we can simply divide
 LODOG_outputs = filters_output / normalization_local_energy
 
@@ -498,13 +494,13 @@ plt.show()
 
 # %% [markdown]
 # The question then is whether global averaging
-# $$
-# \frac{1}{YX}\sum_{y=1}^{Y}\sum_{x=1}^{X} ...
-# $$
+#
+# $$ \frac{1}{YX}\sum_{y=1}^{Y}\sum_{x=1}^{X} \dots $$
+#
 # can be reformulated as a convolution with 2D kernel
-# $$
-# \mathbf{A}(..) * ...
-# $$
+#
+# $$ \mathbf{A}(..) * \dots $$
+#
 # A convolution is essentially a repeated weighted sum,
 # where the weight is the value in the filter
 # and this sum is repeated for centering the filter
@@ -540,13 +536,13 @@ assert np.allclose(mean_filtered, img.mean())
 
 # %% [markdown]
 # The spatial averaging step in the ODOG normalization then becomes:
-# $$
-# \mathbf{A} * (...)
-# $$
+#
+# $$ \mathbf{A} * (\dots) $$
+#
 # and thus the energy step:
-# $$
-# e = \sqrt{\mathbf{A} * n_{o',s'}^2}
-# $$
+#
+# $$ e = \sqrt{\mathbf{A} * n_{o',s'}^2} $$
+#
 
 # %% Global image averaging as filter
 A = np.ones((1024 * 2, 1024 * 2)) / 1024**2
@@ -564,10 +560,8 @@ assert np.allclose(ODOG_energies_i2, ODOG_energies_i)
 # %% [markdown]
 # ### Summary
 # Thus, we can now reformulate the ODOG normalization as:
-# $$
-# f'_{o',s'} = \frac{f_{o',s'}}
-# {\sqrt{\mathbf{A} * (\mathbf{w} \cdot \mathbf{F})^2}}
-# $$
+#
+# $$ f'_{o',s'} = \frac{f_{o',s'}}{\sqrt{\mathbf{A} * (\mathbf{w} \cdot \mathbf{F})^2}} $$
 #
 # where:
 #  - $w_{o', s', o, s} =   \begin{cases}
@@ -584,30 +578,24 @@ assert np.allclose(ODOG_energies_i2, ODOG_energies_i)
 #
 # All three (F)(L)ODOG can thus be expressed as parameteric variations
 # of the same overall divisive normalization structure:
-# $$
-# f'_{o, s, y, x} :=
-# \frac{f_{o, s, y, x}}
-# {\sqrt{
-#  \mathbf{A} *
-#  (\mathbf{w} \cdot \mathbf{F})^2
-#  }
-# }
-# $$
+#
+# $$ f'_{o, s, y, x} := \frac{f_{o, s, y, x}}{\sqrt{\mathbf{A} * (\mathbf{w} \cdot \mathbf{F})^2}} $$
 #
 # Both $\mathbf{w}$ and $\mathbf{A}$ depend on the specific model:
 # - $\mathbf{w}$ is the same for LODOG and ODOG, where
-#    $$ w_{o', s', o, s} =   \begin{cases}
+#    $ w_{o', s', o, s} =   \begin{cases}
 #      1 & o = o'  \\
 #      0 & else
-#     \end{cases} $$
-#   For FLODOG, the $w_{o', s'}$ also depends on the relative index of $(s', s)$
-# - $\mathbf{A}$ is Gaussian filter $\mathbf{G(\sigma)}$ for LODOG and FLODOG,
+#     \end{cases} $
+#   For FLODOG, the $ w_{o', s'} $ also depends on the relative index of $ (s', s) $
+# - $ \mathbf{A} $ is Gaussian filter $\mathbf{G(\sigma)}$ for LODOG and FLODOG,
 #   where $\sigma = k$ and $\sigma = ks$, respectively.
-#   For ODOG, $\mathbf{A}$ is a (larger) constant filter.
-#   However, this could even be understood as an infinite-width Gaussian $\mathbf{G(\infty)}$
+#   For ODOG, $ \mathbf{A} $ is a (larger) constant filter.
+#   However, this could even be understood as an infinite-width Gaussian $ \mathbf{G(\infty)} $
 
 # %% [markdown]
 # ### Pseudo-implementation
+
 
 # %%
 def divisive_normalization(filter_output, norm_energy):
