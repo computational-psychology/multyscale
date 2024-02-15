@@ -12,7 +12,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 21,
+   "execution_count": null,
    "id": "b4e3519d",
    "metadata": {},
    "outputs": [],
@@ -29,7 +29,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 22,
+   "execution_count": null,
    "id": "1b0ec8f2",
    "metadata": {},
    "outputs": [],
@@ -44,7 +44,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 23,
+   "execution_count": null,
    "id": "a1e9446d",
    "metadata": {},
    "outputs": [],
@@ -54,7 +54,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 24,
+   "execution_count": null,
    "id": "e7655c54",
    "metadata": {},
    "outputs": [],
@@ -65,7 +65,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 25,
+   "execution_count": null,
    "id": "c7e7f6b5",
    "metadata": {},
    "outputs": [],
@@ -76,7 +76,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 26,
+   "execution_count": null,
    "id": "436e1ca2",
    "metadata": {},
    "outputs": [],
@@ -95,7 +95,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 27,
+   "execution_count": null,
    "id": "7c119c91",
    "metadata": {},
    "outputs": [],
@@ -120,7 +120,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 28,
+   "execution_count": null,
    "id": "ce890e25",
    "metadata": {},
    "outputs": [],
@@ -154,7 +154,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 30,
+   "execution_count": null,
    "id": "0c9b348d",
    "metadata": {},
    "outputs": [],
@@ -192,7 +192,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 41,
+   "execution_count": null,
    "id": "274ab70c",
    "metadata": {},
    "outputs": [],
@@ -237,7 +237,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 14,
+   "execution_count": null,
    "id": "97891411",
    "metadata": {},
    "outputs": [],
@@ -318,31 +318,10 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 15,
+   "execution_count": null,
    "id": "3a27717c",
    "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "unit test normcoeff\n",
-      "Run full 6x7 analysis? [y/n] n\n",
-      "only doing 5 dimensions chosen at random\n",
-      "dimension 2,6 is sound\n",
-      "dimension 3,0 is sound\n",
-      "dimension 4,5 is sound\n",
-      "dimension 1,3 is sound\n",
-      "dimension 0,2 is sound\n",
-      "unit test divisive\n",
-      "dimension 2,5 is sound\n",
-      "dimension 0,2 is sound\n",
-      "dimension 3,0 is sound\n",
-      "dimension 4,0 is sound\n",
-      "dimension 5,4 is sound\n"
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
     "def filtershape():\n",
     "    return (1024,1024)\n",
@@ -406,23 +385,10 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 16,
+   "execution_count": null,
    "id": "56300fe0",
    "metadata": {},
-   "outputs": [
-    {
-     "ename": "AssertionError",
-     "evalue": "",
-     "output_type": "error",
-     "traceback": [
-      "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
-      "\u001b[0;31mAssertionError\u001b[0m                            Traceback (most recent call last)",
-      "\u001b[0;32m/tmp/ipykernel_2666/416394366.py\u001b[0m in \u001b[0;36m<module>\u001b[0;34m\u001b[0m\n\u001b[1;32m     17\u001b[0m     \u001b[0;31m#assert np.allclose(output, output_odog_matlab)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     18\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 19\u001b[0;31m \u001b[0mtest_integration_odog_reform\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"\"\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mstimulus\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m",
-      "\u001b[0;32m/tmp/ipykernel_2666/416394366.py\u001b[0m in \u001b[0;36mtest_integration_odog_reform\u001b[0;34m(output_odog_matlab, stimulus)\u001b[0m\n\u001b[1;32m     14\u001b[0m     \u001b[0mmodel\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mnormalize_outputs\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mnormalize_multiple_outputs\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     15\u001b[0m     \u001b[0moutput\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mmodel\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mapply\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mstimulus\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 16\u001b[0;31m     \u001b[0;32massert\u001b[0m \u001b[0mnp\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mallclose\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0moutput\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0moutput2\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     17\u001b[0m     \u001b[0;31m#assert np.allclose(output, output_odog_matlab)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     18\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n",
-      "\u001b[0;31mAssertionError\u001b[0m: "
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
     "import scipy\n",
     "\n",
