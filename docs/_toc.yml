@@ -29,6 +29,7 @@ parts:
     - file: normalization/normalization_FLODOG
       sections:
       - file: normalization/explore_FLODOG_parameters
+    - file: normalization/normalization_generalized
   # - caption: Decoding
   #   numbered: False
   - caption: Reference
