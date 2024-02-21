@@ -360,7 +360,7 @@ plt.show()
 
 # %% Global image RMS
 ODOG_norm_coeffs = ODOG.norm_coeffs(filters_output)
-ODOG_energies = ODOG.normalizers_to_RMS(ODOG_normalizers)
+ODOG_energies = ODOG_norm_coeffs.mean(axis=-1).mean(axis=-1)
 print(ODOG_energies.shape)
 
 # Visualise
@@ -443,29 +443,33 @@ assert np.allclose(ODOG_outputs, norm_i_outputs)
 #
 
 # %% Spatial Gaussian
-sigmas = LODOG.window_sigmas
-G = multyscale.normalization.spatial_avg_windows_gaussian(LODOG.bank.x, LODOG.bank.y, sigmas)
+spatial_kernels = np.ndarray(filters_output.shape)
+for o, s in np.ndindex(LODOG.window_sigmas.shape[:2]):
+    spatial_kernels[o, s, :] = multyscale.normalization.spatial_kernel_gaussian(
+        LODOG.bank.x, LODOG.bank.y, LODOG.window_sigmas[o, s]
+    )
+
+assert np.array_equal(spatial_kernels, LODOG.spatial_kernels())
 
 # %% [markdown]
 # Applying this Gaussian window gives the _local_ (estimate of) of energy
 
 # %% Local RMS
-normalization_local_energy = np.square(normalizing_coefficients.copy())
-for o, s in np.ndindex(normalizing_coefficients.shape[:2]):
-    normalization_local_energy[o, s] = multyscale.filters.apply(
-        G[o, s, :], normalization_local_energy[o, s], padval=0
+local_energies = np.ndarray(normalizing_coefficients_LODOG.shape)
+for o, s in np.ndindex(normalizing_coefficients_LODOG.shape[:2]):
+    norm = normalizing_coefficients_LODOG[o, s]
+    norm = norm ** 2
+    local_avg = multyscale.filters.apply(
+        norm, spatial_kernels[o, s], padval=0
     )
+    local_energies[o, s] = np.sqrt(local_avg + 1e-6)  # minor offset to avoid negatives/0's
 
-normalization_local_energy = (
-    np.sqrt(normalization_local_energy + 1e-6) + 1e-6
-)  # minor offset to avoid negatives/0's
-
-# assert np.array_equal(normalization_local_energy, LODOG.normalizers_to_RMS(normalizing_coefficients))
+assert np.allclose(local_energies, LODOG.norm_energies(normalizing_coefficients_LODOG, eps=1e-6))
 
 # Visualize each local RMS
-fig, axs = plt.subplots(*normalization_local_energy.shape[:2], sharex="all", sharey="all")
-for o, s in np.ndindex(normalization_local_energy.shape[:2]):
-    axs[o, s].imshow(normalization_local_energy[o, s], cmap="coolwarm", extent=visextent)
+fig, axs = plt.subplots(*local_energies.shape[:2], sharex="all", sharey="all")
+for o, s in np.ndindex(local_energies.shape[:2]):
+    axs[o, s].imshow(local_energies[o, s], cmap="coolwarm", extent=visextent)
 fig.supxlabel("Spatial scale/freq. $s'$")
 fig.supylabel("Orientation $o'$")
 plt.show()

@@ -169,7 +169,7 @@ window_sigmas = spatial_window_scalar * np.broadcast_to(
 FLODOG.window_sigmas = window_sigmas
 
 # Apply spatial averaging windows to normalizing coefficients
-energies_2_3 = FLODOG.normalizers_to_RMS(normalizing_coefficients_3)
+energies_2_3 = FLODOG.norm_energies(normalizing_coefficients_3)
 
 # Visualize each energy estimate
 fig, axs = plt.subplots(*energies_2_3.shape[:2], sharex="all", sharey="all")

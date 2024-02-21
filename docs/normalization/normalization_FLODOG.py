@@ -249,8 +249,8 @@ plt.show()
 # that form the denominators of the normalization
 
 # %% Energy estimates
-energies_LODOG = LODOG.normalizers_to_RMS(normalizing_coefficients_LODOG)
-energies_FLODOG = FLODOG.normalizers_to_RMS(normalizing_coefficients_FLODOG)
+energies_LODOG = LODOG.norm_energies(normalizing_coefficients_LODOG, eps=1e-6)
+energies_FLODOG = FLODOG.norm_energies(normalizing_coefficients_FLODOG, eps=1e-6)
 
 # Visualize
 vmin = min(np.min(energies_LODOG), np.min(energies_FLODOG))

@@ -149,13 +149,13 @@ plt.ylabel("Y (deg. vis. angle)")
 plt.show()
 
 # %% [markdown]
-# The model method `.normalizers_to_RMS()` automatically generates and applies
+# The model method `.norm_energies()` automatically generates and applies
 # these spatial averaging windows to the proved normalizing coeffiencts.
 # This produces an $O \times S$ set of locally ($Y \times X$) calculated energies,
 # one for each normalizaing coefficient.
 
 # %%
-energies_4 = LODOG.normalizers_to_RMS(normalizing_coefficients)
+energies_4 = LODOG.norm_energies(normalizing_coefficients)
 
 # Visualize each local energy
 fig, axs = plt.subplots(*energies_4.shape[:2], sharex="all", sharey="all")
@@ -232,7 +232,7 @@ plt.show()
 # more locally restricted (smaller spatial averaging window) energies
 
 # %%
-energies_1 = LODOG.normalizers_to_RMS(normalizing_coefficients)
+energies_1 = LODOG.norm_energies(normalizing_coefficients)
 
 # Visualize each local energy
 fig, axs = plt.subplots(*energies_4.shape[:2], sharex="all", sharey="all")

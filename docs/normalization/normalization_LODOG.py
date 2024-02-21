@@ -376,23 +376,22 @@ plt.show()
 # %% [markdown]
 # Applying this Gaussian window gives the _local_ (estimate of) of energy
 
-# %% Local RMS
-normalization_local_RMS = np.square(normalizing_coefficients.copy())
+# %% Local energy estimates
+normalization_local_energies = np.ndarray(normalizing_coefficients.shape)
 for o, s in np.ndindex(normalizing_coefficients.shape[:2]):
-    normalization_local_RMS[o, s] = multyscale.filters.apply(
-        window, normalization_local_RMS[o, s], padval=0
+    coeff = normalizing_coefficients[o, s] ** 2
+    energy = multyscale.filters.apply(
+        spatial_windows[o, s], coeff, padval=0
     )
+    energy = np.sqrt(energy + 1e-6) # minor offset to avoid negatives/0's
+    normalization_local_energies[o, s, :] = energy
 
-normalization_local_RMS = (
-    np.sqrt(normalization_local_RMS + 1e-6) + 1e-6
-)  # minor offset to avoid negatives/0's
-
-assert np.array_equal(normalization_local_RMS, LODOG.normalizers_to_RMS(normalizing_coefficients))
+assert np.allclose(normalization_local_energies, LODOG.norm_energies(normalizing_coefficients, eps=1e-6))
 
 # Visualize each local RMS
-fig, axs = plt.subplots(*normalization_local_RMS.shape[:2], sharex="all", sharey="all")
-for o, s in np.ndindex(normalization_local_RMS.shape[:2]):
-    axs[o, s].imshow(normalization_local_RMS[o, s], cmap="coolwarm", extent=visextent)
+fig, axs = plt.subplots(*normalization_local_energies.shape[:2], sharex="all", sharey="all")
+for o, s in np.ndindex(normalization_local_energies.shape[:2]):
+    axs[o, s].imshow(normalization_local_energies[o, s], cmap="coolwarm", extent=visextent)
 fig.supxlabel("Spatial scale/freq. $s'$")
 fig.supylabel("Orientation $o'$")
 plt.show()

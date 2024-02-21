@@ -2,7 +2,7 @@
 import numpy as np
 
 # Local application imports
-from . import filterbanks, filters, normalization
+from . import filterbanks, normalization
 
 # TODO: refactor filter-output datastructures
 
@@ -55,34 +55,41 @@ class ODOG_RHS2007:
     def weight_outputs(self, filters_output):
         return filterbanks.weight_oriented_multiscale_outputs(filters_output, self.scale_weights)
 
-    def normalizers(self, filters_output):
-        # Get normalizers
-        normalizers = normalization.normalizers(filters_output, self.normalization_weights)
-        return normalizers
+    def norm_coeffs(self, filters_output):
+        return normalization.norm_coeffs(filters_output, self.normalization_weights)
 
-    def normalizers_to_RMS(self, normalizers):
-        # Get RMS from each normalizer
-        spatial_avg_filters = normalization.spatial_avg_windows_globalmean(normalizers)
-        normalizers_RMS = normalizers.copy()
-        normalizers_RMS = np.square(normalizers_RMS)
-        normalizers_RMS = spatial_avg_filters * normalizers_RMS
-        normalizers_RMS = normalizers_RMS.sum(axis=(-1, -2))
-        normalizers_RMS = np.sqrt(normalizers_RMS)
-        return normalizers_RMS
+    def spatial_kernels(self):
+        kernel = normalization.spatial_kernel_globalmean(self.bank.shape[2:])
+        kernels = np.ndarray(self.bank.shape[:2] + kernel.shape)
+        for o, s in np.ndindex(kernels.shape[:2]):
+            kernels[o, s] = kernel
 
-    def normalize_outputs(self, filters_output):
+        return kernels
+
+    def norm_energies(self, norm_coeffs, eps=0.0):
+        kernels = self.spatial_kernels()
+
+        norm_energies = np.ndarray(norm_coeffs.shape)
+        for o_prime, s_prime in np.ndindex(norm_coeffs.shape[:2]):
+            norm_energies[o_prime, s_prime] = normalization.norm_energy(
+                norm_coeffs[o_prime, s_prime], kernels[o_prime, s_prime], eps=eps
+            )
+
+        return norm_energies
+
+    def normalize_outputs(self, filters_output, eps=0.0):
         # TODO: docstring
-        normalizers = self.normalizers(filters_output)
+        norm_coeffs = self.norm_coeffs(filters_output)
 
-        normalizer_RMS = self.normalizers_to_RMS(normalizers)
+        norm_energies = self.norm_energies(norm_coeffs, eps=eps)
 
-        normalized_outputs = np.ndarray(filters_output.shape)
-        for o, s in np.ndindex(filters_output.shape[:2]):
-            normalized_outputs[o, s] = filters_output[o, s] / normalizer_RMS[o, s]
+        normalized_outputs = normalization.divisive_normalization(
+            filters_output, norm_energies, eps=eps
+        )
 
         return normalized_outputs
 
-    def apply(self, image):
+    def apply(self, image, eps=0.0):
         # TODO: docstring
 
         # Sum over spatial scales
@@ -90,10 +97,11 @@ class ODOG_RHS2007:
         weighted_outputs = self.weight_outputs(filters_output)
 
         # Normalize oriented multiscale outputs
-        normalized_outputs = self.normalize_outputs(weighted_outputs)
+        normalized_outputs = self.normalize_outputs(weighted_outputs, eps=eps)
 
         # Sum over orientations and scales
         output = normalized_outputs.sum((0, 1))
+
         return output
 
 
@@ -106,22 +114,15 @@ class LODOG_RHS2007(ODOG_RHS2007):
         self.window_sigma = window_sigma
         self.window_sigmas = np.ones(shape=(*self.bank.shape[:2], 2)) * self.window_sigma
 
-    def normalizers_to_RMS(self, normalizers):
-        # Expand sigmas
-        # Get RMS from each normalizer
-        spatial_avg_filters = normalization.spatial_avg_windows_gaussian(
-            self.bank.x, self.bank.y, self.window_sigmas
-        )
-        normalizers_RMS = normalizers.copy()
-        normalizers_RMS = np.square(normalizers_RMS)
-        for o, s in np.ndindex(normalizers_RMS.shape[:2]):
-            normalizers_RMS[o, s] = filters.apply(
-                spatial_avg_filters[o, s], normalizers_RMS[o, s], padval=0
+    def spatial_kernels(self):
+        kernels = np.ndarray(self.bank.shape)
+        for o_prime, s_prime in np.ndindex(self.window_sigmas.shape[:2]):
+            kernels[o_prime, s_prime] = normalization.spatial_kernel_gaussian(
+                self.bank.x,
+                self.bank.y,
+                sigmas=self.window_sigmas[o_prime, s_prime],
             )
-        normalizers_RMS += 1e-6
-        normalizers_RMS = np.sqrt(normalizers_RMS)
-        normalizers_RMS += 1e-6
-        return normalizers_RMS
+        return kernels
 
 
 class FLODOG_RHS2007(LODOG_RHS2007):
