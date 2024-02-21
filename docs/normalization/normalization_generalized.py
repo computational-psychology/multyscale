@@ -368,7 +368,7 @@ plt.show()
 
 # %% Global image RMS
 normalizing_coefficients_ODOG = normalizing_coefficients
-ODOG_energies = ODOG_norm_coeffs.mean(axis=-1).mean(axis=-1)
+ODOG_energies = np.sqrt((normalizing_coefficients_ODOG ** 2).mean(axis=(-1, -2)))
 print(ODOG_energies.shape)
 
 # Visualise
@@ -429,7 +429,7 @@ print(ODOG_energies_i.shape)
 # %% Divisive normalization
 norm_i_outputs = filters_output / ODOG_energies_i
 
-assert np.allclose(ODOG_outputs, norm_i_outputs)
+assert np.array_equal(ODOG_outputs, norm_i_outputs)
 
 
 # %% [markdown]
@@ -557,17 +557,21 @@ assert np.allclose(mean_filtered, img.mean())
 #
 
 # %% Global image averaging as filter
-A = np.ones((1024 * 2, 1024 * 2)) / 1024**2
-
 # calculate energy using the kernel
-ODOG_energies_i2 = np.ndarray(filters_output.shape)
-for o, s in np.ndindex(filters_output.shape[:2]):
-    norm = ODOG_norm_coeffs[o, s, ...] ** 2
-    mean = multyscale.filters.apply(norm, A, padval=0)
-    ODOG_energies_i2[o, s] = np.sqrt(mean)
+ODOG_energies_i2 = np.ndarray(normalizing_coefficients_ODOG.shape)
+for o, s in np.ndindex(normalizing_coefficients_ODOG.shape[:2]):
+    norm_coeff = normalizing_coefficients_ODOG[o, s]
+    norm = norm_coeff ** 2
+    spatial_average = multyscale.filters.apply(norm, spatial_kernel, padval=0)
+    energy = np.sqrt(spatial_average)
+    ODOG_energies_i2[o, s] = energy
 
-# this replicates the just verified normalizing image
 assert np.allclose(ODOG_energies_i2, ODOG_energies_i)
+
+# %%
+ODOG_outputs_i2 = filters_output / ODOG_energies_i2
+
+assert np.allclose(ODOG_outputs, ODOG_outputs_i2)
 
 # %% [markdown]
 # ### Summary
