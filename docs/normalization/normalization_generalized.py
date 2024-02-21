@@ -483,7 +483,7 @@ plt.show()
 # %% Divisive normalization
 # Since the local energies tensor is the same $(O, S, X, Y)$ shape as the filter outputs
 # we can simply divide
-LODOG_outputs = filters_output / normalization_local_energy
+LODOG_outputs = filters_output / (local_energies + 1e-6)
 
 # Visualize each normalized f'_{o',s'}
 fig, axs = plt.subplots(*LODOG_outputs.shape[:2], sharex="all", sharey="all")

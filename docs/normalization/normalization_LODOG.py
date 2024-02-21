@@ -172,7 +172,7 @@ assert np.array_equal(ODOG.bank.filters, LODOG.bank.filters)
 filters_output = ODOG.bank.apply(stimulus)
 weighted_outputs = ODOG.weight_outputs(filters_output)
 
-norm_outputs = LODOG.normalize_outputs(weighted_outputs)
+norm_outputs = LODOG.normalize_outputs(weighted_outputs, eps=1e-6)
 output_LODOG = norm_outputs.sum(axis=(0, 1))
 
 # %% Extract target prediction
@@ -262,6 +262,7 @@ assert np.array_equal(norm_weights, LODOG.normalization_weights)
 
 # %% Normalizing images as weighted combination (tensor dot-product) of filter outputs
 normalizing_coefficients = multyscale.normalization.norm_coeffs(weighted_outputs, norm_weights)
+assert np.array_equal(normalizing_coefficients, LODOG.norm_coeffs(weighted_outputs))
 
 # Visualize each normalizing coefficient n_{o,s}, i.e. for each individual filter f_{o,s}
 fig, axs = plt.subplots(*normalizing_coefficients.shape[:2], sharex="all", sharey="all")
@@ -432,8 +433,8 @@ plt.show()
 # %% Divisive normalization
 # Since the local RMSs tensor is the same (O, S, X, Y) shape as the filter outputs
 # we can simply divide
-normalized_outputs = weighted_outputs / normalization_local_RMS
-assert np.array_equal(normalized_outputs, norm_outputs)
+normalized_outputs = weighted_outputs / (normalization_local_energies + 1e-6)
+assert np.allclose(normalized_outputs, norm_outputs)
 
 # Visualize each normalized f'_{o',s'}
 fig, axs = plt.subplots(*normalized_outputs.shape[:2], sharex="all", sharey="all")
@@ -462,7 +463,7 @@ plt.show()
 
 # %% Recombine
 recombined_outputs = np.sum(normalized_outputs, axis=(0, 1))
-assert np.array_equal(recombined_outputs, output_LODOG)
+assert np.allclose(recombined_outputs, output_LODOG)
 
 plt.subplot(2, 2, 1)
 plt.imshow(recombined_outputs, cmap="coolwarm", extent=visextent)

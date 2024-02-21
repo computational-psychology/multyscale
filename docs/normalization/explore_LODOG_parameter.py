@@ -155,7 +155,7 @@ plt.show()
 # one for each normalizaing coefficient.
 
 # %%
-energies_4 = LODOG.norm_energies(normalizing_coefficients)
+energies_4 = LODOG.norm_energies(normalizing_coefficients, eps=1e-6)
 
 # Visualize each local energy
 fig, axs = plt.subplots(*energies_4.shape[:2], sharex="all", sharey="all")
@@ -232,7 +232,7 @@ plt.show()
 # more locally restricted (smaller spatial averaging window) energies
 
 # %%
-energies_1 = LODOG.norm_energies(normalizing_coefficients)
+energies_1 = LODOG.norm_energies(normalizing_coefficients, eps=1e-6)
 
 # Visualize each local energy
 fig, axs = plt.subplots(*energies_4.shape[:2], sharex="all", sharey="all")
@@ -248,7 +248,7 @@ plt.show()
 # as would be expected.
 
 # %%
-normalized_outputs_1 = filters_output / energies_1
+normalized_outputs_1 = filters_output / (energies_1 + 1e-6)
 
 # Visualize each normalized output
 vmin = min(np.min(normalized_outputs_4), np.min(normalized_outputs_1))
