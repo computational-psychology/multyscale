@@ -135,7 +135,7 @@ filters_output = FLODOG.weight_outputs(filters_output)
 #     a 4D tensor of same dimensions and size as $\mathbf{F}$
 #
 # Combined, this gives:
-# 
+#
 # $$ f'_{o, s, y, x} := 
 #  \frac{f_{o, s, y, x}}
 #  {\sqrt{\mathrm{avg_{xy}}((\mathbf{w}\cdot\mathbf{F})^2)}} 
@@ -226,6 +226,9 @@ plt.show()
 # %% Normalizing coefficients
 normalizing_coefficients = multyscale.normalization.norm_coeffs(filters_output, interaction_weights)
 
+assert np.array_equal(normalizing_coefficients, ODOG.norm_coeffs(filters_output))
+
+
 # Visualize each normalizing coefficient n_{o,s}, i.e.
 # the normalizer image for each individual filter f_{o,s}
 fig, axs = plt.subplots(*normalizing_coefficients.shape[:2], sharex="all", sharey="all")
@@ -236,7 +239,13 @@ fig.supylabel("Orientation $o'$")
 plt.show()
 
 # %% [markdown]
-# The LODOG model uses the same interaction weights as the base ODOG model.
+# The LODOG model uses the same interaction weights
+# (and thus same normalizing coefficients)
+# as the base ODOG model.
+
+# %%
+normalizing_coefficients_LODOG = LODOG.norm_coeffs(filters_output)
+assert np.array_equal(normalizing_coefficients, normalizing_coefficients_LODOG)
 
 # %% [markdown]
 # The FLODOG model uses a different set of interaction weights.
@@ -262,7 +271,7 @@ axs[0, 0].pcolor(
     vmax=1,
 )
 axs[0, 0].set_ylabel("scale of filter to normalize (idx)")
-axs[0, 0].set_title("LODOG weights")
+axs[0, 0].set_title("(L)ODOG weights")
 
 axs[0, 1].pcolor(
     FLODOG.scale_norm_weights,
@@ -290,7 +299,6 @@ plt.show()
 # the filter outputs at these spatial scales.
 
 # %% Normalizing coefficients
-normalizing_coefficients_LODOG = LODOG.norm_coeffs(filters_output)
 normalizing_coefficients_FLODOG = FLODOG.norm_coeffs(filters_output)
 
 # Visualize each norm. coeff.
@@ -308,7 +316,7 @@ for o, s in np.ndindex(normalizing_coefficients_LODOG.shape[:2]):
     )
 fig.supxlabel("Spatial scale/freq. $s'$")
 fig.supylabel("Orientation $o'$")
-fig.suptitle("LODOG")
+fig.suptitle("(L)ODOG")
 plt.show()
 
 fig, axs = plt.subplots(*normalizing_coefficients_FLODOG.shape[:2], sharex="all", sharey="all")
@@ -344,7 +352,7 @@ plt.show()
 # Energy here is expressed as the (spatial) root-mean-square of the signal.
 #
 # 1. Square each ($X \times Y = 1024 \times 1024$) pixel of the normalizing coefficient $n_{o, s}$
-# 2. Average \mathrm{avg_{yx}} across pixels
+# 2. Average $\mathrm{avg_{yx}}$ across pixels
 # 3. Square-root of this average
 #
 # $$ e_{o, s, y, x}  := \sqrt{\mathrm{avg_{yx}}(n_{o, s}^2)} $$
@@ -359,7 +367,7 @@ plt.show()
 # This results in a single energy estimate for each $(o', s')$.
 
 # %% Global image RMS
-ODOG_norm_coeffs = ODOG.norm_coeffs(filters_output)
+normalizing_coefficients_ODOG = normalizing_coefficients
 ODOG_energies = ODOG_norm_coeffs.mean(axis=-1).mean(axis=-1)
 print(ODOG_energies.shape)
 
