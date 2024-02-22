@@ -12,31 +12,45 @@ from . import filters
 def norm_coeffs(multioutput: np.ndarray, normalization_weights: np.ndarray) -> np.ndarray:
     """Construct all normalizing coefficients: weighted combination of all filter outputs, for each filter
 
+    The multi(dimensional)output consists of all (O, S) filter outputs,
+    where each is of dimension (Y, X).
+    Thus, the multioutput has dimension (O, S, Y, X).
+
+    The output will be one normalizing coefficient, a matrix of (Y, X) pixels,
+    for each filter-to-normalize f'(o', s').
+    Thus, the norm_coeffs output also has dimension (O', S', Y, X).
+
+    To create these, for each filter-to-normalize f'(o', s'),
+    there should be (O, S) weights provide:
+    one for how each filter is weighted in this normalizing coefficient.
+    Thus, the normalization weights are of dimension (O', S', O, S):
+    for each (o',s') filter-to-normalize, there are (O, S) weights.
+
     Parameters
     ----------
     multioutput : numpy.ndarray
-        all (O, S, X, Y) filter outputs
+        all (O, S, Y, X) filter outputs
     normalization_weights : numpy.ndarray
-        full tensor (O, S, O, S) of normalization weights
+        full tensor (O', S', O, S) of normalization weights
 
     Returns
     -------
     numpy.ndarray
-        all (O, S, X, Y) normalizing coefficients:
-        a single 2D (X,Y) weighted combination of all filter outputs
-        per (O, S) filter-to-normalize
+        all (O', S', Y, X) normalizing coefficients:
+        a single 2D (Y, X) weighted combination of all filter outputs
+        per (O', S') filter-to-normalize
     """
 
-    # Create normalizing images from weighted combination of filter outputs
-    norms: np.ndarray = np.ndarray(shape=multioutput.shape)
-    for o, s in np.ndindex(multioutput.shape[:2]):
-        weights = normalization_weights[o, s]
-
-        # Tensor dot: multiply filters_output by weights, then sum over axes [0,1]
-        norm_coeff = np.tensordot(multioutput, weights, axes=([0, 1], [0, 1]))
-
-        # Accumulate
-        norms[o, s, ...] = norm_coeff
+    # Create all normalizing coefficients from weighted combination of filter outputs
+    # This is done as a single tensor dot-product operation.
+    # Multiply the (O', S', O, S) weights, by the (O, S, Y, X) filter outputs,
+    # then sum over the (O, S) dimensions.
+    # In Einstein summation notation (and q := o', r := s'), that is:
+    #
+    # norms = np.einsum('qros, osyx -> qryx', normalization_weights, multioutput)
+    #
+    # which in tensordot syntax is:
+    norms = np.tensordot(normalization_weights, multioutput, axes=([2, 3], [0, 1]))
 
     return norms
 
