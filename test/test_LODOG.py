@@ -32,37 +32,26 @@ def test_weights(model):
     assert np.allclose(model.scale_weights, RHS_implementation.w_val)
 
 
-def test_normalizers(model, MATLAB_filteroutput):
+def test_norm_coeffs(model, MATLAB_filteroutput):
     weighted_outputs = model.weight_outputs(MATLAB_filteroutput)
-    normalizers = model.normalizers(weighted_outputs)
+    norm_coeffs = model.norm_coeffs(weighted_outputs)
     RHS_norms = RHS_implementation.LODOG_normalizers(weighted_outputs)
-    assert np.allclose(normalizers.shape, RHS_norms.shape)
-    assert np.allclose(normalizers, RHS_norms)
+    assert np.allclose(norm_coeffs.shape, RHS_norms.shape)
+    assert np.allclose(norm_coeffs, RHS_norms)
 
 
 def test_spatial_mask(model, MATLAB_LODOG_params):
     # Is the spatial (Gaussian) averaging window the same?
-    RHS_mask = RHS_implementation.LODOG_mask(sig1=MATLAB_LODOG_params["sig1"])
-    spatial_avg_filters = multyscale.normalization.spatial_avg_windows_gaussian(
-        model.bank.x, model.bank.y, model.window_sigmas
-    )
-    for o, s in np.ndindex(spatial_avg_filters.shape[:2]):
-        assert np.allclose(spatial_avg_filters[o, s], RHS_mask)
-
-
-def test_LODOG_RMS(model, MATLAB_filteroutput, MATLAB_LODOG_params):
-    weighted_outputs = model.weight_outputs(MATLAB_filteroutput)
-    normalizers = model.normalizers(weighted_outputs)
-
-    RMSs = model.normalizers_to_RMS(normalizers)
-    RHS_RMSs = RHS_implementation.LODOG_RMSs(normalizers, sig1=MATLAB_LODOG_params["sig1"])
-    assert np.allclose(RMSs, RHS_RMSs)
+    RHS_kernel = RHS_implementation.LODOG_mask(sig1=MATLAB_LODOG_params["sig1"])
+    spatial_kernels = model.spatial_kernels()
+    for o, s in np.ndindex(spatial_kernels.shape[:2]):
+        assert np.allclose(spatial_kernels[o, s], RHS_kernel)
 
 
 def test_normalized_outputs(model, MATLAB_filteroutput, MATLAB_LODOG_params):
     weighted_outputs = model.weight_outputs(MATLAB_filteroutput)
 
-    normed_outputs = model.normalize_outputs(weighted_outputs)
+    normed_outputs = model.normalize_outputs(weighted_outputs, eps=1e-6)
 
     RHS_normalized_outputs = RHS_implementation.LODOG_normalize(
         weighted_outputs, sig1=MATLAB_LODOG_params["sig1"]
@@ -71,5 +60,5 @@ def test_normalized_outputs(model, MATLAB_filteroutput, MATLAB_LODOG_params):
 
 
 def test_model_output(output_LODOG_MATLAB, model, stimulus):
-    output = model.apply(stimulus)
+    output = model.apply(stimulus, eps=1e-6)
     assert np.allclose(output, output_LODOG_MATLAB)

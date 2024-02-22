@@ -29,9 +29,11 @@ def test_weights(model):
 
 
 def test_normalize(output_ODOG_MATLAB, model, MATLAB_filteroutput):
-    filter_outputs = model.weight_outputs(MATLAB_filteroutput)
-    normed_outputs = model.normalize_outputs(filter_outputs)
+    weighted_outputs = model.weight_outputs(MATLAB_filteroutput)
+    normed_outputs = model.normalize_outputs(weighted_outputs)
+
     output = np.sum(normed_outputs, (0, 1))
+
     assert np.allclose(output, output_ODOG_MATLAB)
 
 
