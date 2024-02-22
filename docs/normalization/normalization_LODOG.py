@@ -261,10 +261,9 @@ norm_weights = multyscale.normalization.create_normalization_weights(
 assert np.array_equal(norm_weights, LODOG.normalization_weights)
 
 # %% Normalizing images as weighted combination (tensor dot-product) of filter outputs
-normalizing_coefficients = multyscale.normalization.normalizers(weighted_outputs, norm_weights)
+normalizing_coefficients = multyscale.normalization.norm_coeffs(weighted_outputs, norm_weights)
 
-# Visualize each normalizing coefficient n_{o,s}, i.e.
-# the normalizer image for each individual filter f_{o,s}
+# Visualize each normalizing coefficient n_{o,s}, i.e. for each individual filter f_{o,s}
 fig, axs = plt.subplots(*normalizing_coefficients.shape[:2], sharex="all", sharey="all")
 for o, s in np.ndindex(normalizing_coefficients.shape[:2]):
     axs[o, s].imshow(normalizing_coefficients[o, s], cmap="coolwarm", extent=visextent)
@@ -346,24 +345,32 @@ plt.plot(LODOG.bank.x[int(window.shape[0] / 2)], window[int(window.shape[0] / 2)
 plt.show()
 
 # %% [markdown]
-# The function `multyscale.normalization.spatial_avg_windows_gaussian()`
+# The function `multyscale.normalization.spatial_kernel_gaussian()`
 # generates a ( $O\times S$ set of) Gaussian filters $G$,
-# where each Gaussian $G_{o',s'}$ is used to locally average filter $f_{o',s'}$.
+# where each Gaussian spatial averaging window
+# $G_{o',s'}$ is used to locally average filter $f_{o',s'}$.
 # In the LODOG model, all $G$ are identical.
 #
 # The parameter $\sigma$ controls the spatial size of each $G(\sigma)$ Gaussian filter;
 # thus this function takes in $O \times S$ $\sigma_{o', s'}$.
 # In the LODOG model, all $\sigma_{o', s'}$ are identical.
 
-# %% Spatial Gaussian
-sigmas = LODOG.window_sigmas
-G = multyscale.normalization.spatial_avg_windows_gaussian(LODOG.bank.x, LODOG.bank.y, sigmas)
+# %% All sigmas identical
+print(LODOG.window_sigmas)
 
-assert np.array_equal(G[0, 0, :], window)
+# %% Generate Gaussian filters
+spatial_windows = np.ndarray(filters_output.shape)
+for o, s in np.ndindex(LODOG.window_sigmas.shape[:2]):
+    spatial_windows[o, s, :] = multyscale.normalization.spatial_kernel_gaussian(
+        LODOG.bank.x, LODOG.bank.y, LODOG.window_sigmas[o, s, :]
+    )
+
+assert np.array_equal(spatial_windows[0, 0, :], window)
+assert np.array_equal(spatial_windows, LODOG.spatial_kernels())
 
 idx = (2, 3)
 
-plt.imshow(G[*idx], cmap="coolwarm", extent=visextent)
+plt.imshow(spatial_windows[*idx], cmap="coolwarm", extent=visextent)
 plt.show()
 
 # %% [markdown]
@@ -420,7 +427,7 @@ plt.show()
 # get normalized quite differently.
 #
 # We now divide each filter(output) $f_{o',s'}$
-# by the spatial RMS of the normalizer coefficient $n_{o',s'}$:
+# by the spatial RMS of the normalizing coefficient $n_{o',s'}$:
 # $$f'_{o',s'} = \frac{f_{o',s'}}{RMS(n_{o',s'})}$$
 
 # %% Divisive normalization

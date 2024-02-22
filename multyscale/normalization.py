@@ -9,8 +9,8 @@ from . import filters
 # Generalized (F)(L)ODOG normalization
 
 
-def normalizers(multioutput: np.ndarray, normalization_weights: np.ndarray) -> np.ndarray:
-    """Construct all normalizers: weighted combination of all fitler outputs, for each filter
+def norm_coeffs(multioutput: np.ndarray, normalization_weights: np.ndarray) -> np.ndarray:
+    """Construct all normalizing coefficients: weighted combination of all filter outputs, for each filter
 
     Parameters
     ----------
@@ -22,7 +22,7 @@ def normalizers(multioutput: np.ndarray, normalization_weights: np.ndarray) -> n
     Returns
     -------
     numpy.ndarray
-        all (O, S, X, Y) normalizers:
+        all (O, S, X, Y) normalizing coefficients:
         a single 2D (X,Y) weighted combination of all filter outputs
         per (O, S) filter-to-normalize
     """
@@ -33,34 +33,35 @@ def normalizers(multioutput: np.ndarray, normalization_weights: np.ndarray) -> n
         weights = normalization_weights[o, s]
 
         # Tensor dot: multiply filters_output by weights, then sum over axes [0,1]
-        normalizer = np.tensordot(multioutput, weights, axes=([0, 1], [0, 1]))
+        norm_coeff = np.tensordot(multioutput, weights, axes=([0, 1], [0, 1]))
+
         # Accumulate
-        norms[o, s, ...] = normalizer
+        norms[o, s, ...] = norm_coeff
 
     return norms
 
 
-def norm_coeff(normalizer: np.ndarray, spatial_kernel: np.ndarray, eps=0.0) -> np.ndarray:
-    """Construct normalization coefficient: denominator for divisive normalization
+def norm_energy(norm_coeff: np.ndarray, spatial_kernel: np.ndarray, eps=0.0) -> np.ndarray:
+    """Convert normalizing coefficient to energy (denominator for divisive normalization)
 
     Parameters
     ----------
-    normalizer : numpy.ndarray
-        single 2D normalizer image; weighted combination of all filter outputs
+    norm_coeff : numpy.ndarray
+        single 2D normalizing coefficient; weighted combination of all filter outputs
     spatial_kernel : numpy.ndarray
-        single kernel to spatially average (2D; over x,y) the normalizer
+        single kernel to spatially average (2D; over x,y) the normalizing coefficient
     eps : float, optional
         precision offset, used to avoid square-root of negative numbers, by default 0.0
 
     Returns
     -------
     numpy.ndarray
-        single normalization coefficient: denominator for divisive normalization
+        single normalizing energy: denominator for divisive normalization
     """
-    norm = normalizer**2
+    norm = norm_coeff**2
     spatial_average = filters.apply(norm, spatial_kernel, padval=0)
-    coeff = np.sqrt(spatial_average + eps)
-    return coeff
+    energy = np.sqrt(spatial_average + eps)
+    return energy
 
 
 def divisive_normalization(
@@ -71,16 +72,18 @@ def divisive_normalization(
     Parameters
     ----------
     filter_output : np.ndarray
-        output from a single filter, 2D of shape (x,y)
+        output from either a single filter, 2D of shape (Y, X),
+        or a whole filterbank, N-Dimensional of shape (M, ..., N, Y, X)
     norm_coeff : np.ndarray
-        single normalization coefficient: denominator for divisive normalization
+        normalizing coefficient(s): denominator for divisive normalization.
+        Must be of same shape as filter_output
     eps : float, optional
         precision offset, used to avoid DivideByZero errors, by default 0.0
 
     Returns
     -------
     np.ndarray
-        normalized filter output, 2D of shape (x, y)
+        normalized filter output, 2D of shape (y, x)
     """
     return filter_output / (norm_coeff + eps)
 
@@ -98,7 +101,10 @@ def spatial_kernel_globalmean(shape: Sequence[int]) -> np.ndarray:
     numpy.ndarray
         spatial averaging kernel
     """
-    return np.ones([dim * 2 for dim in shape]) / np.prod(shape)
+    kernel = np.ones([dim * 2 for dim in shape])
+    kernel /= kernel.sum()
+    kernel *= 4
+    return kernel
 
 
 def spatial_kernel_gaussian(x: np.ndarray, y: np.ndarray, sigmas: Sequence[float]) -> np.ndarray:

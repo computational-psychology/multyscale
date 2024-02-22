@@ -224,7 +224,7 @@ plt.show()
 # to create the normalizing coefficients $\mathbf{n}$
 
 # %% Normalizing coefficients
-normalizing_coefficients = multyscale.normalization.normalizers(filters_output, interaction_weights)
+normalizing_coefficients = multyscale.normalization.norm_coeffs(filters_output, interaction_weights)
 
 # Visualize each normalizing coefficient n_{o,s}, i.e.
 # the normalizer image for each individual filter f_{o,s}
@@ -290,8 +290,8 @@ plt.show()
 # the filter outputs at these spatial scales.
 
 # %% Normalizing coefficients
-normalizing_coefficients_LODOG = LODOG.normalizers(filters_output)
-normalizing_coefficients_FLODOG = FLODOG.normalizers(filters_output)
+normalizing_coefficients_LODOG = LODOG.norm_coeffs(filters_output)
+normalizing_coefficients_FLODOG = FLODOG.norm_coeffs(filters_output)
 
 # Visualize each norm. coeff.
 vmin = min(np.min(normalizing_coefficients_LODOG), np.min(normalizing_coefficients_FLODOG))
@@ -359,7 +359,7 @@ plt.show()
 # This results in a single energy estimate for each $(o', s')$.
 
 # %% Global image RMS
-ODOG_normalizers = ODOG.normalizers(filters_output)
+ODOG_norm_coeffs = ODOG.norm_coeffs(filters_output)
 ODOG_energies = ODOG.normalizers_to_RMS(ODOG_normalizers)
 print(ODOG_energies.shape)
 
@@ -511,10 +511,10 @@ plt.show()
 
 # %%
 # have doubly sized kernel so that pixel reaches each pixel in the average
-A = np.ones((1024 * 2, 1024 * 2)) / 1024**2
+spatial_kernel = np.ones((1024 * 2, 1024 * 2)) / 1024**2
 
 img = filters_output[3, 4]
-mean_filtered = multyscale.filters.apply(img, A, padval=0)
+mean_filtered = multyscale.filters.apply(img, spatial_kernel, padval=0)
 
 assert np.allclose(mean_filtered, img.mean())
 
@@ -550,7 +550,7 @@ A = np.ones((1024 * 2, 1024 * 2)) / 1024**2
 # calculate energy using the kernel
 ODOG_energies_i2 = np.ndarray(filters_output.shape)
 for o, s in np.ndindex(filters_output.shape[:2]):
-    norm = ODOG_normalizers[o, s, ...] ** 2
+    norm = ODOG_norm_coeffs[o, s, ...] ** 2
     mean = multyscale.filters.apply(norm, A, padval=0)
     ODOG_energies_i2[o, s] = np.sqrt(mean)
 

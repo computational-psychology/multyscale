@@ -244,7 +244,7 @@ for o_prime, s_prime in np.ndindex(weighted_outputs.shape[:2]):  # for each filt
             ]  # add this filter to normalizing coefficient
 
 # Plot each normalizing coefficient n_{o,s},
-# i.e., the normalizer image for each individual filter f_{o,s}
+# i.e., for each individual filter f_{o,s}
 fig, axs = plt.subplots(*norm_coeffs.shape[:2], sharex="all", sharey="all")
 for o, s in np.ndindex(norm_coeffs.shape[:2]):
     axs[o, s].imshow(
@@ -314,8 +314,8 @@ normalizing_coefficients = np.tensordot(
     normalization_weights, weighted_outputs, axes=([0, 1], [0, 1])
 )
 
-# Visualize each normalizing coefficient n_{o,s}, i.e.
-# the normalizer image for each individual filter f_{o,s}
+# Visualize each normalizing coefficient n_{o,s},
+# i.e., for each individual filter f_{o,s}
 fig, axs = plt.subplots(*normalizing_coefficients.shape[:2], sharex="all", sharey="all")
 for o, s in np.ndindex(normalizing_coefficients.shape[:2]):
     axs[o, s].imshow(normalizing_coefficients[o, s], cmap="coolwarm", extent=visextent)
@@ -404,15 +404,15 @@ plt.show()
 # for constructing the normalizing coefficients
 # from such weights, and the filter outputs to be normalized.
 #
-# The function `multyscale.normalization.normalizers()` creates these coefficients,
+# The function `multyscale.normalization.norm_coeffs()` creates these coefficients,
 # and note that these are identical to the $N$ constructed above.
 
 # %% Identical normalizing coefficients
-norm_coeffs = multyscale.normalization.normalizers(weighted_outputs, normalization_weights)
+norm_coeffs = multyscale.normalization.norm_coeffs(weighted_outputs, normalization_weights)
 assert np.allclose(norm_coeffs, normalizing_coefficients)
 
-# Visualize each normalizing coefficient n_{o,s}, i.e.
-# the normalizer image for each individual filter f_{o,s}
+# Visualize each normalizing coefficient n_{o,s},
+# i.e. for each individual filter f_{o,s}
 fig, axs = plt.subplots(*normalizing_coefficients.shape[:2], sharex="all", sharey="all")
 for o, s in np.ndindex(normalizing_coefficients.shape[:2]):
     axs[o, s].imshow(normalizing_coefficients[o, s], cmap="coolwarm", extent=visextent)
@@ -459,7 +459,7 @@ plt.show()
 #
 # Thus, the normalized filter output $f'_{o', s'}$
 # is calculating by dividing each filter(output) $f_{o',s'}$
-# by the energy of the normalizer coefficient $n_{o',s'}$:
+# by the energy of the normalizing coefficient $n_{o',s'}$:
 # $$f'_{o',s'} = \frac{f_{o',s'}}{RMS(n_{o',s'})}$$
 
 # %% Divisive normalization

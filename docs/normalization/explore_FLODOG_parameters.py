@@ -127,7 +127,7 @@ normalization_weights = multyscale.normalization.create_normalization_weights(
 # FLODOG.normalization_weights = normalization_weights
 
 # %% Determine normalizing coefficients
-normalizing_coefficients_3 = multyscale.normalization.normalizers(
+normalizing_coefficients_3 = multyscale.normalization.norm_coeffs(
     filters_output, normalization_weights
 )
 

@@ -109,7 +109,7 @@ plt.show()
 # and thus also only need to be calculated once for all the parameterizations explored here.
 
 # %%
-normalizing_coefficients = LODOG.normalizers(filters_output)
+normalizing_coefficients = LODOG.norm_coeffs(filters_output)
 
 # %% Gaussian spatial averaging window [markdown]
 # The spatial averaging window in the LODOG model is
@@ -128,9 +128,11 @@ window_sigmas = LODOG.window_sigmas
 
 assert np.all(window_sigmas == window_sigma)
 
-spatial_filters = multyscale.normalization.spatial_avg_windows_gaussian(
-    LODOG.bank.x, LODOG.bank.y, LODOG.window_sigmas
-)
+spatial_filters = np.ndarray(filters_output.shape)
+for o, s in np.ndindex(LODOG.window_sigmas.shape[:2]):
+    spatial_filters[o, s, :] = multyscale.normalization.spatial_kernel_gaussian(
+        LODOG.bank.x, LODOG.bank.y, LODOG.window_sigmas[o, s, :]
+    )
 plt.subplot(1, 2, 1)
 plt.imshow(spatial_filters[0, 0, ...], cmap="coolwarm", extent=visextent)
 plt.colorbar()
@@ -203,10 +205,14 @@ LODOG.window_sigmas = np.ones(shape=(*LODOG.bank.shape[:2], 2)) * LODOG.window_s
 assert np.all(LODOG.window_sigmas == LODOG.window_sigma)
 
 # %%
-spatial_filters = multyscale.normalization.spatial_avg_windows_gaussian(
-    LODOG.bank.x, LODOG.bank.y, LODOG.window_sigmas
-)
-plt.subplot(1, 2, 1)
+spatial_filters = np.ndarray(filters_output.shape)
+for o, s in np.ndindex(LODOG.window_sigmas.shape[:2]):
+    spatial_filters[o, s, :] = multyscale.normalization.spatial_kernel_gaussian(
+        LODOG.bank.x, LODOG.bank.y, LODOG.window_sigmas[o, s, :]
+    )
+
+# %% 
+plt.subplot(1, 2, 1) 
 plt.imshow(spatial_filters[0, 0, ...], cmap="coolwarm", extent=visextent)
 plt.colorbar()
 plt.subplot(1, 2, 2)

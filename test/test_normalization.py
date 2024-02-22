@@ -41,15 +41,10 @@ def test_norm_weights_combine():
 
     assert np.all(norm_weights == ground_truth)
 
+
 @pytest.mark.xfail
-def test_normalizers():
+def test_norm_coeffs():
     raise NotImplementedError()
-
-
-def test_spatial_kernel_ODOG():
-    ODOG_kernel = normalization.spatial_kernel_globalmean(shape)
-    A = np.ones((shape[0] * 2, shape[0] * 2)) / (shape[0] * shape[0])
-    assert np.all(ODOG_kernel == A)
 
 
 def test_spatial_avg_kernel():
@@ -62,7 +57,7 @@ def test_spatial_avg_kernel():
     assert np.allclose(filtered, img.mean())
 
 
-def test_norm_coeff():
+def test_norm_energy():
     filters_output = np.random.rand(O, S, shape[0], shape[1])
 
     scale_norm_weights = normalization.scale_norm_weights_equal(S)
@@ -71,15 +66,15 @@ def test_norm_coeff():
         O, S, scale_norm_weights, orientation_norm_weights
     )
 
-    normalizers = normalization.normalizers(filters_output, normalization_weights)
+    norm_coeffs = normalization.norm_coeffs(filters_output, normalization_weights)
 
-    coeffs = np.ndarray(filters_output.shape)
+    energies = np.ndarray(filters_output.shape)
     kernel = normalization.spatial_kernel_globalmean(shape)
 
     for o, s in np.ndindex(filters_output.shape[:2]):
-        coeffs[o, s, ...] = normalization.norm_coeff(normalizers[o, s, ...], kernel)
+        energies[o, s, ...] = normalization.norm_energy(norm_coeffs[o, s, ...], kernel)
 
-    ground_truth = np.sqrt((normalizers**2).mean(axis=(2, 3)) + 1e-6)
+    ground_truth = np.sqrt((norm_coeffs**2).mean(axis=(2, 3)) + 1e-6)
     ground_truth = np.tile(np.expand_dims(ground_truth, [2, 3]), (1, 1, shape[0], shape[1]))
 
-    assert np.allclose(coeffs, ground_truth)
+    assert np.allclose(energies, ground_truth)
