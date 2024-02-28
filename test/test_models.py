@@ -22,7 +22,7 @@ def test_lodog_output(stimulus, output_LODOG_MATLAB, MATLAB_LODOG_params):
         visextent,
         window_sigma=MATLAB_LODOG_params["sig1"] / 32,
     )
-    output = model.apply(stimulus)
+    output = model.apply(stimulus, eps=1e-6)
     assert np.allclose(output, output_LODOG_MATLAB)
 
 
@@ -33,5 +33,5 @@ def test_flodog_output(stimulus, output_FLODOG_MATLAB, MATLAB_FLODOG_params):
         sdmix=MATLAB_FLODOG_params["sdmix"],
         spatial_window_scalar=MATLAB_FLODOG_params["sigx"],
     )
-    output = model.apply(stimulus)
+    output = model.apply(stimulus, eps=1e-6)
     assert np.allclose(output, output_FLODOG_MATLAB)

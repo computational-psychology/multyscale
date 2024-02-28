@@ -1,3 +1,20 @@
+# -*- coding: utf-8 -*-
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: sdmix,incorrectly_encoded_metadata,spatial_window_scalar,size,title,-all
+#     custom_cell_magics: kql
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.11.2
+#   kernelspec:
+#     display_name: multyscale
+#     language: python
+#     name: python3
+# ---
+
 # %% [markdown]
 # # Exploring FLODOG normalization parameter
 # This guide describes how to change the normalization parameters
@@ -86,7 +103,7 @@ fig.supylabel("Orientation $o$")
 plt.show()
 
 # %% Output default model
-normalized_4_05 = FLODOG.normalize_outputs(filters_output)
+normalized_4_05 = FLODOG.normalize_outputs(filters_output, eps=1e-6)
 output_4_05 = np.sum(normalized_4_05, axis=(0, 1))
 
 # %% [markdown]
@@ -127,7 +144,7 @@ normalization_weights = multyscale.normalization.create_normalization_weights(
 # FLODOG.normalization_weights = normalization_weights
 
 # %% Determine normalizing coefficients
-normalizing_coefficients_3 = multyscale.normalization.normalizers(
+normalizing_coefficients_3 = multyscale.normalization.norm_coeffs(
     filters_output, normalization_weights
 )
 
@@ -153,11 +170,11 @@ plt.show()
 # (the $\sigma$ of the 2D Gaussian)
 # to the spatial scale of the filter being normalized.
 # This is controlled by a parameter `spatial_window_scalar`:
-# $\sigma = \mathrm{spatial_window_scalar} \times s$.
+# $\sigma = \texttt{spatial window scalar} \times s$.
 # To explore how, here we apply various parameterizations of this normalization
 # to the same stimulus image and corresponding (weighted) filter outputs.
 
-# %% FLODOG with spatial_window_scalar = 2
+# %% FLODOG with spatial_window_scalar=2
 # Set parameter
 spatial_window_scalar = 2
 # FLODOG.spatial_window_scalar = spaial_window_scalar
@@ -169,7 +186,7 @@ window_sigmas = spatial_window_scalar * np.broadcast_to(
 FLODOG.window_sigmas = window_sigmas
 
 # Apply spatial averaging windows to normalizing coefficients
-energies_2_3 = FLODOG.normalizers_to_RMS(normalizing_coefficients_3)
+energies_2_3 = FLODOG.norm_energies(normalizing_coefficients_3, eps=1e-6)
 
 # Visualize each energy estimate
 fig, axs = plt.subplots(*energies_2_3.shape[:2], sharex="all", sharey="all")
@@ -186,7 +203,7 @@ fig.supylabel("Orientation $o$")
 plt.show()
 
 # %% Output
-normalized_2_3 = filters_output / energies_2_3
+normalized_2_3 = filters_output / (energies_2_3 + 1e-6)
 output_2_3 = np.sum(normalized_2_3, axis=(0, 1))
 
 # %% Comparing FLODOG outputs
@@ -233,7 +250,7 @@ FLODOG_4_3 = multyscale.models.FLODOG_RHS2007(
 # to normalize the filter outputs accordingly.
 
 # %% Normalize
-normalized_4_3 = FLODOG_4_3.normalize_outputs(filters_output)
+normalized_4_3 = FLODOG_4_3.normalize_outputs(filters_output, eps=1e-6)
 
 # %% [markdown]
 # To then readout the final model prediction,
@@ -291,11 +308,11 @@ FLODOG_2_05 = multyscale.models.FLODOG_RHS2007(
 # )
 
 # %% Outputs
-output_2_05 = FLODOG_2_05.normalize_outputs(filters_output).sum((0, 1))
+output_2_05 = FLODOG_2_05.normalize_outputs(filters_output, eps=1e-6).sum((0, 1))
 
 # %% LODOG, $\sigma=4$
 LODOG = multyscale.models.LODOG_RHS2007(shape=stimulus.shape, visextent=visextent, window_sigma=4)
-output_LODOG_4 = LODOG.normalize_outputs(filters_output).sum((0, 1))
+output_LODOG_4 = LODOG.normalize_outputs(filters_output, eps=1e-6).sum((0, 1))
 
 
 # %% [markdown]
@@ -312,7 +329,7 @@ output_LODOG_4 = LODOG.normalize_outputs(filters_output).sum((0, 1))
 # - subtract the two means
 # - divide the whole model output by this difference
 
-# %% Standardize such that effect size = 1
+# %% Standardize such that effect size=1
 mask = np.load("example_stimulus_mask.npy")
 
 

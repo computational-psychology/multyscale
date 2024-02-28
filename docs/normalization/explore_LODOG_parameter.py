@@ -109,7 +109,7 @@ plt.show()
 # and thus also only need to be calculated once for all the parameterizations explored here.
 
 # %%
-normalizing_coefficients = LODOG.normalizers(filters_output)
+normalizing_coefficients = LODOG.norm_coeffs(filters_output)
 
 # %% Gaussian spatial averaging window [markdown]
 # The spatial averaging window in the LODOG model is
@@ -128,9 +128,11 @@ window_sigmas = LODOG.window_sigmas
 
 assert np.all(window_sigmas == window_sigma)
 
-spatial_filters = multyscale.normalization.spatial_avg_windows_gaussian(
-    LODOG.bank.x, LODOG.bank.y, LODOG.window_sigmas
-)
+spatial_filters = np.ndarray(filters_output.shape)
+for o, s in np.ndindex(LODOG.window_sigmas.shape[:2]):
+    spatial_filters[o, s, :] = multyscale.normalization.spatial_kernel_gaussian(
+        LODOG.bank.x, LODOG.bank.y, LODOG.window_sigmas[o, s, :]
+    )
 plt.subplot(1, 2, 1)
 plt.imshow(spatial_filters[0, 0, ...], cmap="coolwarm", extent=visextent)
 plt.colorbar()
@@ -147,13 +149,13 @@ plt.ylabel("Y (deg. vis. angle)")
 plt.show()
 
 # %% [markdown]
-# The model method `.normalizers_to_RMS()` automatically generates and applies
+# The model method `.norm_energies()` automatically generates and applies
 # these spatial averaging windows to the proved normalizing coeffiencts.
 # This produces an $O \times S$ set of locally ($Y \times X$) calculated energies,
 # one for each normalizaing coefficient.
 
 # %%
-energies_4 = LODOG.normalizers_to_RMS(normalizing_coefficients)
+energies_4 = LODOG.norm_energies(normalizing_coefficients, eps=1e-6)
 
 # Visualize each local energy
 fig, axs = plt.subplots(*energies_4.shape[:2], sharex="all", sharey="all")
@@ -203,10 +205,14 @@ LODOG.window_sigmas = np.ones(shape=(*LODOG.bank.shape[:2], 2)) * LODOG.window_s
 assert np.all(LODOG.window_sigmas == LODOG.window_sigma)
 
 # %%
-spatial_filters = multyscale.normalization.spatial_avg_windows_gaussian(
-    LODOG.bank.x, LODOG.bank.y, LODOG.window_sigmas
-)
-plt.subplot(1, 2, 1)
+spatial_filters = np.ndarray(filters_output.shape)
+for o, s in np.ndindex(LODOG.window_sigmas.shape[:2]):
+    spatial_filters[o, s, :] = multyscale.normalization.spatial_kernel_gaussian(
+        LODOG.bank.x, LODOG.bank.y, LODOG.window_sigmas[o, s, :]
+    )
+
+# %% 
+plt.subplot(1, 2, 1) 
 plt.imshow(spatial_filters[0, 0, ...], cmap="coolwarm", extent=visextent)
 plt.colorbar()
 plt.subplot(1, 2, 2)
@@ -226,7 +232,7 @@ plt.show()
 # more locally restricted (smaller spatial averaging window) energies
 
 # %%
-energies_1 = LODOG.normalizers_to_RMS(normalizing_coefficients)
+energies_1 = LODOG.norm_energies(normalizing_coefficients, eps=1e-6)
 
 # Visualize each local energy
 fig, axs = plt.subplots(*energies_4.shape[:2], sharex="all", sharey="all")
@@ -242,7 +248,7 @@ plt.show()
 # as would be expected.
 
 # %%
-normalized_outputs_1 = filters_output / energies_1
+normalized_outputs_1 = filters_output / (energies_1 + 1e-6)
 
 # Visualize each normalized output
 vmin = min(np.min(normalized_outputs_4), np.min(normalized_outputs_1))

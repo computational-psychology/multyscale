@@ -165,8 +165,8 @@ plt.show()
 # the filter outputs at these spatial scales.
 
 # %% Normalizing coefficients
-normalizing_coefficients_LODOG = LODOG.normalizers(filters_output)
-normalizing_coefficients_FLODOG = FLODOG.normalizers(filters_output)
+normalizing_coefficients_LODOG = LODOG.norm_coeffs(filters_output)
+normalizing_coefficients_FLODOG = FLODOG.norm_coeffs(filters_output)
 
 # Visualize each norm. coeff.
 vmin = min(np.min(normalizing_coefficients_LODOG), np.min(normalizing_coefficients_FLODOG))
@@ -215,12 +215,17 @@ plt.show()
 # both in space, and in _spatial scale_ / _**F**requency_.
 
 # %% Spatial averaging window
-spatial_windows_LODOG = multyscale.normalization.spatial_avg_windows_gaussian(
-    LODOG.bank.x, LODOG.bank.y, LODOG.window_sigmas
-)
-spatial_windows_FLODOG = multyscale.normalization.spatial_avg_windows_gaussian(
-    FLODOG.bank.x, FLODOG.bank.y, FLODOG.window_sigmas
-)
+spatial_windows_LODOG = np.ndarray(filters_output.shape)
+for o, s in np.ndindex(LODOG.window_sigmas.shape[:2]):
+    spatial_windows_LODOG[o, s, :] = multyscale.normalization.spatial_kernel_gaussian(
+        LODOG.bank.x, LODOG.bank.y, LODOG.window_sigmas[o, s, :]
+    )
+
+spatial_windows_FLODOG = np.ndarray(filters_output.shape)
+for o, s in np.ndindex(FLODOG.window_sigmas.shape[:2]):
+    spatial_windows_FLODOG[o, s, :] = multyscale.normalization.spatial_kernel_gaussian(
+        FLODOG.bank.x, FLODOG.bank.y, FLODOG.window_sigmas[o, s, :]
+    )
 
 # Visualize each spatial avg. window
 fig, axs = plt.subplots(2, spatial_windows_LODOG.shape[1], sharex="all", sharey="all")
@@ -244,8 +249,8 @@ plt.show()
 # that form the denominators of the normalization
 
 # %% Energy estimates
-energies_LODOG = LODOG.normalizers_to_RMS(normalizing_coefficients_LODOG)
-energies_FLODOG = FLODOG.normalizers_to_RMS(normalizing_coefficients_FLODOG)
+energies_LODOG = LODOG.norm_energies(normalizing_coefficients_LODOG, eps=1e-6)
+energies_FLODOG = FLODOG.norm_energies(normalizing_coefficients_FLODOG, eps=1e-6)
 
 # Visualize
 vmin = min(np.min(energies_LODOG), np.min(energies_FLODOG))

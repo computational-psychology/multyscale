@@ -135,7 +135,7 @@ filters_output = FLODOG.weight_outputs(filters_output)
 #     a 4D tensor of same dimensions and size as $\mathbf{F}$
 #
 # Combined, this gives:
-# 
+#
 # $$ f'_{o, s, y, x} := 
 #  \frac{f_{o, s, y, x}}
 #  {\sqrt{\mathrm{avg_{xy}}((\mathbf{w}\cdot\mathbf{F})^2)}} 
@@ -224,7 +224,10 @@ plt.show()
 # to create the normalizing coefficients $\mathbf{n}$
 
 # %% Normalizing coefficients
-normalizing_coefficients = multyscale.normalization.normalizers(filters_output, interaction_weights)
+normalizing_coefficients = multyscale.normalization.norm_coeffs(filters_output, interaction_weights)
+
+assert np.array_equal(normalizing_coefficients, ODOG.norm_coeffs(filters_output))
+
 
 # Visualize each normalizing coefficient n_{o,s}, i.e.
 # the normalizer image for each individual filter f_{o,s}
@@ -236,7 +239,13 @@ fig.supylabel("Orientation $o'$")
 plt.show()
 
 # %% [markdown]
-# The LODOG model uses the same interaction weights as the base ODOG model.
+# The LODOG model uses the same interaction weights
+# (and thus same normalizing coefficients)
+# as the base ODOG model.
+
+# %%
+normalizing_coefficients_LODOG = LODOG.norm_coeffs(filters_output)
+assert np.array_equal(normalizing_coefficients, normalizing_coefficients_LODOG)
 
 # %% [markdown]
 # The FLODOG model uses a different set of interaction weights.
@@ -262,7 +271,7 @@ axs[0, 0].pcolor(
     vmax=1,
 )
 axs[0, 0].set_ylabel("scale of filter to normalize (idx)")
-axs[0, 0].set_title("LODOG weights")
+axs[0, 0].set_title("(L)ODOG weights")
 
 axs[0, 1].pcolor(
     FLODOG.scale_norm_weights,
@@ -290,8 +299,7 @@ plt.show()
 # the filter outputs at these spatial scales.
 
 # %% Normalizing coefficients
-normalizing_coefficients_LODOG = LODOG.normalizers(filters_output)
-normalizing_coefficients_FLODOG = FLODOG.normalizers(filters_output)
+normalizing_coefficients_FLODOG = FLODOG.norm_coeffs(filters_output)
 
 # Visualize each norm. coeff.
 vmin = min(np.min(normalizing_coefficients_LODOG), np.min(normalizing_coefficients_FLODOG))
@@ -308,7 +316,7 @@ for o, s in np.ndindex(normalizing_coefficients_LODOG.shape[:2]):
     )
 fig.supxlabel("Spatial scale/freq. $s'$")
 fig.supylabel("Orientation $o'$")
-fig.suptitle("LODOG")
+fig.suptitle("(L)ODOG")
 plt.show()
 
 fig, axs = plt.subplots(*normalizing_coefficients_FLODOG.shape[:2], sharex="all", sharey="all")
@@ -344,7 +352,7 @@ plt.show()
 # Energy here is expressed as the (spatial) root-mean-square of the signal.
 #
 # 1. Square each ($X \times Y = 1024 \times 1024$) pixel of the normalizing coefficient $n_{o, s}$
-# 2. Average \mathrm{avg_{yx}} across pixels
+# 2. Average $\mathrm{avg_{yx}}$ across pixels
 # 3. Square-root of this average
 #
 # $$ e_{o, s, y, x}  := \sqrt{\mathrm{avg_{yx}}(n_{o, s}^2)} $$
@@ -359,8 +367,8 @@ plt.show()
 # This results in a single energy estimate for each $(o', s')$.
 
 # %% Global image RMS
-ODOG_normalizers = ODOG.normalizers(filters_output)
-ODOG_energies = ODOG.normalizers_to_RMS(ODOG_normalizers)
+normalizing_coefficients_ODOG = normalizing_coefficients
+ODOG_energies = np.sqrt((normalizing_coefficients_ODOG ** 2).mean(axis=(-1, -2)))
 print(ODOG_energies.shape)
 
 # Visualise
@@ -421,7 +429,7 @@ print(ODOG_energies_i.shape)
 # %% Divisive normalization
 norm_i_outputs = filters_output / ODOG_energies_i
 
-assert np.allclose(ODOG_outputs, norm_i_outputs)
+assert np.array_equal(ODOG_outputs, norm_i_outputs)
 
 
 # %% [markdown]
@@ -443,29 +451,33 @@ assert np.allclose(ODOG_outputs, norm_i_outputs)
 #
 
 # %% Spatial Gaussian
-sigmas = LODOG.window_sigmas
-G = multyscale.normalization.spatial_avg_windows_gaussian(LODOG.bank.x, LODOG.bank.y, sigmas)
+spatial_kernels = np.ndarray(filters_output.shape)
+for o, s in np.ndindex(LODOG.window_sigmas.shape[:2]):
+    spatial_kernels[o, s, :] = multyscale.normalization.spatial_kernel_gaussian(
+        LODOG.bank.x, LODOG.bank.y, LODOG.window_sigmas[o, s]
+    )
+
+assert np.array_equal(spatial_kernels, LODOG.spatial_kernels())
 
 # %% [markdown]
 # Applying this Gaussian window gives the _local_ (estimate of) of energy
 
 # %% Local RMS
-normalization_local_energy = np.square(normalizing_coefficients.copy())
-for o, s in np.ndindex(normalizing_coefficients.shape[:2]):
-    normalization_local_energy[o, s] = multyscale.filters.apply(
-        G[o, s, :], normalization_local_energy[o, s], padval=0
+local_energies = np.ndarray(normalizing_coefficients_LODOG.shape)
+for o, s in np.ndindex(normalizing_coefficients_LODOG.shape[:2]):
+    norm = normalizing_coefficients_LODOG[o, s]
+    norm = norm ** 2
+    local_avg = multyscale.filters.apply(
+        norm, spatial_kernels[o, s], padval=0
     )
+    local_energies[o, s] = np.sqrt(local_avg + 1e-6)  # minor offset to avoid negatives/0's
 
-normalization_local_energy = (
-    np.sqrt(normalization_local_energy + 1e-6) + 1e-6
-)  # minor offset to avoid negatives/0's
-
-# assert np.array_equal(normalization_local_energy, LODOG.normalizers_to_RMS(normalizing_coefficients))
+assert np.allclose(local_energies, LODOG.norm_energies(normalizing_coefficients_LODOG, eps=1e-6))
 
 # Visualize each local RMS
-fig, axs = plt.subplots(*normalization_local_energy.shape[:2], sharex="all", sharey="all")
-for o, s in np.ndindex(normalization_local_energy.shape[:2]):
-    axs[o, s].imshow(normalization_local_energy[o, s], cmap="coolwarm", extent=visextent)
+fig, axs = plt.subplots(*local_energies.shape[:2], sharex="all", sharey="all")
+for o, s in np.ndindex(local_energies.shape[:2]):
+    axs[o, s].imshow(local_energies[o, s], cmap="coolwarm", extent=visextent)
 fig.supxlabel("Spatial scale/freq. $s'$")
 fig.supylabel("Orientation $o'$")
 plt.show()
@@ -479,7 +491,7 @@ plt.show()
 # %% Divisive normalization
 # Since the local energies tensor is the same $(O, S, X, Y)$ shape as the filter outputs
 # we can simply divide
-LODOG_outputs = filters_output / normalization_local_energy
+LODOG_outputs = filters_output / (local_energies + 1e-6)
 
 # Visualize each normalized f'_{o',s'}
 fig, axs = plt.subplots(*LODOG_outputs.shape[:2], sharex="all", sharey="all")
@@ -511,10 +523,10 @@ plt.show()
 
 # %%
 # have doubly sized kernel so that pixel reaches each pixel in the average
-A = np.ones((1024 * 2, 1024 * 2)) / 1024**2
+spatial_kernel = np.ones((1024 * 2, 1024 * 2)) / 1024**2
 
 img = filters_output[3, 4]
-mean_filtered = multyscale.filters.apply(img, A, padval=0)
+mean_filtered = multyscale.filters.apply(img, spatial_kernel, padval=0)
 
 assert np.allclose(mean_filtered, img.mean())
 
@@ -545,17 +557,21 @@ assert np.allclose(mean_filtered, img.mean())
 #
 
 # %% Global image averaging as filter
-A = np.ones((1024 * 2, 1024 * 2)) / 1024**2
-
 # calculate energy using the kernel
-ODOG_energies_i2 = np.ndarray(filters_output.shape)
-for o, s in np.ndindex(filters_output.shape[:2]):
-    norm = ODOG_normalizers[o, s, ...] ** 2
-    mean = multyscale.filters.apply(norm, A, padval=0)
-    ODOG_energies_i2[o, s] = np.sqrt(mean)
+ODOG_energies_i2 = np.ndarray(normalizing_coefficients_ODOG.shape)
+for o, s in np.ndindex(normalizing_coefficients_ODOG.shape[:2]):
+    norm_coeff = normalizing_coefficients_ODOG[o, s]
+    norm = norm_coeff ** 2
+    spatial_average = multyscale.filters.apply(norm, spatial_kernel, padval=0)
+    energy = np.sqrt(spatial_average)
+    ODOG_energies_i2[o, s] = energy
 
-# this replicates the just verified normalizing image
 assert np.allclose(ODOG_energies_i2, ODOG_energies_i)
+
+# %%
+ODOG_outputs_i2 = filters_output / ODOG_energies_i2
+
+assert np.allclose(ODOG_outputs, ODOG_outputs_i2)
 
 # %% [markdown]
 # ### Summary
