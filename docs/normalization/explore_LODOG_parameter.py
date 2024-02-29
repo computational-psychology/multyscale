@@ -150,9 +150,9 @@ plt.show()
 
 # %% [markdown]
 # The model method `.norm_energies()` automatically generates and applies
-# these spatial averaging windows to the proved normalizing coeffiencts.
+# these spatial averaging windows to the provided normalizing coefficients.
 # This produces an $O \times S$ set of locally ($Y \times X$) calculated energies,
-# one for each normalizaing coefficient.
+# one for each normalizing coefficient.
 
 # %%
 energies_4 = LODOG.norm_energies(normalizing_coefficients, eps=1e-6)
@@ -211,8 +211,8 @@ for o, s in np.ndindex(LODOG.window_sigmas.shape[:2]):
         LODOG.bank.x, LODOG.bank.y, LODOG.window_sigmas[o, s, :]
     )
 
-# %% 
-plt.subplot(1, 2, 1) 
+# %%
+plt.subplot(1, 2, 1)
 plt.imshow(spatial_filters[0, 0, ...], cmap="coolwarm", extent=visextent)
 plt.colorbar()
 plt.subplot(1, 2, 2)
@@ -283,14 +283,14 @@ plt.plot(
     output_LODOG_4[512, :],
     color="black",
     linestyle="dotted",
-    label="LODOG $\sigma=4$",
+    label=r"LODOG $\sigma=4$",
 )
 plt.plot(
     np.linspace(visextent[2], visextent[3], stimulus.shape[1]),
     output_LODOG_1[512, :],
     color="black",
     linestyle="dashed",
-    label="LODOG $\sigma=1$",
+    label=r"LODOG $\sigma=1$",
 )
 plt.legend()
 plt.show()

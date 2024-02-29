@@ -71,7 +71,7 @@ type = "gitlab"
 
 [tool.black]
 line-length = 99
-target-version = ["py311"]
+target-version = ["py312"]
 
 [tool.isort]
 profile = "black"
@@ -79,4 +79,4 @@ line_length = 99
 
 [tool.codespell]
 skip = "./docs/_build/*,*.ipynb"
-#exclude-file = ".codespell.ignore"
+exclude-file = ".codespell.ignore"

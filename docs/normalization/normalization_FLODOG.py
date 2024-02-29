@@ -74,7 +74,7 @@ plt.show()
 # Secondly, they argue that because similar spatial frequencies cluster in early visual regions,
 # they are also more likely to inhibit each other.
 # In other words, filters at similar scales (sensitive to similar spatial frequencies)
-# should normalize each other more strongly than filters with very different sensitivies.
+# should normalize each other more strongly than filters with very different sensitivities.
 #
 # Thus, Robinson, Hammon, & de Sa (2007) propose a
 # (spatial) **F**requency-specific **L**ocally normalized -ODOG (FLODOG) model,

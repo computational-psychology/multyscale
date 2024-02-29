@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -220,14 +219,14 @@ plt.plot(
     output_4_05[512, :],
     color="black",
     linestyle="dotted",
-    label="FLODOG $\sigma=4; sdmix=0.5$",
+    label=r"FLODOG $\sigma=4; sdmix=0.5$",
 )
 plt.plot(
     np.linspace(visextent[2], visextent[3], stimulus.shape[1]),
     output_2_3[512, :],
     color="black",
     linestyle="dashed",
-    label="FLODOG $\sigma=2s; sdmix=1$",
+    label=r"FLODOG $\sigma=2s; sdmix=1$",
 )
 plt.legend()
 plt.show()
@@ -273,14 +272,14 @@ plt.plot(
     output_4_05[512, :],
     color="black",
     linestyle="dotted",
-    label="FLODOG $\sigma=4; sdmix=0.5$",
+    label=r"FLODOG $\sigma=4; sdmix=0.5$",
 )
 plt.plot(
     np.linspace(visextent[2], visextent[3], stimulus.shape[1]),
     output_4_3[512, :],
     color="black",
     linestyle="dashed",
-    label="FLODOG $\sigma=2s; sdmix=1$",
+    label=r"FLODOG $\sigma=2s; sdmix=1$",
 )
 plt.legend()
 plt.show()
@@ -373,7 +372,7 @@ plt.plot(
     output_4_05[512, :],
     color="blue",
     linestyle="solid",
-    label="FLODOG $\sigma=4s, m=0.5$",
+    label=r"FLODOG $\sigma=4s, m=0.5$",
 )
 plt.grid(axis="y")
 plt.yticks(ticks=range(-4, 6, 2))
@@ -387,7 +386,7 @@ plt.plot(
     output_2_05[512, :],
     color="blue",
     linestyle="solid",
-    label="FLODOG $\sigma=2s, m=0.5$",
+    label=r"FLODOG $\sigma=2s, m=0.5$",
 )
 plt.grid(axis="y")
 plt.yticks(ticks=range(-4, 6, 2))
@@ -401,7 +400,7 @@ plt.plot(
     output_4_3[512, :],
     color="blue",
     linestyle="solid",
-    label="FLODOG $\sigma=4s, m=3.0$",
+    label=r"FLODOG $\sigma=4s, m=3.0$",
 )
 plt.grid(axis="y")
 plt.yticks(ticks=range(-4, 6, 2))

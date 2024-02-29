@@ -136,9 +136,9 @@ filters_output = FLODOG.weight_outputs(filters_output)
 #
 # Combined, this gives:
 #
-# $$ f'_{o, s, y, x} := 
+# $$ f'_{o, s, y, x} :=
 #  \frac{f_{o, s, y, x}}
-#  {\sqrt{\mathrm{avg_{xy}}((\mathbf{w}\cdot\mathbf{F})^2)}} 
+#  {\sqrt{\mathrm{avg_{xy}}((\mathbf{w}\cdot\mathbf{F})^2)}}
 # $$
 #
 # All three (F)(L)ODOG models can be expressed in this form,
@@ -156,7 +156,7 @@ filters_output = FLODOG.weight_outputs(filters_output)
 # one normalizing coefficient $n_{o',s'}$ per filter $f_{o',s'}$ to normalize.
 #
 # In `multyscale`, we calculate these normalizing coefficients
-# as a tensor dot-product beween a set of weights $\mathbf{w}$
+# as a tensor dot-product between a set of weights $\mathbf{w}$
 # and all filter outputs $\mathbf{F}$.
 # The 4D tensor ($O, S, O, S$) of interaction weights $\mathbf{w}$
 # can be constructed by combined separately defined sets of weights
@@ -224,7 +224,9 @@ plt.show()
 # to create the normalizing coefficients $\mathbf{n}$
 
 # %% Normalizing coefficients
-normalizing_coefficients = multyscale.normalization.norm_coeffs(filters_output, interaction_weights)
+normalizing_coefficients = multyscale.normalization.norm_coeffs(
+    filters_output, interaction_weights
+)
 
 assert np.array_equal(normalizing_coefficients, ODOG.norm_coeffs(filters_output))
 
@@ -368,7 +370,7 @@ plt.show()
 
 # %% Global image RMS
 normalizing_coefficients_ODOG = normalizing_coefficients
-ODOG_energies = np.sqrt((normalizing_coefficients_ODOG ** 2).mean(axis=(-1, -2)))
+ODOG_energies = np.sqrt((normalizing_coefficients_ODOG**2).mean(axis=(-1, -2)))
 print(ODOG_energies.shape)
 
 # Visualise
@@ -466,10 +468,8 @@ assert np.array_equal(spatial_kernels, LODOG.spatial_kernels())
 local_energies = np.ndarray(normalizing_coefficients_LODOG.shape)
 for o, s in np.ndindex(normalizing_coefficients_LODOG.shape[:2]):
     norm = normalizing_coefficients_LODOG[o, s]
-    norm = norm ** 2
-    local_avg = multyscale.filters.apply(
-        norm, spatial_kernels[o, s], padval=0
-    )
+    norm = norm**2
+    local_avg = multyscale.filters.apply(norm, spatial_kernels[o, s], padval=0)
     local_energies[o, s] = np.sqrt(local_avg + 1e-6)  # minor offset to avoid negatives/0's
 
 assert np.allclose(local_energies, LODOG.norm_energies(normalizing_coefficients_LODOG, eps=1e-6))
@@ -561,7 +561,7 @@ assert np.allclose(mean_filtered, img.mean())
 ODOG_energies_i2 = np.ndarray(normalizing_coefficients_ODOG.shape)
 for o, s in np.ndindex(normalizing_coefficients_ODOG.shape[:2]):
     norm_coeff = normalizing_coefficients_ODOG[o, s]
-    norm = norm_coeff ** 2
+    norm = norm_coeff**2
     spatial_average = multyscale.filters.apply(norm, spatial_kernel, padval=0)
     energy = np.sqrt(spatial_average)
     ODOG_energies_i2[o, s] = energy
@@ -592,7 +592,7 @@ assert np.allclose(ODOG_outputs, ODOG_outputs_i2)
 # %% [markdown]
 # ## Generalized formulation
 #
-# All three (F)(L)ODOG can thus be expressed as parameteric variations
+# All three (F)(L)ODOG can thus be expressed as parametric variations
 # of the same overall divisive normalization structure:
 #
 # $$ f'_{o, s, y, x} := \frac{f_{o, s, y, x}}{\sqrt{\mathbf{A} * (\mathbf{w} \cdot \mathbf{F})^2}} $$

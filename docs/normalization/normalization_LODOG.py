@@ -381,13 +381,13 @@ plt.show()
 normalization_local_energies = np.ndarray(normalizing_coefficients.shape)
 for o, s in np.ndindex(normalizing_coefficients.shape[:2]):
     coeff = normalizing_coefficients[o, s] ** 2
-    energy = multyscale.filters.apply(
-        spatial_windows[o, s], coeff, padval=0
-    )
-    energy = np.sqrt(energy + 1e-6) # minor offset to avoid negatives/0's
+    energy = multyscale.filters.apply(spatial_windows[o, s], coeff, padval=0)
+    energy = np.sqrt(energy + 1e-6)  # minor offset to avoid negatives/0's
     normalization_local_energies[o, s, :] = energy
 
-assert np.allclose(normalization_local_energies, LODOG.norm_energies(normalizing_coefficients, eps=1e-6))
+assert np.allclose(
+    normalization_local_energies, LODOG.norm_energies(normalizing_coefficients, eps=1e-6)
+)
 
 # Visualize each local RMS
 fig, axs = plt.subplots(*normalization_local_energies.shape[:2], sharex="all", sharey="all")

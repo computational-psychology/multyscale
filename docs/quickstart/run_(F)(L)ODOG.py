@@ -297,7 +297,7 @@ plt.show()
 # are convolved with the stimulus image.
 # The general -DOG family of models uses
 # *D*ifference-*o*f-*G*aussian filters,
-# which act as intensity-difference detecters.
+# which act as intensity-difference detectors.
 # The scale of the filter directly determines the spatial frequency selectivity.
 # The -ODOG subfamily of models uses *O*riented DoG filters
 # that also have one of several orientations $O$.
