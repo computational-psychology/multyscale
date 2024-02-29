@@ -18,9 +18,9 @@ import numpy as np
 import RHS_implementation
 
 
-def test_filterbank(rhs_bank, MATLAB_bank):
+def test_filterbank(RHS_bank, MATLAB_bank):
     """Python filterbank matches RHS MATLAB filterbank"""
-    assert np.allclose(rhs_bank, MATLAB_bank)
+    assert np.allclose(RHS_bank, MATLAB_bank)
 
 
 def test_RHSconv_MATLAB(MATLAB_filteroutput, MATLAB_bank, stimulus):
@@ -34,12 +34,12 @@ def test_RHSconv_MATLAB(MATLAB_filteroutput, MATLAB_bank, stimulus):
     assert np.allclose(MATLAB_filteroutput, filters_output)
 
 
-def test_RHSconv_RHS(MATLAB_filteroutput, stimulus, rhs_bank):
+def test_RHSconv_RHS(MATLAB_filteroutput, stimulus, RHS_bank):
     """Python convolution with Python filters matches RHS MATLAB filters output"""
-    filters_output = np.empty(rhs_bank.shape)
-    for o, s in np.ndindex(rhs_bank.shape[:2]):
+    filters_output = np.empty(RHS_bank.shape)
+    for o, s in np.ndindex(RHS_bank.shape[:2]):
         filters_output[o, s, ...] = RHS_implementation.ourconv(
-            stimulus, rhs_bank[o, s, ...], pad=0.5
+            stimulus, RHS_bank[o, s, ...], pad=0.5
         )
 
     assert np.allclose(MATLAB_filteroutput, filters_output)
@@ -55,7 +55,7 @@ def test_ODOG(output_ODOG_MATLAB, MATLAB_filteroutput):
     assert np.allclose(output, output_ODOG_MATLAB)
 
 
-def test_LODOG(output_LODOG_MATLAB, MATLAB_filteroutput, MATLAB_LODOG_params):
+def test_LODOG(output_LODOG_MATLAB, MATLAB_filteroutput, params_LODOG_MATLAB):
     """Python LODOG normalization & output matches RHS MATLAB LODOG output"""
 
     # Weight filteroutput by scale
@@ -64,7 +64,7 @@ def test_LODOG(output_LODOG_MATLAB, MATLAB_filteroutput, MATLAB_LODOG_params):
     # Normalize
     normed_multi_responses = RHS_implementation.LODOG_normalize(
         filters_output,
-        **MATLAB_LODOG_params,
+        **params_LODOG_MATLAB,
     )
 
     # Readout model output by summing normalized channel outputs
@@ -74,7 +74,7 @@ def test_LODOG(output_LODOG_MATLAB, MATLAB_filteroutput, MATLAB_LODOG_params):
     assert np.allclose(output, output_LODOG_MATLAB)
 
 
-def test_FLODOG(output_FLODOG_MATLAB, MATLAB_filteroutput, MATLAB_FLODOG_params):
+def test_FLODOG(output_FLODOG_MATLAB, MATLAB_filteroutput, params_FLODOG_MATLAB):
     """Python FLODOG normalization & output matches RHS MATLAB FLODOG output"""
 
     # Weight filteroutput by scale
@@ -83,7 +83,7 @@ def test_FLODOG(output_FLODOG_MATLAB, MATLAB_filteroutput, MATLAB_FLODOG_params)
     # Normalize
     normed_multi_responses = RHS_implementation.FLODOG_normalize(
         filters_output,
-        **MATLAB_FLODOG_params,
+        **params_FLODOG_MATLAB,
     )
 
     # Sum normalized channel outputs, to read out model output

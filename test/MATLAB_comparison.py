@@ -1,10 +1,10 @@
-import os
+from pathlib import Path
 
 import numpy as np
 import pytest
 from scipy import io
 
-filepath_MATLAB_output = os.path.abspath(__file__ + "../../odog_MATLAB.mat")
+filepath_MATLAB = Path(__file__).parent / "MATLAB_RHS2007_(F)(L)ODOG.mat"
 
 
 @pytest.fixture()
@@ -16,52 +16,54 @@ def MATLAB_visextent():
 
 
 @pytest.fixture()
-def MATLAB_shape():
+def MATLAB_shape(MATLAB_bank):
     # Shape (resolution) of image, filters (Y, X)
-    return (1024, 1024)
+    return MATLAB_bank.shape[-2:]
 
 
 @pytest.fixture()
 def MATLAB_bank():
     # Load RHS bank from MATLAB implementation
-    return np.array(io.loadmat(filepath_MATLAB_output)["filters"].tolist())
+    return np.array(io.loadmat(filepath_MATLAB)["filterbank"].tolist())
 
 
 @pytest.fixture()
 def stimulus():
-    return io.loadmat(filepath_MATLAB_output)["illusion"]
+    return io.loadmat(filepath_MATLAB)["stimulus"]
 
 
 @pytest.fixture()
 def MATLAB_filteroutput():
     # Load RHS bank from MATLAB implementation
-    return np.array(io.loadmat(filepath_MATLAB_output)["filter_response"].tolist())
+    return np.array(io.loadmat(filepath_MATLAB)["filters_output"].tolist())
 
 
 @pytest.fixture()
 def output_ODOG_MATLAB():
-    return io.loadmat(filepath_MATLAB_output)["odog_output"]
+    return io.loadmat(filepath_MATLAB)["output_ODOG"]
 
 
 @pytest.fixture()
 def output_LODOG_MATLAB():
-    return io.loadmat(filepath_MATLAB_output)["lodog_output"]
+    return io.loadmat(filepath_MATLAB)["output_LODOG"]
 
 
 @pytest.fixture()
 def output_FLODOG_MATLAB():
-    return io.loadmat(filepath_MATLAB_output)["flodog_output"]
+    return io.loadmat(filepath_MATLAB)["output_FLODOG"]
 
 
 @pytest.fixture()
-def MATLAB_LODOG_params():
+def params_LODOG_MATLAB():
     """Normalization parameters used to produce the MATLAB output for LODOG"""
-    LODOG_params = {"sig1": 128, "sr": 1}
-    return LODOG_params
+    params_LODOG = io.loadmat(filepath_MATLAB)["params_LODOG"]
+    params_LODOG = {name: float(params_LODOG[name]) for name in params_LODOG.dtype.names}
+    return params_LODOG
 
 
 @pytest.fixture()
-def MATLAB_FLODOG_params():
+def params_FLODOG_MATLAB():
     """Normalization parameters used to produce the MATLAB output for FLODOG"""
-    FLODOG_params = {"sigx": 4, "sr": 1, "sdmix": 0.5}
-    return FLODOG_params
+    params_FLODOG = io.loadmat(filepath_MATLAB)["params_FLODOG"]
+    params_FLODOG = {name: float(params_FLODOG[name]) for name in params_FLODOG.dtype.names}
+    return params_FLODOG

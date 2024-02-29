@@ -13,11 +13,11 @@ visextent = np.array([-0.5, 0.5, -0.5, 0.5]) * (1023 / 32)
 
 # %% Model
 @pytest.fixture
-def model(stimulus, MATLAB_LODOG_params):
+def model(stimulus, params_LODOG_MATLAB):
     return multyscale.models.LODOG_RHS2007(
         stimulus.shape,
         visextent,
-        window_sigma=MATLAB_LODOG_params["sig1"] / 32,
+        window_sigma=params_LODOG_MATLAB["sig1"] / 32,
     )
 
 
@@ -40,21 +40,21 @@ def test_norm_coeffs(model, MATLAB_filteroutput):
     assert np.allclose(norm_coeffs, RHS_norms)
 
 
-def test_spatial_mask(model, MATLAB_LODOG_params):
+def test_spatial_mask(model, params_LODOG_MATLAB):
     # Is the spatial (Gaussian) averaging window the same?
-    RHS_kernel = RHS_implementation.LODOG_mask(sig1=MATLAB_LODOG_params["sig1"])
+    RHS_kernel = RHS_implementation.LODOG_mask(sig1=params_LODOG_MATLAB["sig1"])
     spatial_kernels = model.spatial_kernels()
     for o, s in np.ndindex(spatial_kernels.shape[:2]):
         assert np.allclose(spatial_kernels[o, s], RHS_kernel)
 
 
-def test_normalized_outputs(model, MATLAB_filteroutput, MATLAB_LODOG_params):
+def test_normalized_outputs(model, MATLAB_filteroutput, params_LODOG_MATLAB):
     weighted_outputs = model.weight_outputs(MATLAB_filteroutput)
 
     normed_outputs = model.normalize_outputs(weighted_outputs, eps=1e-6)
 
     RHS_normalized_outputs = RHS_implementation.LODOG_normalize(
-        weighted_outputs, sig1=MATLAB_LODOG_params["sig1"]
+        weighted_outputs, sig1=params_LODOG_MATLAB["sig1"]
     )
     assert np.allclose(normed_outputs, RHS_normalized_outputs)
 
