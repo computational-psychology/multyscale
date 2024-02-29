@@ -11,13 +11,13 @@ parts:
     - file: quickstart/quickstart
   - caption: Overiew
     chapters:
-    - file: topic_guides/overview
+    # - file: topic_guides/overview
     - file: topic_guides/history
   - caption: Filtering
     numbered: True
     chapters:
     - file: filtering/filters
-    - file: filtering/multiscale
+    # - file: filtering/multiscale
     - file: filtering/filterbanks
   - caption: Normalization
     numbered: True
@@ -31,7 +31,6 @@ parts:
       - file: normalization/explore_FLODOG_parameters
     - file: normalization/normalization_generalized
   # - caption: Decoding
-  #   numbered: False
   - caption: Reference
     chapters:
     - file: reference/api.md
