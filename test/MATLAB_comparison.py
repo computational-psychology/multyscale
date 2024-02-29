@@ -56,12 +56,14 @@ def output_FLODOG_MATLAB():
 @pytest.fixture()
 def MATLAB_LODOG_params():
     """Normalization parameters used to produce the MATLAB output for LODOG"""
-    LODOG_params = {"sig1": 128, "sr": 1}
-    return LODOG_params
+    params_LODOG = io.loadmat(filepath_MATLAB)["params_LODOG"]
+    params_LODOG = {name: float(params_LODOG[name]) for name in params_LODOG.dtype.names}
+    return params_LODOG
 
 
 @pytest.fixture()
 def MATLAB_FLODOG_params():
     """Normalization parameters used to produce the MATLAB output for FLODOG"""
-    FLODOG_params = {"sigx": 4, "sr": 1, "sdmix": 0.5}
-    return FLODOG_params
+    params_FLODOG = io.loadmat(filepath_MATLAB)["params_FLODOG"]
+    params_FLODOG = {name: float(params_FLODOG[name]) for name in params_FLODOG.dtype.names}
+    return params_FLODOG
