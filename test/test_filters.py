@@ -4,7 +4,7 @@ import RHS_implementation
 import multyscale
 
 # %% RHS bank
-rhs_bank = RHS_implementation.filterbank()
+RHS_bank = RHS_implementation.filterbank()
 
 # %% Parameters of image
 shape = (1024, 1024)  # filtershape in pixels
@@ -18,38 +18,60 @@ axisv = np.linspace(visextent[2], visextent[3], shape[1])
 (x, y) = np.meshgrid(axish, axisv)
 
 
-# %% Circular Gaussian
 def test_circular_Gaussian():
+    """Test that multyscale's (circular) Gaussian is equal to RHS (circular) Gaussian"""
+
+    # Filter params
     sigma1 = 2
     sigmas = np.array([1, 1]) * sigma1
-    f = multyscale.filters.gaussian2d(x, y, (sigmas[0], sigmas[1]))
-    f = f / f.sum()
-    f_2 = RHS_implementation.d2gauss(shape[0], sigmas[0] * 32, shape[1], sigmas[0] * 32, 0)
 
-    assert np.allclose(f, f_2)
+    # Generate filter
+    filter_multy = multyscale.filters.gaussian2d(x, y, (sigmas[0], sigmas[1]))
+    filter_multy = filter_multy / filter_multy.sum()
+
+    # Generate comparison filter
+    filter_multy = RHS_implementation.d2gauss(
+        shape[0], sigmas[0] * 32, shape[1], sigmas[0] * 32, 0
+    )
+
+    assert np.allclose(filter_multy, filter_multy)
 
 
-# %% Elliptical Gaussian
 def test_elliptical_Gaussian():
+    """Test that multyscale's (elliptical) Gaussian is equal to RHS (elliptical) Gaussian"""
+
+    # Filter params
     sigma1 = 2
     orientation = 40
     sigma2 = 2 * sigma1
     sigmas = np.array([1, 1]) * np.array([sigma1, sigma2])
-    f = multyscale.filters.gaussian2d(x, y, (sigmas[0], sigmas[1]), orientation=orientation)
-    f = f / f.sum()
-    f_2 = RHS_implementation.d2gauss(
+
+    # Generate filter
+    filter_multy = multyscale.filters.gaussian2d(
+        x, y, (sigmas[0], sigmas[1]), orientation=orientation
+    )
+    filter_multy = filter_multy / filter_multy.sum()
+
+    # Generate comparison filter
+    filter_RHS = RHS_implementation.d2gauss(
         shape[0], sigmas[0] * 32, shape[1], sigmas[1] * 32, orientation
     )
 
-    assert np.allclose(f, f_2)
+    assert np.allclose(filter_multy, filter_RHS)
 
 
-# %% ODOG
 def test_ODOG():
+    """Test that multyscale's ODOG filter is equal to RHS ODOG filter"""
+
+    # Filter params
     orientation = 150
     sigma3 = 2
     sigmas = np.array([[1, 1], [1, 2]]) * sigma3
-    rhs_odog = RHS_implementation.odog(shape[0], shape[1], sigma3 * 32, orientation=orientation)
-    multy_odog = multyscale.filters.odog(x, y, sigmas, orientation=(orientation, orientation))
 
-    assert np.allclose(rhs_odog, multy_odog)
+    # Generate filter
+    filter_RHS = RHS_implementation.odog(shape[0], shape[1], sigma3 * 32, orientation=orientation)
+
+    # Generate comparison filter
+    filter_multy = multyscale.filters.odog(x, y, sigmas, orientation=(orientation, orientation))
+
+    assert np.allclose(filter_RHS, filter_multy)
