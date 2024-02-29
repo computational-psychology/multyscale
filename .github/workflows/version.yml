@@ -1,0 +1,35 @@
+name: Bump version (if necessary)
+
+on:
+  pull_request_target:
+    types:
+      - closed
+  workflow_dispatch:
+
+jobs:
+  bump-version:
+    if: (github.event.pull_request.merged == true) || (github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    concurrency: bump-version
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # checkout full commit history
+          token: ${{ secrets.GHA_Token }}
+
+      - name: Python Semantic Release
+        id: versioning
+        uses: python-semantic-release/python-semantic-release@master
+        with:
+          github_token: ${{ secrets.GHA_TOKEN }}
+
+      - name: Publish package distributions to GitHub Releases
+        uses: python-semantic-release/upload-to-gh-release@main
+        if: steps.versioning.outputs.released == 'true'
+        with:
+          github_token: ${{ secrets.GHA_TOKEN }}
