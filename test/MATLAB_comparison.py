@@ -1,10 +1,10 @@
-import os
+from pathlib import Path
 
 import numpy as np
 import pytest
 from scipy import io
 
-filepath_MATLAB_output = os.path.abspath(__file__ + "../../odog_MATLAB.mat")
+filepath_MATLAB_output = Path(__file__).parent / "MATLAB_RHS2007_(F)(L)ODOG.mat"
 
 
 @pytest.fixture()
@@ -24,33 +24,33 @@ def MATLAB_shape():
 @pytest.fixture()
 def MATLAB_bank():
     # Load RHS bank from MATLAB implementation
-    return np.array(io.loadmat(filepath_MATLAB_output)["filters"].tolist())
+    return np.array(io.loadmat(filepath_MATLAB_output)["filterbank"].tolist())
 
 
 @pytest.fixture()
 def stimulus():
-    return io.loadmat(filepath_MATLAB_output)["illusion"]
+    return io.loadmat(filepath_MATLAB_output)["stimulus"]
 
 
 @pytest.fixture()
 def MATLAB_filteroutput():
     # Load RHS bank from MATLAB implementation
-    return np.array(io.loadmat(filepath_MATLAB_output)["filter_response"].tolist())
+    return np.array(io.loadmat(filepath_MATLAB_output)["filters_output"].tolist())
 
 
 @pytest.fixture()
 def output_ODOG_MATLAB():
-    return io.loadmat(filepath_MATLAB_output)["odog_output"]
+    return io.loadmat(filepath_MATLAB_output)["output_ODOG"]
 
 
 @pytest.fixture()
 def output_LODOG_MATLAB():
-    return io.loadmat(filepath_MATLAB_output)["lodog_output"]
+    return io.loadmat(filepath_MATLAB_output)["output_LODOG"]
 
 
 @pytest.fixture()
 def output_FLODOG_MATLAB():
-    return io.loadmat(filepath_MATLAB_output)["flodog_output"]
+    return io.loadmat(filepath_MATLAB_output)["output_FLODOG"]
 
 
 @pytest.fixture()
