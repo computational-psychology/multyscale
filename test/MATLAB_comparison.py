@@ -16,9 +16,9 @@ def MATLAB_visextent():
 
 
 @pytest.fixture()
-def MATLAB_shape():
+def MATLAB_shape(MATLAB_bank):
     # Shape (resolution) of image, filters (Y, X)
-    return (1024, 1024)
+    return MATLAB_bank.shape[-2:]
 
 
 @pytest.fixture()
