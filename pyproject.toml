@@ -19,7 +19,7 @@ license = { file = "LICENSE" }
 maintainers = [{ name = "Joris Vincent", email = "joris.vincent@tu-berlin.de" }]
 version = "0.2.0"
 
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = ["numpy", "scipy", "matplotlib", "Pillow"]
 
 [project.optional-dependencies]
